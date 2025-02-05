@@ -84,11 +84,7 @@ class UserResource extends Resource
 
                 Forms\Components\TextInput::make('username')
                     ->label('Username')
-<<<<<<< HEAD
                     ->unique(ignoreRecord: true)
-=======
-                    ->unique()
->>>>>>> 81ca43aa7d98a78f67a464623a44bbcfbea49d5a
                     ->required(),
 
                 Forms\Components\TextInput::make('password')
@@ -97,17 +93,12 @@ class UserResource extends Resource
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(Page $livewire): bool =>  $livewire instanceof CreateRecord),
 
-<<<<<<< HEAD
                 Forms\Components\Select::make('role')
                     ->label('Role')
                     ->options([
                         'admin' => 'admin',
                         'user' => 'user',
                     ])
-=======
-                Forms\Components\TextInput::make('role')
-                    ->label('Role')
->>>>>>> 81ca43aa7d98a78f67a464623a44bbcfbea49d5a
                     ->default('user')
                     ->required(),
 
