@@ -31,89 +31,28 @@ class UserResource extends Resource
 
     public static function canAccess(): bool
     {
-        $canAccess = Auth::check() && Auth::user()->role === 'admin';
-
-        if (!$canAccess) {
-            Notification::make()
-                ->title('Akses Ditolak')
-                ->body('Maaf, hanya admin yang dapat mengakses halaman ini.')
-                ->danger()
-                ->send();
-
-            return false;
-        }
-
-        return true;
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public static function canCreate(): bool
     {
-        $canCreate = Auth::check() && Auth::user()->role === 'admin';
-
-        if (!$canCreate) {
-            Notification::make()
-                ->title('Akses Ditolak')
-                ->body('Maaf, hanya admin yang dapat membuat user baru.')
-                ->danger()
-                ->send();
-
-            return false;
-        }
-
-        return true;
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public static function canEdit(Model $record): bool
     {
-        $canEdit = Auth::check() && Auth::user()->role === 'admin';
-
-        if (!$canEdit) {
-            Notification::make()
-                ->title('Akses Ditolak')
-                ->body('Maaf, hanya admin yang dapat mengedit user.')
-                ->danger()
-                ->send();
-
-            return false;
-        }
-
-        return true;
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public static function canDelete(Model $record): bool
     {
-        $canDelete = Auth::check() && Auth::user()->role === 'admin';
-
-        if (!$canDelete) {
-            Notification::make()
-                ->title('Akses Ditolak')
-                ->body('Maaf, hanya admin yang dapat menghapus user.')
-                ->danger()
-                ->send();
-
-            return false;
-        }
-
-        return true;
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     public static function canView(Model $record): bool
     {
-        $canView = Auth::check() && Auth::user()->role === 'admin';
-
-        if (!$canView) {
-            Notification::make()
-                ->title('Akses Ditolak')
-                ->body('Maaf, hanya admin yang dapat melihat detail user.')
-                ->danger()
-                ->send();
-
-            return false;
-        }
-
-        return true;
+        return Auth::check() && Auth::user()->role === 'admin';
     }
-
 
     public static function form(Form $form): Form
     {

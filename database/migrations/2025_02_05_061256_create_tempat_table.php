@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama');
             $table->string('kategori');
             $table->string('image')->nullable();
-            $table->decimal('tarif',10,2);
+            $table->string('tarif');
             $table->timestamps();
         });
     }
