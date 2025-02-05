@@ -145,7 +145,7 @@ class UserResource extends Resource
 
                 Forms\Components\TextInput::make('username')
                     ->label('Username')
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->required(),
 
                 Forms\Components\TextInput::make('password')
