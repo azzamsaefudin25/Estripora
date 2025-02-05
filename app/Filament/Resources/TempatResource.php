@@ -36,7 +36,7 @@ class TempatResource extends Resource
     }
     public static function getModelLabel(): string
     {
-        return 'Places';
+        return 'Place';
     }
 
     public static function canAccess(): bool
