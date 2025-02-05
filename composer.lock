@@ -6,6 +6,7 @@
     ],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "1e5495ce9f6757bd30b0a576f9af38ed",
 =======
     "content-hash": "c9e1f46c27566f78a3554bb9881e2505",
@@ -13,6 +14,12 @@
 =======
     "content-hash": "0cefc8f8c8f7320e732db22110e017ed",
 >>>>>>> parent of 9c78754 (db)
+=======
+    "content-hash": "c9e1f46c27566f78a3554bb9881e2505",
+=======
+    "content-hash": "1e5495ce9f6757bd30b0a576f9af38ed",
+>>>>>>> a01dcf69ab68c0739b4b2707e9b74233d4c3f117
+>>>>>>> 81ca43aa7d98a78f67a464623a44bbcfbea49d5a
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
