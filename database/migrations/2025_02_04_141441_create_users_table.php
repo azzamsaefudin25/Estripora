@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('username')->unique()->nullable();
             $table->string('password');
-            $table->string('role')->default('user'); 
+            $table->enum('role', ['user', 'admin'])->default('user'); 
             $table->timestamps();
         });
     }
@@ -31,7 +31,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['nik','nama' ,'phone', 'username', 'password']);
+            $table->dropColumn(['nik','name' ,'phone','email', 'email_verified_at' ,'username', 'password', 'role']);
         });
     }
 };

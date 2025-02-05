@@ -154,8 +154,12 @@ class UserResource extends Resource
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(Page $livewire): bool =>  $livewire instanceof CreateRecord),
 
-                Forms\Components\TextInput::make('role')
+                Forms\Components\Select::make('role')
                     ->label('Role')
+                    ->options([
+                        'admin' => 'admin',
+                        'user' => 'user',
+                    ])
                     ->default('user')
                     ->required(),
 
