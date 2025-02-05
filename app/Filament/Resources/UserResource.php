@@ -102,7 +102,7 @@ class UserResource extends Resource
                     ->default('user')
                     ->required(),
 
-            ]); // Hanya admin yang bisa mengakses form;
+            ]); 
 
     }
 
@@ -134,7 +134,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]); // Hanya admin yang bisa mengakses form;
+            ]); 
     }
 
     public static function getRelations(): array

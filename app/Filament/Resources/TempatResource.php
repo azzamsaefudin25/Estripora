@@ -2,19 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TempatResource\Pages;
-use App\Filament\Resources\TempatResource\RelationManagers;
-use App\Models\Tempat;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Tempat;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
+use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\TempatResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\TempatResource\RelationManagers;
 
 class TempatResource extends Resource
 {
@@ -51,20 +55,27 @@ class TempatResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama')
-                    ->label('Nama')
-                    ->required(),
-                Forms\Components\TextInput::make('kategori')
-                    ->label('Kategori')
-                    ->required(),
-                Forms\Components\FileUpload::make('image')
-                    ->label('Image')
-                    ->image() // Hanya menerima file gambar
-                    ->directory('uploads/tempat') // Menyimpan ke storage
-                    ->nullable(),
-                Forms\Components\TextInput::make('tarif')
-                    ->label('Tarif')
-                    ->required(),
+                Section::make([
+                    Grid::make()
+                        ->schema([
+                            Forms\Components\TextInput::make('nama')
+                                ->label('Nama')
+                                ->required(),
+                            Forms\Components\TextInput::make('kategori')
+                                ->label('Kategori')
+                                ->required(),
+                            Forms\Components\TextInput::make('tarif')
+                                ->label('Tarif')
+                                ->required(),
+                        ]),
+
+                    Forms\Components\FileUpload::make('image')
+                        ->label('Image')
+                        ->image() // Hanya menerima file gambar
+                        ->directory('uploads/tempat') // Menyimpan ke storage
+                        ->nullable(),
+                ])
+
             ]);
     }
 
