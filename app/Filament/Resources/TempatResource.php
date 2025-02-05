@@ -85,9 +85,9 @@ class TempatResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
-                Tables\Columns\ImageColumn::make('image')->label('Image')->sortable()->searchable(),
+                Tables\Columns\ImageColumn::make('image')->label('Image')->sortable(),
                 Tables\Columns\TextColumn::make('tarif')->label('Tarif')->sortable()->searchable(),
-
+                Tables\Columns\TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
             ->filters([
                 //
