@@ -102,8 +102,7 @@ class UserResource extends Resource
                     ->default('user')
                     ->required(),
 
-            ]); 
-
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -134,7 +133,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]); 
+            ]);
     }
 
     public static function getRelations(): array
@@ -143,6 +142,7 @@ class UserResource extends Resource
             //
         ];
     }
+
 
     public static function getPages(): array
     {

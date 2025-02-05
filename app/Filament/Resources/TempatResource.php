@@ -24,7 +24,20 @@ class TempatResource extends Resource
 {
     protected static ?string $model = Tempat::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Places'; // Ganti dengan nama yang kamu inginkan
+    }
+    public static function getPluralLabel(): string
+    {
+        return 'Places'; // Ganti dengan nama yang sesuai
+    }
+    public static function getModelLabel(): string
+    {
+        return 'Places';
+    }
 
     public static function canAccess(): bool
     {
