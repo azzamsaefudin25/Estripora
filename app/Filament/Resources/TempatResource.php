@@ -80,6 +80,21 @@ class TempatResource extends Resource
                             Forms\Components\TextInput::make('rentang_harga')
                                 ->label('Rentang Harga')
                                 ->required(),
+                            Forms\Components\MarkdownEditor::make('deskripsi')
+                                ->label('Deskripsi')
+                                ->toolbarButtons([
+                                    'bold',
+                                    'italic',
+                                    'underline',
+                                    'strike',
+                                    'bulletList',
+                                    'orderedList',
+                                    'link',
+                                    'blockquote',
+                                    'codeBlock',
+                                ])
+                                ->placeholder('Masukkan deskripsi...')
+                                ->columnSpanFull(),
                         ]),
 
                     Forms\Components\FileUpload::make('image')
@@ -99,6 +114,7 @@ class TempatResource extends Resource
                 Tables\Columns\TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
                 Tables\Columns\ImageColumn::make('image')->label('Image')->sortable(),
+                Tables\Columns\TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])

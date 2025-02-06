@@ -63,7 +63,17 @@ class LokasiResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Forms\Components\Select::make('id_tempat')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->relationship('tempat', 'nama'),
+                Forms\Components\TextInput::make('nama_lokasi')
+                    ->label('Nama Lokasi')
+                    ->required(),
+                Forms\Components\TextInput::make('tarif')
+                    ->label('Tarif')
+                    ->required(),
             ]);
     }
 
@@ -77,7 +87,11 @@ class LokasiResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

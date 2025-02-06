@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_penyewaan');
+            $table->unsignedBigInteger('id_penyewaan');
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('id_billing');
             $table->string('nik');

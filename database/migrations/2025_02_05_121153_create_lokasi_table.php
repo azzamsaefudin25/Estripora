@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
-            $table->Integer('id_lokasi')->primary();
+            $table->bigIncrements('id_lokasi');
             $table->foreignId('id_tempat')->constrained('tempat')->onDelete('cascade');
             $table->string('nama_lokasi');
             $table->decimal('tarif', 10, 2)->nullable();
