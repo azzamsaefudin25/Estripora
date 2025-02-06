@@ -15,8 +15,6 @@ return new class extends Migration
             $table->Integer('id_lokasi')->primary();
             $table->foreignId('id_tempat')->constrained('tempat')->onDelete('cascade');
             $table->string('nama_lokasi');
-            $table->time('waktu')->nullable();
-            $table->date('tanggal');
             $table->decimal('tarif', 10, 2)->nullable();
             $table->timestamps();
         });

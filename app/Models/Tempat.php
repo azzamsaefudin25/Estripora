@@ -11,5 +11,5 @@ class Tempat extends Model
 
     protected $table='tempat';
 
-    protected $fillable = ['nama', 'kategori', 'image', 'tarif'];
+    protected $fillable = ['nama', 'kategori', 'image', 'rentang_harga'];
 }

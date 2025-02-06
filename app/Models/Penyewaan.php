@@ -10,7 +10,7 @@ class Penyewaan extends Model
     use HasFactory;
 
     protected $table='penyewaan';
-    protected $fillable = ['id_penyewaan','nik','id_tempat','tgl_booking','tgl_mulai','tgl_selesai','jumlah','tarif','status' ];
+    protected $fillable = ['id_penyewaan','nik','id_tempat','tgl_booking','jam_mulai','jam_selesai','tgl_mulai','tgl_selesai','jumlah','tarif','sub_total','status' ];
 
     public function customer()
     {

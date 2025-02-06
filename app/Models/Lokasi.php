@@ -11,7 +11,7 @@ class Lokasi extends Model
 
     protected $table = 'lokasi';
 
-    protected $fillable = ['id_lokasi', 'id_tempat', 'nama_lokasi', 'waktu', 'tanggal', 'tarif'];
+    protected $fillable = ['id_lokasi', 'id_tempat', 'nama_lokasi', 'tarif'];
 
     public function tempat()
     {
