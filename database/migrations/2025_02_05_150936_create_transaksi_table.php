@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('tarif', 10, 2);
             $table->decimal('sub_total', 10, 2);
             $table->enum('metode_pembayaran', ['Transfer Bank', 'E-Wallet', 'Kartu Kredit']);
-            $table->enum('status_pembayaran', ['Pending', 'Paid', 'Failed'])->default('Pending');
+            $table->enum('status', ['Pending', 'Paid', 'Failed'])->default('Pending');
             $table->timestamps();
         });
     }
