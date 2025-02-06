@@ -13,15 +13,18 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
+            $table->integer('id_penyewaan');
+            $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('id_billing');
             $table->string('nik');
             $table->foreign('nik')->references('nik')->on('customer')->onDelete('cascade');
-            $table->string('uraian');
             $table->date('tgl_booking');
             $table->integer('jumlah');
-            $table->integer('luas');
-            $table->integer('harga');
-            $table->string('status');
+            $table->integer('luas')->nullable();
+            $table->decimal('tarif', 10, 2);
+            $table->decimal('sub_total', 10, 2);
+            $table->enum('metode_pembayaran', ['Transfer Bank', 'E-Wallet', 'Kartu Kredit']);
+            $table->enum('status_pembayaran', ['Pending', 'Paid', 'Failed'])->default('Pending');
             $table->timestamps();
         });
     }
