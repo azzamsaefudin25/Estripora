@@ -11,11 +11,14 @@ use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\TempatResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TempatResource\RelationManagers;
@@ -71,16 +74,16 @@ class TempatResource extends Resource
                 Section::make([
                     Grid::make()
                         ->schema([
-                            Forms\Components\TextInput::make('nama')
+                            TextInput::make('nama')
                                 ->label('Nama')
                                 ->required(),
-                            Forms\Components\TextInput::make('kategori')
+                            TextInput::make('kategori')
                                 ->label('Kategori')
                                 ->required(),
-                            Forms\Components\TextInput::make('rentang_harga')
+                            TextInput::make('rentang_harga')
                                 ->label('Rentang Harga')
                                 ->required(),
-                            Forms\Components\MarkdownEditor::make('deskripsi')
+                            MarkdownEditor::make('deskripsi')
                                 ->label('Deskripsi')
                                 ->toolbarButtons([
                                     'bold',
@@ -97,7 +100,7 @@ class TempatResource extends Resource
                                 ->columnSpanFull(),
                         ]),
 
-                    Forms\Components\FileUpload::make('image')
+                    FileUpload::make('image')
                         ->label('Image')
                         ->image() // Hanya menerima file gambar
                         ->directory('uploads/tempat') // Menyimpan ke storage
@@ -111,12 +114,12 @@ class TempatResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
-                Tables\Columns\ImageColumn::make('image')->label('Image')->sortable(),
-                Tables\Columns\TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
+                TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
+                TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
+                ImageColumn::make('image')->label('Image')->sortable(),
+                TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
+                TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
+                TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
             ->filters([
                 //

@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\LokasiResource\Pages;
-use App\Filament\Resources\LokasiResource\RelationManagers;
-use App\Models\Lokasi;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Lokasi;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\LokasiResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\LokasiResource\RelationManagers;
 
 class LokasiResource extends Resource
 {
@@ -63,16 +66,19 @@ class LokasiResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('id_tempat')
+                Select::make('id_tempat')
                     ->required()
                     ->searchable()
                     ->preload()
                     ->relationship('tempat', 'nama'),
-                Forms\Components\TextInput::make('nama_lokasi')
+                TextInput::make('nama_lokasi')
                     ->label('Nama Lokasi')
                     ->required(),
-                Forms\Components\TextInput::make('tarif')
+                TextInput::make('tarif')
                     ->label('Tarif')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.'))
                     ->required(),
             ]);
     }
@@ -81,7 +87,13 @@ class LokasiResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('tempat.nama')->label('Nama Tempat')->sortable()->searchable(),
+                TextColumn::make('nama_lokasi')->label('Nama Lokasi')->sortable()->searchable(),
+                TextColumn::make('tarif')
+                    ->label('Tarif')
+                    ->formatStateUsing(fn(string $state): string => 'Rp ' . number_format($state, 0, ',', '.'))
+                    ->sortable(),
+
             ])
             ->filters([
                 //

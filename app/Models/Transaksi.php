@@ -10,6 +10,11 @@ class Transaksi extends Model
     use HasFactory;
 
     protected $table='transaksi';
+
+    protected $primaryKey = 'id'; 
+    public $incrementing = true; 
+    protected $keyType = 'int'; 
+
     protected $fillable = ['id','id_billing','nik','uraian','tgl_booking','jumlah','luas','tarif','subtotal','metode_pembayaran','status' ];
 
     public function customer()

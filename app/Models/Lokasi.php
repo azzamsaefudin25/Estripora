@@ -9,9 +9,12 @@ class Lokasi extends Model
 {
     use HasFactory;
 
-    protected $table = 'lokasi';
+    protected $table = 'lokasi'; 
+    protected $primaryKey = 'id_lokasi';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
-    protected $fillable = ['id_lokasi', 'id_tempat', 'nama_lokasi', 'tarif'];
+    protected $fillable = ['id_tempat', 'nama_lokasi', 'tarif'];
 
     public function tempat()
     {
