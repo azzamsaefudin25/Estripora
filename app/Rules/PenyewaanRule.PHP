@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Penyewaan;
 
-class JadwalPenyewaanRule implements Rule
+class PenyewaanRule implements Rule
 {
     protected $message;
     protected $locationId;
@@ -72,9 +72,9 @@ class JadwalPenyewaanRule implements Rule
         }
 
         foreach ($existingPenyewaan as $penyewaan) {
-            $existingSchedules = is_string($penyewaan->jadwal_per_jam) 
-                ? json_decode($penyewaan->jadwal_per_jam, true) 
-                : $penyewaan->jadwal_per_jam;
+            $existingSchedules = is_string($penyewaan->penyewaan_per_jam) 
+                ? json_decode($penyewaan->penyewaan_per_jam, true) 
+                : $penyewaan->penyewaan_per_jam;
 
             if (!is_array($existingSchedules)) {
                 continue;
@@ -94,8 +94,7 @@ class JadwalPenyewaanRule implements Rule
                 }
 
                 if ($this->hasTimeOverlap($newStart, $newEnd, $existingStart, $existingEnd)) {
-                    $this->message = "Jadwal bertabrakan dengan penyewaan yang sudah ada pada tanggal " . 
-                        $existingDate . " jam " . $existingSchedule['jam_mulai'] . " - " . $existingSchedule['jam_selesai'];
+                    $this->message = "Tanggal ini sudah penuh. Mohon pilih tanggal yang lain. ";
                     return false;
                 }
             }
@@ -114,9 +113,9 @@ class JadwalPenyewaanRule implements Rule
         $newEnd = Carbon::parse($schedule['tgl_selesai']);
 
         foreach ($existingPenyewaan as $penyewaan) {
-            $existingSchedules = is_string($penyewaan->jadwal_per_hari) 
-                ? json_decode($penyewaan->jadwal_per_hari, true) 
-                : $penyewaan->jadwal_per_hari;
+            $existingSchedules = is_string($penyewaan->penyewaan_per_hari) 
+                ? json_decode($penyewaan->penyewaan_per_hari, true) 
+                : $penyewaan->penyewaan_per_hari;
 
             if (!is_array($existingSchedules)) {
                 continue;
@@ -127,8 +126,7 @@ class JadwalPenyewaanRule implements Rule
                 $existingEnd = Carbon::parse($existingSchedule['tgl_selesai']);
 
                 if ($this->hasDateOverlap($newStart, $newEnd, $existingStart, $existingEnd)) {
-                    $this->message = "Jadwal bertabrakan dengan penyewaan yang sudah ada pada tanggal " .
-                        $existingStart->format('d-m-Y') . " sampai " . $existingEnd->format('d-m-Y');
+                    $this->message = "Tanggal ini sudah penuh. Mohon pilih tanggal yang lain. ";
                     return false;
                 }
             }
@@ -162,7 +160,7 @@ class JadwalPenyewaanRule implements Rule
                     if ($end2->lt($start2)) $end2->addDay();
 
                     if ($baseDate1 === $baseDate2 && $this->hasTimeOverlap($start1, $end1, $start2, $end2)) {
-                        $this->message = "Terdapat jadwal yang bertabrakan dalam pengajuan penyewaan";
+                        $this->message = "Tanggal ini sudah penuh. Mohon pilih tanggal yang lain.";
                         return false;
                     }
                 } else {
@@ -177,7 +175,7 @@ class JadwalPenyewaanRule implements Rule
                     $end2 = Carbon::parse($schedules[$j]['tgl_selesai']);
 
                     if ($this->hasDateOverlap($start1, $end1, $start2, $end2)) {
-                        $this->message = "Terdapat jadwal yang bertabrakan dalam pengajuan penyewaan";
+                        $this->message = "Tanggal ini sudah penuh. Mohon pilih tanggal yang lain.";
                         return false;
                     }
                 }
@@ -199,6 +197,6 @@ class JadwalPenyewaanRule implements Rule
 
     public function message()
     {
-        return $this->message ?? 'Jadwal tidak tersedia.';
+        return $this->message ?? 'tidak tersedia.';
     }
 }

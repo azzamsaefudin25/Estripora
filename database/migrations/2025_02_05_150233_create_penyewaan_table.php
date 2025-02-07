@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('id_lokasi')->references('id_lokasi')->on('lokasi')->onDelete('cascade');
             $table->enum('kategori_sewa', ['per jam', 'per hari']);
             $table->date('tgl_booking')->default(now());
-            $table->json('jadwal_per_jam')->nullable();
-            $table->json('jadwal_per_hari')->nullable();
+            $table->json('penyewaan_per_jam')->nullable();
+            $table->json('penyewaan_per_hari')->nullable();
             $table->text('deskripsi')->nullable();
             $table->integer('total_durasi');
             $table->decimal('tarif', 10, 2);

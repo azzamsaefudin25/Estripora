@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Ramsey\Uuid\Type\Time;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
-use App\Rules\JadwalPenyewaanRule;
+use App\Rules\PenyewaanRule;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
@@ -125,7 +125,7 @@ class PenyewaanResource extends Resource
                     ->default(now())
                     ->required(),
 
-                Repeater::make('jadwal_per_jam')
+                Repeater::make('penyewaan_per_jam')
                     ->label('Pilih Hari dan Jam')
                     ->hidden(fn($get) => $get('kategori_sewa') !== 'per jam')
                     ->schema([
@@ -140,20 +140,11 @@ class PenyewaanResource extends Resource
                             ->label('Jam Selesai')
                             ->required()
                             ->rules(['required', 'different:jam_mulai'])
-                            ->afterStateUpdated(function ($state, $get, $set) {
-                                if ($get('jam_mulai') === $state) {
-                                    $set('jam_selesai', null);
-                                    \Filament\Notifications\Notification::make()()
-                                        ->danger()
-                                        ->title('Jam selesai harus berbeda dengan jam mulai')
-                                        ->send();
-                                }
-                            }),
                     ])
                     ->rules([
                         'array',
                         fn($get) => function ($attribute, $value, $fail) use ($get) {
-                            $validator = new JadwalPenyewaanRule(
+                            $validator = new PenyewaanRule(
                                 $get('id_lokasi'),
                                 'per jam',
                                 $get('record.id')
@@ -169,13 +160,13 @@ class PenyewaanResource extends Resource
                     ->live()
                     ->afterStateUpdated(function ($set, $get) {
                         $totalJam = 0;
-                        $jadwalPerJam = $get('jadwal_per_jam') ?? [];
+                        $penyewaanPerJam = $get('penyewaan_per_jam') ?? [];
 
-                        foreach ($jadwalPerJam as $jadwal) {
-                            if (isset($jadwal['jam_mulai'], $jadwal['jam_selesai'])) {
+                        foreach ($penyewaanPerJam as $penyewaan) {
+                            if (isset($penyewaan['jam_mulai'], $penyewaan['jam_selesai'])) {
                                 $baseDate = date('Y-m-d');
-                                $jamMulai = \Carbon\Carbon::parse($baseDate . ' ' . $jadwal['jam_mulai']);
-                                $jamSelesai = \Carbon\Carbon::parse($baseDate . ' ' . $jadwal['jam_selesai']);
+                                $jamMulai = \Carbon\Carbon::parse($baseDate . ' ' . $penyewaan['jam_mulai']);
+                                $jamSelesai = \Carbon\Carbon::parse($baseDate . ' ' . $penyewaan['jam_selesai']);
 
                                 if ($jamSelesai->lt($jamMulai)) {
                                     $jamSelesai->addDay();
@@ -196,7 +187,7 @@ class PenyewaanResource extends Resource
                     })
                     ->columnSpanFull(),
 
-                Repeater::make('jadwal_per_hari')
+                Repeater::make('penyewaan_per_hari')
                     ->label('Pilih Tanggal')
                     ->hidden(fn($get) => $get('kategori_sewa') !== 'per hari')
                     ->schema([
@@ -214,7 +205,7 @@ class PenyewaanResource extends Resource
                     ->rules([
                         'array',
                         fn($get) => function ($attribute, $value, $fail) use ($get) {
-                            $validator = new JadwalPenyewaanRule(
+                            $validator = new PenyewaanRule(
                                 $get('id_lokasi'),
                                 'per hari',
                                 $get('record.id')
@@ -230,12 +221,12 @@ class PenyewaanResource extends Resource
                     ->live()
                     ->afterStateUpdated(function ($set, $get) {
                         $totalHari = 0;
-                        $jadwalPerHari = $get('jadwal_per_hari') ?? [];
+                        $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
 
-                        foreach ($jadwalPerHari as $jadwal) {
-                            if (isset($jadwal['tgl_mulai'], $jadwal['tgl_selesai'])) {
-                                $tglMulai = \Carbon\Carbon::createFromFormat('Y-m-d', $jadwal['tgl_mulai']);
-                                $tglSelesai = \Carbon\Carbon::createFromFormat('Y-m-d', $jadwal['tgl_selesai']);
+                        foreach ($penyewaanPerHari as $penyewaan) {
+                            if (isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai'])) {
+                                $tglMulai = \Carbon\Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_mulai']);
+                                $tglSelesai = \Carbon\Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_selesai']);
 
                                 // Jika tanggal sama, langsung tambahkan 1 hari
                                 if ($tglMulai->isSameDay($tglSelesai)) {
@@ -326,16 +317,16 @@ class PenyewaanResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('jadwal')
+                TextColumn::make('penyewaan')
                     ->label('Uraian')
                     ->getStateUsing(function ($record) {
                         if (!$record) return '';
 
                         $schedules = null;
                         if ($record->kategori_sewa === 'per jam') {
-                            $schedules = is_string($record->jadwal_per_jam)
-                                ? json_decode($record->jadwal_per_jam, true)
-                                : $record->jadwal_per_jam;
+                            $schedules = is_string($record->penyewaan_per_jam)
+                                ? json_decode($record->penyewaan_per_jam, true)
+                                : $record->penyewaan_per_jam;
 
                             if (!empty($schedules)) {
                                 return implode(', ', array_map(function ($item) {
@@ -343,9 +334,9 @@ class PenyewaanResource extends Resource
                                 }, $schedules));
                             }
                         } elseif ($record->kategori_sewa === 'per hari') {
-                            $schedules = is_string($record->jadwal_per_hari)
-                                ? json_decode($record->jadwal_per_hari, true)
-                                : $record->jadwal_per_hari;
+                            $schedules = is_string($record->penyewaan_per_hari)
+                                ? json_decode($record->penyewaan_per_hari, true)
+                                : $record->penyewaan_per_hari;
 
                             if (!empty($schedules)) {
                                 return implode(', ', array_map(function ($item) {

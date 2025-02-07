@@ -18,8 +18,8 @@ class Penyewaan extends Model
         'id_lokasi',
         'tgl_booking',
         'kategori_sewa',
-        'jadwal_per_jam',
-        'jadwal_per_hari',
+        'penyewaan_per_jam',
+        'penyewaan_per_hari',
         'total_durasi',
         'tarif',
         'sub_total',
@@ -27,8 +27,8 @@ class Penyewaan extends Model
     ];
 
     protected $casts = [
-        'jadwal_per_jam' => 'array',
-        'jadwal_per_hari' => 'array',
+        'penyewaan_per_jam' => 'array',
+        'penyewaan_per_hari' => 'array',
     ];
 
     public function user()
