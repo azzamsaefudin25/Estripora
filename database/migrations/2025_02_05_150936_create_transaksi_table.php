@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('id_billing');
             $table->string('nik');
-            $table->foreign('nik')->references('nik')->on('customer')->onDelete('cascade');
+            $table->foreign('nik')->references('nik')->on('users')->onDelete('cascade');
             $table->date('tgl_booking');
             $table->integer('jumlah');
             $table->integer('luas')->nullable();

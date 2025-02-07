@@ -9,9 +9,11 @@ class BalasanUlasan extends Model
 {
     use HasFactory;
 
-    protected $table='balasanUlasan';
-
-    protected $fillable = ['id', 'id_ulasan', 'nik', 'id_penyewaan','parent_id','ulasan','reaksi'];
+    protected $table = 'balasanUlasan';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    protected $fillable = ['id_ulasan', 'nik', 'id_penyewaan', 'parent_id', 'ulasan', 'reaksi'];
 
     public function penyewaan()
     {

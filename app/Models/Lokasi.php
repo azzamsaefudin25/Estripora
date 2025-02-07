@@ -9,7 +9,7 @@ class Lokasi extends Model
 {
     use HasFactory;
 
-    protected $table = 'lokasi'; 
+    protected $table = 'lokasi';
     protected $primaryKey = 'id_lokasi';
     public $incrementing = true;
     protected $keyType = 'int';
@@ -18,7 +18,6 @@ class Lokasi extends Model
 
     public function tempat()
     {
-        return $this->belongsTo(Tempat::class, 'id_tempat');
+        return $this->belongsTo(Tempat::class, 'id_tempat', 'id');
     }
 }
-

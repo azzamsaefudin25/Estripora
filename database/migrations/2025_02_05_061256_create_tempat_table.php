@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kategori');
             $table->string('image')->nullable();
             $table->text('deskripsi')->nullable();
+            $table->enum('kategori_sewa', ['per jam', 'per hari']);
             $table->string('rentang_harga');
             $table->timestamps();
         });

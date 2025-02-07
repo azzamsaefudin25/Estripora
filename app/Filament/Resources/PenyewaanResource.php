@@ -1,0 +1,436 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Closure;
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Forms\Form;
+use App\Models\Penyewaan;
+use Filament\Tables\Table;
+use Ramsey\Uuid\Type\Time;
+use Illuminate\Support\Carbon;
+use Filament\Resources\Resource;
+use App\Rules\JadwalPenyewaanRule;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Notifications\Notification;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\MarkdownEditor;
+use App\Filament\Resources\PenyewaanResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\PenyewaanResource\RelationManagers;
+
+class PenyewaanResource extends Resource
+{
+    protected static ?string $model = Penyewaan::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Bookings'; // Ganti dengan nama yang kamu inginkan
+    }
+    public static function getPluralLabel(): string
+    {
+        return 'Bookings'; // Ganti dengan nama yang sesuai
+    }
+    public static function getModelLabel(): string
+    {
+        return 'Booking';
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Select::make('nik')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->relationship('user', 'name'),
+
+                Select::make('id_lokasi')
+                    ->label('Lokasi & Tempat')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->relationship(
+                        name: 'lokasi',
+                        titleAttribute: 'nama_lokasi',
+                        modifyQueryUsing: fn($query) => $query->with('tempat')
+                    )
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
+                    ->afterStateUpdated(function ($set, $get, $state) {
+                        if ($state) {
+                            $lokasi = \App\Models\Lokasi::with('tempat')->where('id_lokasi', $state)->first();
+
+                            if ($lokasi && $lokasi->tempat) {
+                                if (!$get('kategori_sewa')) {
+                                    $set('kategori_sewa', $lokasi->tempat->kategori_sewa);
+                                }
+                                $set('tarif', floatval($lokasi->tarif));
+
+                                // Reset total_durasi and sub_total
+                                $set('total_durasi', 0);
+                                $set('sub_total', 0);
+                            }
+                        }
+                    })
+                    ->live(),
+
+                TextInput::make('kategori_sewa')
+                    ->label('Kategori Sewa')
+                    ->disabled()
+                    ->live()
+                    ->dehydrated(true),
+
+                DateTimePicker::make('tgl_booking')
+                    ->label('Tanggal Booking')
+                    ->default(now())
+                    ->required(),
+
+                Repeater::make('jadwal_per_jam')
+                    ->label('Pilih Hari dan Jam')
+                    ->hidden(fn($get) => $get('kategori_sewa') !== 'per jam')
+                    ->schema([
+                        DatePicker::make('tgl_mulai')
+                            ->label('Tanggal Pemakaian')
+                            ->required()
+                            ->rules(['required', 'date', 'after_or_equal:today']),
+                        TimePicker::make('jam_mulai')
+                            ->label('Jam Mulai')
+                            ->required(),
+                        TimePicker::make('jam_selesai')
+                            ->label('Jam Selesai')
+                            ->required()
+                            ->rules(['required', 'different:jam_mulai'])
+                            ->afterStateUpdated(function ($state, $get, $set) {
+                                if ($get('jam_mulai') === $state) {
+                                    $set('jam_selesai', null);
+                                    \Filament\Notifications\Notification::make()()
+                                        ->danger()
+                                        ->title('Jam selesai harus berbeda dengan jam mulai')
+                                        ->send();
+                                }
+                            }),
+                    ])
+                    ->rules([
+                        'array',
+                        fn($get) => function ($attribute, $value, $fail) use ($get) {
+                            $validator = new JadwalPenyewaanRule(
+                                $get('id_lokasi'),
+                                'per jam',
+                                $get('record.id')
+                            );
+
+                            if (!$validator->passes($attribute, $value)) {
+                                $fail($validator->message());
+                            }
+                        }
+                    ])
+                    ->minItems(1)
+                    ->maxItems(10)
+                    ->live()
+                    ->afterStateUpdated(function ($set, $get) {
+                        $totalJam = 0;
+                        $jadwalPerJam = $get('jadwal_per_jam') ?? [];
+
+                        foreach ($jadwalPerJam as $jadwal) {
+                            if (isset($jadwal['jam_mulai'], $jadwal['jam_selesai'])) {
+                                $baseDate = date('Y-m-d');
+                                $jamMulai = \Carbon\Carbon::parse($baseDate . ' ' . $jadwal['jam_mulai']);
+                                $jamSelesai = \Carbon\Carbon::parse($baseDate . ' ' . $jadwal['jam_selesai']);
+
+                                if ($jamSelesai->lt($jamMulai)) {
+                                    $jamSelesai->addDay();
+                                }
+
+                                // Hitung selisih dalam jam
+                                $selisihJam = abs((int)$jamSelesai->diffInHours($jamMulai));
+                                $totalJam += $selisihJam;;
+                            }
+                        }
+
+                        $set('total_durasi', $totalJam);
+
+                        if ($get('tarif')) {
+                            $subTotal = floatval($get('tarif')) * $totalJam;
+                            $set('sub_total', $subTotal);
+                        }
+                    })
+                    ->columnSpanFull(),
+
+                Repeater::make('jadwal_per_hari')
+                    ->label('Pilih Tanggal')
+                    ->hidden(fn($get) => $get('kategori_sewa') !== 'per hari')
+                    ->schema([
+                        DatePicker::make('tgl_mulai')
+                            ->label('Tanggal Mulai')
+                            ->required()
+                            ->rules(['required', 'date', 'after_or_equal:today'])
+                            ->format('d-m-Y'),
+                        DatePicker::make('tgl_selesai')
+                            ->label('Tanggal Selesai')
+                            ->required()
+                            ->rules(['required', 'date', 'after_or_equal:tgl_mulai'])
+                            ->format('d-m-Y'),
+                    ])
+                    ->rules([
+                        'array',
+                        fn($get) => function ($attribute, $value, $fail) use ($get) {
+                            $validator = new JadwalPenyewaanRule(
+                                $get('id_lokasi'),
+                                'per hari',
+                                $get('record.id')
+                            );
+
+                            if (!$validator->passes($attribute, $value)) {
+                                $fail($validator->message());
+                            }
+                        }
+                    ])
+                    ->minItems(1)
+                    ->maxItems(10)
+                    ->live()
+                    ->afterStateUpdated(function ($set, $get) {
+                        $totalHari = 0;
+                        $jadwalPerHari = $get('jadwal_per_hari') ?? [];
+
+                        foreach ($jadwalPerHari as $jadwal) {
+                            if (isset($jadwal['tgl_mulai'], $jadwal['tgl_selesai'])) {
+                                $tglMulai = \Carbon\Carbon::createFromFormat('Y-m-d', $jadwal['tgl_mulai']);
+                                $tglSelesai = \Carbon\Carbon::createFromFormat('Y-m-d', $jadwal['tgl_selesai']);
+
+                                // Jika tanggal sama, langsung tambahkan 1 hari
+                                if ($tglMulai->isSameDay($tglSelesai)) {
+                                    $selisihHari = 1;
+                                } else {
+                                    // Jika tanggal berbeda, hitung selisih dan tambah 1
+                                    $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
+                                }
+
+                                $totalHari += $selisihHari;
+                            }
+                        }
+
+                        $set('total_durasi', $totalHari);
+
+                        if ($get('tarif')) {
+                            $subTotal = floatval($get('tarif')) * $totalHari;
+                            $set('sub_total', $subTotal);
+                        }
+                    })
+                    ->columnSpanFull(),
+
+                TextInput::make('total_durasi')
+                    ->label('Total Durasi')
+                    ->numeric()
+                    ->disabled()
+                    ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? 'Jam' : 'Hari')
+                    ->live()
+                    ->dehydrated(true),
+
+                TextInput::make('tarif')
+                    ->label('Tarif')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? '/Jam' : '/Hari')
+                    ->live()
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->formatStateUsing(function ($state) {
+                        return $state ? number_format($state, 2, '.', ',') : null;
+                    }),
+
+                TextInput::make('sub_total')
+                    ->label('Sub Total')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->disabled()
+                    ->formatStateUsing(function ($state) {
+                        return $state ? number_format($state, 2, '.', ',') : null;
+                    })
+                    ->live()
+                    ->dehydrated(true),
+
+                TextInput::make('status')
+                    ->label('Status')
+                    ->default('Pending')
+                    ->disabled()
+                    ->dehydrated(true),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->query(Penyewaan::with(['lokasi.tempat']))
+            ->columns([
+                TextColumn::make('user.name')
+                    ->label('Nama User')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('lokasi.nama_lokasi')
+                    ->label('Lokasi')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('kategori_sewa')
+                    ->label('Kategori Sewa')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('jadwal')
+                    ->label('Uraian')
+                    ->getStateUsing(function ($record) {
+                        if (!$record) return '';
+
+                        $schedules = null;
+                        if ($record->kategori_sewa === 'per jam') {
+                            $schedules = is_string($record->jadwal_per_jam)
+                                ? json_decode($record->jadwal_per_jam, true)
+                                : $record->jadwal_per_jam;
+
+                            if (!empty($schedules)) {
+                                return implode(', ', array_map(function ($item) {
+                                    return "{$item['tgl_mulai']} {$item['jam_mulai']} - {$item['jam_selesai']}";
+                                }, $schedules));
+                            }
+                        } elseif ($record->kategori_sewa === 'per hari') {
+                            $schedules = is_string($record->jadwal_per_hari)
+                                ? json_decode($record->jadwal_per_hari, true)
+                                : $record->jadwal_per_hari;
+
+                            if (!empty($schedules)) {
+                                return implode(', ', array_map(function ($item) {
+                                    return "{$item['tgl_mulai']} - {$item['tgl_selesai']}";
+                                }, $schedules));
+                            }
+                        }
+
+                        return '';
+                    })
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('total_durasi')
+                    ->label('Total Durasi')
+                    ->numeric()
+                    ->sortable(),
+
+                TextColumn::make('tarif')
+                    ->label('Tarif')
+                    ->money('IDR', true)
+                    ->sortable(),
+
+                TextColumn::make('sub_total')
+                    ->label('Sub Total')
+                    ->money('IDR', true)
+                    ->sortable(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('kategori_sewa')
+                    ->label('Filter Kategori Sewa')
+                    ->options([
+                        'per jam' => 'Per Jam',
+                        'per hari' => 'Per Hari',
+                    ]),
+            ])
+            ->defaultSort('tgl_booking', 'desc')
+
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPenyewaans::route('/'),
+            'create' => Pages\CreatePenyewaan::route('/create'),
+            'edit' => Pages\EditPenyewaan::route('/{record}/edit'),
+        ];
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Ensure kategori_sewa is preserved during creation
+        if (isset($data['id_lokasi'])) {
+            $lokasi = \App\Models\Lokasi::with('tempat')->find($data['id_lokasi']);
+            if ($lokasi && $lokasi->tempat) {
+                $data['kategori_sewa'] = $lokasi->tempat->kategori_sewa;
+            }
+        }
+        return $data;
+    }
+
+    public static function mutateFormDataBeforeSave(array $data): array
+    {
+        // Ensure kategori_sewa is preserved during update
+        if (isset($data['id_lokasi'])) {
+            $lokasi = \App\Models\Lokasi::with('tempat')->find($data['id_lokasi']);
+            if ($lokasi && $lokasi->tempat) {
+                $data['kategori_sewa'] = $lokasi->tempat->kategori_sewa;
+            }
+        }
+        return $data;
+    }
+}

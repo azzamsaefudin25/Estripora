@@ -9,19 +9,35 @@ class Penyewaan extends Model
 {
     use HasFactory;
 
-    protected $table='penyewaan';
+    protected $table = 'penyewaan';
     protected $primaryKey = 'id_penyewaan';
     public $incrementing = true;
     protected $keyType = 'int';
-    protected $fillable = ['nik','id_tempat','tgl_booking','jam_mulai','jam_selesai','tgl_mulai','tgl_selesai','jumlah','tarif','sub_total','status' ];
+    protected $fillable = [
+        'nik',
+        'id_lokasi',
+        'tgl_booking',
+        'kategori_sewa',
+        'jadwal_per_jam',
+        'jadwal_per_hari',
+        'total_durasi',
+        'tarif',
+        'sub_total',
+        'status'
+    ];
 
-    public function customer()
+    protected $casts = [
+        'jadwal_per_jam' => 'array',
+        'jadwal_per_hari' => 'array',
+    ];
+
+    public function user()
     {
-        return $this->belongsTo(Tempat::class, 'nik');
+        return $this->belongsTo(User::class, 'nik', 'nik');
     }
 
-    public function tempat()
+    public function lokasi()
     {
-        return $this->belongsTo(Tempat::class, 'id_tempat');
+        return $this->belongsTo(Lokasi::class, 'id_lokasi');
     }
 }

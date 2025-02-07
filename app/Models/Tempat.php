@@ -9,7 +9,15 @@ class Tempat extends Model
 {
     use HasFactory;
 
-    protected $table='tempat';
+    protected $table = 'tempat';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
-    protected $fillable = ['nama', 'kategori', 'image', 'deskripsi', 'rentang_harga'];
+    protected $fillable = ['nama', 'kategori', 'image', 'deskripsi', 'kategori_sewa', 'rentang_harga'];
+
+    public function lokasi()
+    {
+        return $this->hasMany(Lokasi::class, 'id_tempat', 'id');
+    }
 }

@@ -97,9 +97,9 @@ class UserResource extends Resource
                     ->label('Role')
                     ->options([
                         'admin' => 'admin',
-                        'user' => 'user',
+                        'customer' => 'customer',
                     ])
-                    ->default('user')
+                    ->default('customer')
                     ->required(),
 
             ]);

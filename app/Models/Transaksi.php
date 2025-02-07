@@ -15,10 +15,10 @@ class Transaksi extends Model
     public $incrementing = true; 
     protected $keyType = 'int'; 
 
-    protected $fillable = ['id','id_billing','nik','uraian','tgl_booking','jumlah','luas','tarif','subtotal','metode_pembayaran','status' ];
+    protected $fillable = ['id_penyewaan','id_billing','nik','uraian','tgl_booking','jumlah','luas','tarif','sub_total','metode_pembayaran','status' ];
 
-    public function customer()
+    public function user()
     {
-        return $this->belongsTo(Tempat::class, 'nik');
+        return $this->belongsTo(User::class, 'nik');
     }
 }

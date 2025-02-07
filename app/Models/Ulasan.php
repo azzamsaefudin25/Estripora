@@ -10,7 +10,10 @@ class Ulasan extends Model
     use HasFactory;
 
     protected $table='ulasan';
-    protected $fillable = ['id_ulasan','id_penyewaan','nik','ulasan','rating' ];
+    protected $primaryKey = 'id_ulasan';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    protected $fillable = ['id_penyewaan','nik','ulasan','rating' ];
 
     public function penyewaanid()
     {

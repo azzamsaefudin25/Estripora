@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -98,6 +99,12 @@ class TempatResource extends Resource
                                 ])
                                 ->placeholder('Masukkan deskripsi...')
                                 ->columnSpanFull(),
+                            Select::make('kategori_sewa')
+                                ->label('Kategori')
+                                ->options([
+                                    'per jam' => 'per jam',
+                                    'per hari' => 'per hari',
+                                ]),
                         ]),
 
                     FileUpload::make('image')
@@ -118,6 +125,7 @@ class TempatResource extends Resource
                 TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
                 ImageColumn::make('image')->label('Image')->sortable(),
                 TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
+                TextColumn::make('kategori_sewa')->label('Kategori Sewa')->sortable()->searchable(),
                 TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
