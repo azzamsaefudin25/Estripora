@@ -166,8 +166,8 @@ class PenyewaanResource extends Resource
                         foreach ($penyewaanPerJam as $penyewaan) {
                             if (isset($penyewaan['jam_mulai'], $penyewaan['jam_selesai'])) {
                                 $baseDate = date('Y-m-d');
-                                $jamMulai = \Carbon\Carbon::parse($baseDate . ' ' . $penyewaan['jam_mulai']);
-                                $jamSelesai = \Carbon\Carbon::parse($baseDate . ' ' . $penyewaan['jam_selesai']);
+                                $jamMulai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_mulai']);
+                                $jamSelesai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_selesai']);
 
                                 if ($jamSelesai->lt($jamMulai)) {
                                     $jamSelesai->addDay();
@@ -226,8 +226,8 @@ class PenyewaanResource extends Resource
 
                         foreach ($penyewaanPerHari as $penyewaan) {
                             if (isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai'])) {
-                                $tglMulai = \Carbon\Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_mulai']);
-                                $tglSelesai = \Carbon\Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_selesai']);
+                                $tglMulai = Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_mulai']);
+                                $tglSelesai = Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_selesai']);
 
                                 // Jika tanggal sama, langsung tambahkan 1 hari
                                 if ($tglMulai->isSameDay($tglSelesai)) {
