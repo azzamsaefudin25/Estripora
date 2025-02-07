@@ -80,7 +80,7 @@ class PenyewaanResource extends Resource
     {
         return $form
             ->schema([
-                
+
                 Select::make('nik')
                     ->required()
                     ->searchable()
@@ -92,6 +92,7 @@ class PenyewaanResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->live()
                     ->relationship(
                         name: 'lokasi',
                         titleAttribute: 'nama_lokasi',
@@ -106,15 +107,14 @@ class PenyewaanResource extends Resource
                                 if (!$get('kategori_sewa')) {
                                     $set('kategori_sewa', $lokasi->tempat->kategori_sewa);
                                 }
-                                $set('tarif', floatval($lokasi->tarif));
+                                $set('tarif', $lokasi->tarif);
 
                                 // Reset total_durasi and sub_total
                                 $set('total_durasi', 0);
                                 $set('sub_total', 0);
                             }
                         }
-                    })
-                    ->live(),
+                    }),
 
                 TextInput::make('kategori_sewa')
                     ->label('Kategori Sewa')
@@ -143,20 +143,20 @@ class PenyewaanResource extends Resource
                             ->required()
                             ->rules(['required', 'different:jam_mulai'])
                     ])
-                    ->rules([
-                        'array',
-                        fn($get) => function ($attribute, $value, $fail) use ($get) {
-                            $validator = new PenyewaanRule(
-                                $get('id_lokasi'),
-                                'per jam',
-                                $get('record.id')
-                            );
+                    // ->rules([
+                    //     'array',
+                    //     fn($get) => function ($attribute, $value, $fail) use ($get) {
+                    //         $validator = new PenyewaanRule(
+                    //             $get('id_lokasi'),
+                    //             'per jam',
+                    //             $get('record.id')
+                    //         );
 
-                            if (!$validator->passes($attribute, $value)) {
-                                $fail($validator->message());
-                            }
-                        }
-                    ])
+                    //         if (!$validator->passes($attribute, $value)) {
+                    //             $fail($validator->message());
+                    //         }
+                    //     }
+                    // ])
                     ->minItems(1)
                     ->maxItems(10)
                     ->live()
@@ -204,20 +204,20 @@ class PenyewaanResource extends Resource
                             ->rules(['required', 'date', 'after_or_equal:tgl_mulai'])
                             ->format('d-m-Y'),
                     ])
-                    ->rules([
-                        'array',
-                        fn($get) => function ($attribute, $value, $fail) use ($get) {
-                            $validator = new PenyewaanRule(
-                                $get('id_lokasi'),
-                                'per hari',
-                                $get('record.id')
-                            );
+                    // ->rules([
+                    //     'array',
+                    //     fn($get) => function ($attribute, $value, $fail) use ($get) {
+                    //         $validator = new PenyewaanRule(
+                    //             $get('id_lokasi'),
+                    //             'per hari',
+                    //             $get('record.id')
+                    //         );
 
-                            if (!$validator->passes($attribute, $value)) {
-                                $fail($validator->message());
-                            }
-                        }
-                    ])
+                    //         if (!$validator->passes($attribute, $value)) {
+                    //             $fail($validator->message());
+                    //         }
+                    //     }
+                    // ])
                     ->minItems(1)
                     ->maxItems(10)
                     ->live()
@@ -268,7 +268,14 @@ class PenyewaanResource extends Resource
                     ->disabled()
                     ->dehydrated(true)
                     ->formatStateUsing(function ($state) {
-                        return $state ? number_format($state, 2, '.', ',') : null;
+                        // Only format if state is not null
+                        return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
+                    })
+                    // Add this to ensure proper state handling
+                    ->afterStateHydrated(function ($component, $state) {
+                        if (!is_null($state)) {
+                            $component->state((float)$state);
+                        }
                     }),
 
                 TextInput::make('sub_total')
@@ -276,11 +283,18 @@ class PenyewaanResource extends Resource
                     ->numeric()
                     ->prefix('Rp')
                     ->disabled()
-                    ->formatStateUsing(function ($state) {
-                        return $state ? number_format($state, 2, '.', ',') : null;
-                    })
+                    ->dehydrated(true)
                     ->live()
-                    ->dehydrated(true),
+                    ->formatStateUsing(function ($state) {
+                        // Only format if state is not null
+                        return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
+                    })
+                    // Add this to ensure proper state handling
+                    ->afterStateHydrated(function ($component, $state) {
+                        if (!is_null($state)) {
+                            $component->state((float)$state);
+                        }
+                    }),
 
                 TextInput::make('status')
                     ->label('Status')
@@ -303,12 +317,12 @@ class PenyewaanResource extends Resource
                 TextColumn::make('lokasi.nama_lokasi')
                     ->label('Lokasi dan Tempat')
                     ->getStateUsing(function ($record) {
-                 
+
                         $lokasi = $record->lokasi;
                         if ($lokasi && $lokasi->tempat) {
                             return $lokasi->tempat->nama . ' - ' . $lokasi->nama_lokasi;
                         }
-                        return ''; 
+                        return '';
                     })
                     ->sortable()
                     ->searchable(),
