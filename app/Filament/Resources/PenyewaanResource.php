@@ -100,19 +100,40 @@ class PenyewaanResource extends Resource
                     )
                     ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
                     ->afterStateUpdated(function ($set, $get, $state) {
+
+                        $set('penyewaan_per_jam', []);
+                        $set('penyewaan_per_hari', []);
+                        $set('total_durasi', 0);
+                        $set('sub_total', 0);
+                        $set('kategori_sewa', null);
+
                         if ($state) {
                             $lokasi = Lokasi::with('tempat')->where('id_lokasi', $state)->first();
 
                             if ($lokasi && $lokasi->tempat) {
-                                if (!$get('kategori_sewa')) {
-                                    $set('kategori_sewa', $lokasi->tempat->kategori_sewa);
-                                }
-                                
+
+                                $kategoriSewa = $lokasi->tempat->kategori_sewa;
+                                $set('kategori_sewa', $kategoriSewa);
                                 $set('tarif', floatval($lokasi->tarif));
 
-                                // Reset total_durasi and sub_total
-                                $set('total_durasi', 0);
-                                $set('sub_total', 0);
+                                if ($kategoriSewa === 'per jam') {
+
+                                    $entry = [
+                                        'tgl_mulai' => '',
+                                        'jam_mulai' => '',
+                                        'jam_selesai' => ''
+                                    ];
+
+                                    $set('penyewaan_per_jam', [$entry]); 
+                                } elseif ($kategoriSewa === 'per hari') {
+
+                                    $entry = [
+                                        'tgl_mulai' => '',
+                                        'tgl_selesai' => ''
+                                    ];
+
+                                    $set('penyewaan_per_hari', [$entry]); 
+                                }
                             }
                         }
                     }),
@@ -130,6 +151,7 @@ class PenyewaanResource extends Resource
 
                 Repeater::make('penyewaan_per_jam')
                     ->label('Pilih Hari dan Jam')
+                    ->live()
                     ->hidden(fn($get) => $get('kategori_sewa') !== 'per jam')
                     ->schema([
                         DatePicker::make('tgl_mulai')
@@ -160,7 +182,6 @@ class PenyewaanResource extends Resource
                     // ])
                     ->minItems(1)
                     ->maxItems(10)
-                    ->live()
                     ->afterStateUpdated(function ($set, $get) {
                         $totalJam = 0;
                         $penyewaanPerJam = $get('penyewaan_per_jam') ?? [];
@@ -192,6 +213,7 @@ class PenyewaanResource extends Resource
 
                 Repeater::make('penyewaan_per_hari')
                     ->label('Pilih Tanggal')
+                    ->live()
                     ->hidden(fn($get) => $get('kategori_sewa') !== 'per hari')
                     ->schema([
                         DatePicker::make('tgl_mulai')
@@ -221,7 +243,6 @@ class PenyewaanResource extends Resource
                     // ])
                     ->minItems(1)
                     ->maxItems(10)
-                    ->live()
                     ->afterStateUpdated(function ($set, $get) {
                         $totalHari = 0;
                         $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
