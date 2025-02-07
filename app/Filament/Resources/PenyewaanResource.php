@@ -107,7 +107,8 @@ class PenyewaanResource extends Resource
                                 if (!$get('kategori_sewa')) {
                                     $set('kategori_sewa', $lokasi->tempat->kategori_sewa);
                                 }
-                                $set('tarif', $lokasi->tarif);
+                                
+                                $set('tarif', floatval($lokasi->tarif));
 
                                 // Reset total_durasi and sub_total
                                 $set('total_durasi', 0);
