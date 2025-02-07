@@ -308,9 +308,18 @@ class PenyewaanResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('lokasi.nama_lokasi')
-                    ->label('Lokasi')
+                    ->label('Lokasi dan Tempat')
+                    ->getStateUsing(function ($record) {
+                        // Memastikan relasi telah dimuat
+                        $lokasi = $record->lokasi;
+                        if ($lokasi && $lokasi->tempat) {
+                            return $lokasi->tempat->nama . ' - ' . $lokasi->nama_lokasi;
+                        }
+                        return ''; // Jika tidak ada data tempat atau lokasi
+                    })
                     ->sortable()
                     ->searchable(),
+
 
                 TextColumn::make('kategori_sewa')
                     ->label('Kategori Sewa')
