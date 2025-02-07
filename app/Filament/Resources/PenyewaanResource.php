@@ -5,15 +5,16 @@ namespace App\Filament\Resources;
 use Closure;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Lokasi;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Models\Penyewaan;
 use Filament\Tables\Table;
 use Ramsey\Uuid\Type\Time;
+use App\Rules\PenyewaanRule;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
-use App\Rules\PenyewaanRule;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
@@ -99,7 +100,7 @@ class PenyewaanResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
                     ->afterStateUpdated(function ($set, $get, $state) {
                         if ($state) {
-                            $lokasi = \App\Models\Lokasi::with('tempat')->where('id_lokasi', $state)->first();
+                            $lokasi = Lokasi::with('tempat')->where('id_lokasi', $state)->first();
 
                             if ($lokasi && $lokasi->tempat) {
                                 if (!$get('kategori_sewa')) {
