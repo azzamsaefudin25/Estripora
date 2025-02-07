@@ -310,12 +310,12 @@ class PenyewaanResource extends Resource
                 TextColumn::make('lokasi.nama_lokasi')
                     ->label('Lokasi dan Tempat')
                     ->getStateUsing(function ($record) {
-                        // Memastikan relasi telah dimuat
+                 
                         $lokasi = $record->lokasi;
                         if ($lokasi && $lokasi->tempat) {
                             return $lokasi->tempat->nama . ' - ' . $lokasi->nama_lokasi;
                         }
-                        return ''; // Jika tidak ada data tempat atau lokasi
+                        return ''; 
                     })
                     ->sortable()
                     ->searchable(),
