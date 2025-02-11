@@ -1,29 +1,31 @@
 <div class="relative w-full min-h-screen">
     <!-- Search Bar (Tepat di Bawah Header, BUKAN Bagian dari Header) -->
     <div class="w-full bg-gray-100 shadow-md py-4 px-6 flex items-center space-x-2 sticky top-0 z-10">
-        <!-- Dropdown Kategori -->
+    <!-- Dropdown Kategori -->
         <select wire:model="kategori" class="px-4 py-2 bg-gray-800 text-white rounded-lg">
             @foreach($categories as $category)
-                <option value="{{ $category }}">{{ $category }}</option>
-            @endforeach
+            <option value="{{ $category }}">{{ $category }}</option>
+        @endforeach
         </select>
 
-        <!-- Input Search -->
+    <!-- Input Search -->
         <input type="text" wire:model="query" placeholder="Cari sesuatu..." 
             class="w-full max-w-[500px] px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-300 focus:outline-none">
 
-        <!-- Tombol Cari -->
+    <!-- Tombol Cari -->
         <button wire:click="search" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Search
+             Search
         </button>
+
     </div>
 
     <!-- Layout Dashboard -->
     <div class="flex w-full px-4 mt-4">
         <!-- Konten Utama  -->
         <div class="flex-1 p-4">
-            <h1 class="text-xl font-bold">Dashboard Page</h1>
-            <p>Hanya cinta dan malam</p>
+            <div class="mt-6">
+                @livewire('tempat')
+            </div>
         </div>
 
         <!-- Kontainer Berita  -->

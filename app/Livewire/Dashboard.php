@@ -18,10 +18,10 @@ class Dashboard extends Component
 
     public function search()
     {
-        // Logika pencarian bisa ditambahkan di sini
         $this->dispatch('searchTriggered', $this->query, $this->kategori);
     }
-
+    
+    
     public function nextBerita()
     {
         $this->beritaIndex = ($this->beritaIndex + 1) % count($this->beritaList);
