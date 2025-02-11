@@ -23,7 +23,7 @@
                             <div>
                                 <label for="email" class="block text-sm mb-2 dark:text-white">Email</label>
                                 <div class="relative">
-                                    <input type="text" id="email" wire:model="email"
+                                    <input type="text" id="email" wire:model="email" placeholder="Email"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="email-error">
                                     @error('email')
@@ -50,7 +50,7 @@
                                         href="/forgot">Lupa password?</a>
                                 </div>
                                 <div class="relative">
-                                    <input type="password" id="password" wire:model="password"
+                                    <input type="password" id="password" wire:model="password" placeholder="Password"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="password-error">
                                     <button type="button" id="togglePassword"

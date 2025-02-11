@@ -7,6 +7,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\Keranjang;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Profile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -43,7 +44,7 @@ Route::get('/dashboard', Dashboard::class)->name('dashboard');
 Route::get('/cetak', Cetak::class)->name('cetak');
 Route::get('/keranjang', Keranjang::class)->name('keranjang');
 Route::get('/settings', Settings::class)->name('settings');
-Route::get('/users', Users::class)->name('users');
+Route::get('/profile', Profile::class)->name('profile');
 
 
 Route::middleware('guest')->group(function () {

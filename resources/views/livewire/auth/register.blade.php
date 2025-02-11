@@ -22,7 +22,7 @@
                             <div>
                                 <label for="nik" class="block text-sm mb-2 dark:text-white">NIK</label>
                                 <div class="relative">
-                                    <input type="text" id="nik" wire:model="nik"
+                                    <input type="text" id="nik" wire:model="nik" placeholder="NIK"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="nik-error">
                                     @error('nik')
@@ -42,9 +42,9 @@
 
                             <!-- Name Field -->
                             <div>
-                                <label for="name" class="block text-sm mb-2 dark:text-white">Name</label>
+                                <label for="name" class="block text-sm mb-2 dark:text-white">Nama Lengkap</label>
                                 <div class="relative">
-                                    <input type="text" id="name" wire:model="name"
+                                    <input type="text" id="name" wire:model="name" placeholder="Nama Lengkap"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="name-error">
                                     @error('name')
@@ -66,7 +66,7 @@
                             <div>
                                 <label for="phone" class="block text-sm mb-2 dark:text-white">No HP</label>
                                 <div class="relative">
-                                    <input type="text" id="phone" wire:model="phone"
+                                    <input type="text" id="phone" wire:model="phone" placeholder="No HP/Telephone"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="phone-error">
                                     @error('phone')
@@ -88,7 +88,7 @@
                             <div>
                                 <label for="email" class="block text-sm mb-2 dark:text-white">Email</label>
                                 <div class="relative">
-                                    <input type="email" id="email" wire:model="email"
+                                    <input type="email" id="email" wire:model="email" placeholder="Email"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="email-error">
                                     @error('email')
@@ -110,7 +110,7 @@
                             <div>
                                 <label for="username" class="block text-sm mb-2 dark:text-white">Username</label>
                                 <div class="relative">
-                                    <input type="text" id="username" wire:model="username"
+                                    <input type="text" id="username" wire:model="username" placeholder="Username"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="username-error">
                                     @error('username')
@@ -132,7 +132,7 @@
                             <div>
                                 <label for="password" class="block text-sm mb-2 dark:text-white">Password</label>
                                 <div class="relative">
-                                    <input type="password" id="password" wire:model="password"
+                                    <input type="password" id="password" wire:model="password" placeholder="Password"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="password-error">
                                     <button type="button" id="togglePassword"
