@@ -91,7 +91,7 @@ class LokasiResource extends Resource
                 TextColumn::make('nama_lokasi')->label('Nama Lokasi')->sortable()->searchable(),
                 TextColumn::make('tarif')
                     ->label('Tarif')
-                    ->formatStateUsing(fn(string $state): string => 'Rp ' . number_format($state, 0, ',', '.'))
+                    ->formatStateUsing(fn(string $state): string => 'Rp ' . number_format($state, 2, ',', '.'))
                     ->sortable(),
 
             ])

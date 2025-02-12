@@ -37,4 +37,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function penyewaan()
+    {
+        return $this->hasMany(Penyewaan::class, 'nik', 'nik');
+    }
 }

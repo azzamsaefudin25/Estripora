@@ -20,7 +20,7 @@ class Transaksi extends Model
     protected $casts = [
         'detail_penyewaan' => 'array',
     ];
-    
+
     public function penyewaan()
     {
         return $this->belongsTo(Penyewaan::class, 'id_penyewaan');

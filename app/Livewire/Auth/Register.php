@@ -32,8 +32,10 @@ class Register extends Component
             'phone' => $this->phone,
             'password' => Hash::make($this->password),
         ]);
+        Auth::login($user);
 
-        return redirect()->route('login')->with('success', 'Registrasi sukses! Silakan login.');
+        $userName = $user->name;
+        return redirect()->route('dashboard')->with('success', "Selamat datang di Estripora, {$userName}!");
     }
 
     public function render()

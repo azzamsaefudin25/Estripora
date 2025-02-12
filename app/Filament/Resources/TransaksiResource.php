@@ -3,11 +3,15 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
+use App\Models\Penyewaan;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Model;
@@ -72,12 +76,34 @@ class TransaksiResource extends Resource
                     ->relationship(
                         name: 'penyewaan',
                         titleAttribute: 'nama_penyewaan',
-                        modifyQueryUsing: fn($query) => $query->with('lokasi', 'tempat')
+                        modifyQueryUsing: fn($query) => $query->with('lokasi.tempat')
                     )
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
-                    ->afterStateUpdated(function ($set, $get, $state) {
+                    ->getOptionLabelFromRecordUsing(
+                        fn($record) => ($record->lokasi && $record->lokasi->tempat)
+                            ? "{$record->id_penyewaan} - {$record->lokasi->tempat->nama} - {$record->lokasi->nama_lokasi}"
+                            : 'Data Tidak Ditemukan'
+                    )
+                    ->afterStateUpdated(function ($set, $state) {
+                        if (!$state) {
+                            $set('nik', null);
+                            return;
+                        }
 
+                        $users = User::whereHas('penyewaan', function ($query) use ($state) {
+                            $query->where('id_penyewaan', $state);
+                        })->get();
+
+                        $options = $users->pluck('nik')->toArray();
+                        $set('nik_options', $options);
                     }),
+
+                Select::make('nik')
+                    ->label('NIK')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(fn(Get $get): array => $get('nik_options') ?? [])
+                    ->live()
             ]);
     }
 
