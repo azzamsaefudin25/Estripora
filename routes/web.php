@@ -5,6 +5,7 @@ use App\Livewire\Users;
 use App\Livewire\Settings;
 use App\Livewire\Dashboard;
 use App\Livewire\Keranjang;
+use App\Livewire\Lapor;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Profile;
@@ -45,7 +46,7 @@ Route::get('/cetak', Cetak::class)->name('cetak');
 Route::get('/keranjang', Keranjang::class)->name('keranjang');
 Route::get('/settings', Settings::class)->name('settings');
 Route::get('/profile', Profile::class)->name('profile');
-
+Route::get('/lapor', Lapor::class)->name('lapor');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', Register::class)->name('register');
