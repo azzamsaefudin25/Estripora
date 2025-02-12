@@ -25,7 +25,6 @@ class Penyewaan extends Model
         'sub_total',
         'status'
     ];
-
     protected $casts = [
         'penyewaan_per_jam' => 'array',
         'penyewaan_per_hari' => 'array',

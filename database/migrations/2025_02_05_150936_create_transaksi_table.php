@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('id_billing');
             $table->string('nik');
-            $table->foreign('nik')->references('nik')->on('users')->onDelete('cascade');
             $table->date('tgl_booking');
-            $table->integer('jumlah');
+            $table->json('detail_penyewaan');
+            $table->integer('total_durasi');
             $table->integer('luas')->nullable();
             $table->decimal('tarif', 10, 2);
             $table->decimal('sub_total', 10, 2);

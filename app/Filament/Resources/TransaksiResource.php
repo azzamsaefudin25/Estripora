@@ -4,34 +4,35 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use App\Models\Ulasan;
 use Filament\Forms\Form;
+use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\UlasanResource\Pages;
+use App\Filament\Resources\TransaksiResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UlasanResource\RelationManagers;
+use App\Filament\Resources\TransaksiResource\RelationManagers;
 
-class UlasanResource extends Resource
+class TransaksiResource extends Resource
 {
-    protected static ?string $model = Ulasan::class;
+    protected static ?string $model = Transaksi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function getNavigationLabel(): string
     {
-        return 'Reviews'; // Ganti dengan nama yang kamu inginkan
+        return 'Transactions'; // Ganti dengan nama yang kamu inginkan
     }
     public static function getPluralLabel(): string
     {
-        return 'Reviews'; // Ganti dengan nama yang sesuai
+        return 'Transactions'; // Ganti dengan nama yang sesuai
     }
     public static function getModelLabel(): string
     {
-        return 'Review';
+        return 'Transaction';
     }
 
     public static function canAccess(): bool
@@ -59,12 +60,24 @@ class UlasanResource extends Resource
         return Auth::check() && Auth::user()->role === 'admin';
     }
 
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Select::make('id_penyewaan')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->relationship(
+                        name: 'penyewaan',
+                        titleAttribute: 'nama_penyewaan',
+                        modifyQueryUsing: fn($query) => $query->with('lokasi', 'tempat')
+                    )
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
+                    ->afterStateUpdated(function ($set, $get, $state) {
+
+                    }),
             ]);
     }
 
@@ -97,9 +110,9 @@ class UlasanResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUlasans::route('/'),
-            'create' => Pages\CreateUlasan::route('/create'),
-            'edit' => Pages\EditUlasan::route('/{record}/edit'),
+            'index' => Pages\ListTransaksis::route('/'),
+            'create' => Pages\CreateTransaksi::route('/create'),
+            'edit' => Pages\EditTransaksi::route('/{record}/edit'),
         ];
     }
 }

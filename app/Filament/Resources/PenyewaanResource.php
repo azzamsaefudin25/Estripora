@@ -12,11 +12,11 @@ use Filament\Forms\Form;
 use App\Models\Penyewaan;
 use Filament\Tables\Table;
 use Ramsey\Uuid\Type\Time;
-use App\Rules\PenyewaanRule;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
+use App\Rules\StrictRentalOverlapRule;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -124,7 +124,7 @@ class PenyewaanResource extends Resource
                                         'jam_selesai' => ''
                                     ];
 
-                                    $set('penyewaan_per_jam', [$entry]); 
+                                    $set('penyewaan_per_jam', [$entry]);
                                 } elseif ($kategoriSewa === 'per hari') {
 
                                     $entry = [
@@ -132,7 +132,7 @@ class PenyewaanResource extends Resource
                                         'tgl_selesai' => ''
                                     ];
 
-                                    $set('penyewaan_per_hari', [$entry]); 
+                                    $set('penyewaan_per_hari', [$entry]);
                                 }
                             }
                         }
@@ -166,20 +166,14 @@ class PenyewaanResource extends Resource
                             ->required()
                             ->rules(['required', 'different:jam_mulai'])
                     ])
-                    // ->rules([
-                    //     'array',
-                    //     fn($get) => function ($attribute, $value, $fail) use ($get) {
-                    //         $validator = new PenyewaanRule(
-                    //             $get('id_lokasi'),
-                    //             'per jam',
-                    //             $get('record.id')
-                    //         );
-
-                    //         if (!$validator->passes($attribute, $value)) {
-                    //             $fail($validator->message());
-                    //         }
-                    //     }
-                    // ])
+                    ->rules([
+                        'array',
+                        fn($get) => new StrictRentalOverlapRule(
+                            $get('id_lokasi'),
+                            'per jam',
+                            $get('record.id')
+                        )
+                    ])
                     ->minItems(1)
                     ->maxItems(10)
                     ->afterStateUpdated(function ($set, $get) {
@@ -209,6 +203,7 @@ class PenyewaanResource extends Resource
                             $set('sub_total', $subTotal);
                         }
                     })
+
                     ->columnSpanFull(),
 
                 Repeater::make('penyewaan_per_hari')
@@ -220,55 +215,74 @@ class PenyewaanResource extends Resource
                             ->label('Tanggal Mulai')
                             ->required()
                             ->rules(['required', 'date', 'after_or_equal:today'])
-                            ->format('d-m-Y'),
+                            ->format('Y-m-d') // Changed format to match Carbon's expected format
+                            ->displayFormat('d-m-Y'), // Added display format for user-friendly view
                         DatePicker::make('tgl_selesai')
                             ->label('Tanggal Selesai')
                             ->required()
                             ->rules(['required', 'date', 'after_or_equal:tgl_mulai'])
-                            ->format('d-m-Y'),
+                            ->format('Y-m-d') // Changed format to match Carbon's expected format
+                            ->displayFormat('d-m-Y'), // Added display format for user-friendly view
                     ])
-                    // ->rules([
-                    //     'array',
-                    //     fn($get) => function ($attribute, $value, $fail) use ($get) {
-                    //         $validator = new PenyewaanRule(
-                    //             $get('id_lokasi'),
-                    //             'per hari',
-                    //             $get('record.id')
-                    //         );
-
-                    //         if (!$validator->passes($attribute, $value)) {
-                    //             $fail($validator->message());
-                    //         }
-                    //     }
-                    // ])
+                    ->rules([
+                        'array',
+                        fn($get) => new StrictRentalOverlapRule(
+                            $get('id_lokasi'),
+                            'per hari',
+                            $get('record.id')
+                        )
+                    ])
                     ->minItems(1)
                     ->maxItems(10)
                     ->afterStateUpdated(function ($set, $get) {
-                        $totalHari = 0;
-                        $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
+                        try {
+                            $totalHari = 0;
+                            $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
 
-                        foreach ($penyewaanPerHari as $penyewaan) {
-                            if (isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai'])) {
-                                $tglMulai = Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_mulai']);
-                                $tglSelesai = Carbon::createFromFormat('Y-m-d', $penyewaan['tgl_selesai']);
+                            foreach ($penyewaanPerHari as $penyewaan) {
+                                if (
+                                    isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai']) &&
+                                    !empty($penyewaan['tgl_mulai']) &&
+                                    !empty($penyewaan['tgl_selesai'])
+                                ) {
+                                    try {
+                                        $tglMulai = Carbon::parse($penyewaan['tgl_mulai']);
+                                        $tglSelesai = Carbon::parse($penyewaan['tgl_selesai']);
 
-                                // Jika tanggal sama, langsung tambahkan 1 hari
-                                if ($tglMulai->isSameDay($tglSelesai)) {
-                                    $selisihHari = 1;
-                                } else {
-                                    // Jika tanggal berbeda, hitung selisih dan tambah 1
-                                    $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
+                                        // Validate dates
+                                        if (!$tglMulai || !$tglSelesai) {
+                                            continue;
+                                        }
+
+                                        // Jika tanggal sama, langsung tambahkan 1 hari
+                                        if ($tglMulai->isSameDay($tglSelesai)) {
+                                            $selisihHari = 1;
+                                        } else {
+                                            // Jika tanggal berbeda, hitung selisih dan tambah 1
+                                            $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
+                                        }
+
+                                        $totalHari += $selisihHari;
+                                    } catch (\Exception $e) {
+                                        // Skip invalid dates
+                                        continue;
+                                    }
                                 }
-
-                                $totalHari += $selisihHari;
                             }
-                        }
 
-                        $set('total_durasi', $totalHari);
+                            $set('total_durasi', $totalHari);
 
-                        if ($get('tarif')) {
-                            $subTotal = floatval($get('tarif')) * $totalHari;
-                            $set('sub_total', $subTotal);
+                            if ($get('tarif')) {
+                                $tarif = floatval($get('tarif'));
+                                if ($tarif > 0 && $totalHari > 0) {
+                                    $subTotal = $tarif * $totalHari;
+                                    $set('sub_total', $subTotal);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            // Handle any unexpected errors
+                            $set('total_durasi', 0);
+                            $set('sub_total', 0);
                         }
                     })
                     ->columnSpanFull(),
@@ -321,7 +335,6 @@ class PenyewaanResource extends Resource
                 TextInput::make('status')
                     ->label('Status')
                     ->default('Pending')
-                    ->disabled()
                     ->dehydrated(true),
             ]);
     }
@@ -356,7 +369,7 @@ class PenyewaanResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('penyewaan')
-                    ->label('Uraian')
+                    ->label('Detail Penyewaan')
                     ->getStateUsing(function ($record) {
                         if (!$record) return '';
 
@@ -367,9 +380,9 @@ class PenyewaanResource extends Resource
                                 : $record->penyewaan_per_jam;
 
                             if (!empty($schedules)) {
-                                return implode(', ', array_map(function ($item) {
-                                    return "{$item['tgl_mulai']} {$item['jam_mulai']} - {$item['jam_selesai']}";
-                                }, $schedules));
+                                return nl2br(implode("\n", array_map(function ($item) {
+                                    return "Tanggal: {$item['tgl_mulai']}, Jam: {$item['jam_mulai']} - {$item['jam_selesai']}";
+                                }, $schedules)));
                             }
                         } elseif ($record->kategori_sewa === 'per hari') {
                             $schedules = is_string($record->penyewaan_per_hari)
@@ -377,30 +390,46 @@ class PenyewaanResource extends Resource
                                 : $record->penyewaan_per_hari;
 
                             if (!empty($schedules)) {
-                                return implode(', ', array_map(function ($item) {
-                                    return "{$item['tgl_mulai']} - {$item['tgl_selesai']}";
-                                }, $schedules));
+                                return nl2br(implode("\n", array_map(function ($item) {
+                                    return "Tanggal: {$item['tgl_mulai']} - {$item['tgl_selesai']}";
+                                }, $schedules)));
                             }
                         }
 
                         return '';
                     })
+                    ->html() // Penting agar bisa render HTML
                     ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('total_durasi')
-                    ->label('Total Durasi')
-                    ->numeric()
                     ->sortable(),
 
                 TextColumn::make('tarif')
                     ->label('Tarif')
-                    ->money('IDR', true)
+                    ->getStateUsing(function ($record) {
+                        $tarif = $record->tarif;
+
+                        // Format tarif menjadi format Rupiah
+                        $formattedTarif = 'Rp ' . number_format($tarif, 2, ',', '.');
+
+                        if ($record->kategori_sewa === 'per jam') {
+                            // Menampilkan tarif dengan satuan per jam
+                            return "{$formattedTarif} / jam";
+                        } elseif ($record->kategori_sewa === 'per hari') {
+                            // Menampilkan tarif dengan satuan per hari
+                            return "{$formattedTarif} / hari";
+                        }
+
+                        return '';
+                    })
                     ->sortable(),
 
                 TextColumn::make('sub_total')
                     ->label('Sub Total')
-                    ->money('IDR', true)
+                    ->getStateUsing(function ($record) {
+                        $subTotal = $record->sub_total;
+                        $formattedSubTotal = 'Rp ' . number_format($subTotal, 2, ',', '.');
+
+                        return $formattedSubTotal;
+                    })
                     ->sortable(),
 
                 TextColumn::make('status')

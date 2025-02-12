@@ -9,16 +9,20 @@ class Transaksi extends Model
 {
     use HasFactory;
 
-    protected $table='transaksi';
+    protected $table = 'transaksi';
 
-    protected $primaryKey = 'id'; 
-    public $incrementing = true; 
-    protected $keyType = 'int'; 
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
-    protected $fillable = ['id_penyewaan','id_billing','nik','uraian','tgl_booking','jumlah','luas','tarif','sub_total','metode_pembayaran','status' ];
+    protected $fillable = ['id_penyewaan', 'id_billing', 'nik', 'tgl_booking', 'detail_penyewaan', 'total_durasi', 'luas', 'tarif', 'sub_total', 'metode_pembayaran', 'status'];
 
-    public function user()
+    protected $casts = [
+        'detail_penyewaan' => 'array',
+    ];
+    
+    public function penyewaan()
     {
-        return $this->belongsTo(User::class, 'nik');
+        return $this->belongsTo(Penyewaan::class, 'id_penyewaan');
     }
 }
