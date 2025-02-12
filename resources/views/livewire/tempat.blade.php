@@ -6,7 +6,7 @@
         <!-- List Tempat dalam Kategori -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
             @foreach($tempatList as $tempat)
-                <div class="bg-white shadow-md rounded-b-xl overflow-hidden">
+                <div class="bg-white shadow-md rounded-b-xl overflow-hidden transform transition-transform duration-300 hover:scale-105">
                     <!-- Gambar Tempat -->
                     <div class="relative w-full h-48">
                         <img src="{{ $tempat['img'] }}" class="w-full h-full object-cover">
