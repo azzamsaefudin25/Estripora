@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
@@ -14,8 +15,13 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\SelectColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Resources\TransaksiResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TransaksiResource\RelationManagers;
@@ -68,42 +74,165 @@ class TransaksiResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('id_penyewaan')
+                Select::make('nik')
+                    ->label('Identitas')
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->options(function () {
+                        return User::whereHas('penyewaan') // Pastikan ada relasi dengan penyewaan
+                            ->pluck('name', 'nik') // Ambil nama dan nik
+                            ->mapWithKeys(function ($name, $nik) {
+                                return [$nik => "{$nik} - {$name}"]; // Format nik - nama
+                            })
+                            ->toArray();
+                    })
                     ->live()
-                    ->relationship(
-                        name: 'penyewaan',
-                        titleAttribute: 'nama_penyewaan',
-                        modifyQueryUsing: fn($query) => $query->with('lokasi.tempat')
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn($record) => ($record->lokasi && $record->lokasi->tempat)
-                            ? "{$record->id_penyewaan} - {$record->lokasi->tempat->nama} - {$record->lokasi->nama_lokasi}"
-                            : 'Data Tidak Ditemukan'
-                    )
                     ->afterStateUpdated(function ($set, $state) {
                         if (!$state) {
-                            $set('nik', null);
+                            $set('id_penyewaan', null);
+                            $set('tgl_booking', null);
+                            $set('detail_penyewaan', null);
+                            $set('total_durasi', null);
+                            $set('tarif', null);
+                            $set('sub_total', null);
+                            $set('penyewaan_options', []);
                             return;
                         }
 
-                        $users = User::whereHas('penyewaan', function ($query) use ($state) {
-                            $query->where('id_penyewaan', $state);
-                        })->get();
+                        // Get penyewaan for selected NIK
+                        $penyewaanList = Penyewaan::with(['lokasi.tempat'])
+                            ->where('nik', $state)
+                            ->get()
+                            ->mapWithKeys(function ($penyewaan) {
+                                $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
+                                    ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
+                                    : "Penyewaan #{$penyewaan->id_penyewaan}";
 
-                        $options = $users->pluck('nik')->toArray();
-                        $set('nik_options', $options);
+                                return [$penyewaan->id_penyewaan => $label];
+                            })
+                            ->toArray();
+
+                        $set('penyewaan_options', $penyewaanList);
                     }),
 
-                Select::make('nik')
-                    ->label('NIK')
+                TextInput::make('id_billing')
+                    ->label('ID Billing')
+                    ->required(),
+
+                Select::make('id_penyewaan')
+                    ->label('Penyewaan')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn(Get $get): array => $get('nik_options') ?? [])
+                    ->options(fn(Get $get): array => $get('penyewaan_options') ?? [])
                     ->live()
+                    ->afterStateUpdated(function ($set, $get, $state) {
+                        if (!$state) {
+                            $set('tgl_booking', null);
+                            $set('detail_penyewaan', null);
+                            $set('total_durasi', null);
+                            $set('tarif', null);
+                            $set('sub_total', null);
+                            return;
+                        }
+
+                        $penyewaan = Penyewaan::with(['lokasi.tempat', 'user'])
+                            ->where('id_penyewaan', $state)
+                            ->where('nik', $get('nik'))
+                            ->first();
+
+                        if ($penyewaan) {
+                            $user = $penyewaan->user;
+
+                            $detailText = [];
+                            $detailText[] = "Penyewa: {$user->name} (NIK: {$user->nik})";
+                            $detailText[] = "Lokasi: {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}";
+                            $detailText[] = "Kategori Sewa: " . ucfirst($penyewaan->kategori_sewa);
+
+                            if ($penyewaan->kategori_sewa === 'per jam') {
+                                foreach ($penyewaan->penyewaan_per_jam as $index => $item) {
+                                    $detailText[] = sprintf(
+                                        "(%d) Tanggal: %s\nJam: %s - %s",
+                                        $index + 1,
+                                        Carbon::parse($item['tgl_mulai'])->format('d/m/Y'),
+                                        $item['jam_mulai'],
+                                        $item['jam_selesai']
+                                    );
+                                }
+                            } else {
+                                foreach ($penyewaan->penyewaan_per_hari as $index => $item) {
+                                    $detailText[] = sprintf(
+                                        "(%d) Periode: %s - %s",
+                                        $index + 1,
+                                        Carbon::parse($item['tgl_mulai'])->format('d/m/Y'),
+                                        Carbon::parse($item['tgl_selesai'])->format('d/m/Y')
+                                    );
+                                }
+                            }
+
+                            $set('tgl_booking', $penyewaan->tgl_booking);
+                            $set('detail_penyewaan', implode("\n", $detailText));
+                            $set('total_durasi', $penyewaan->total_durasi);
+                            $set('tarif', $penyewaan->tarif);
+                            $set('sub_total', $penyewaan->sub_total);
+                        }
+                    }),
+
+                TextInput::make('tgl_booking')
+                    ->label('Tanggal Booking')
+                    ->disabled()
+                    ->dehydrated(true),
+
+                Textarea::make('detail_penyewaan')
+                    ->label('Detail Penyewaan')
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->rows(6),
+
+                TextInput::make('total_durasi')
+                    ->label('Total Durasi')
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->suffix(function (Get $get) {
+                        $penyewaan = Penyewaan::find($get('id_penyewaan'));
+                        if ($penyewaan && isset($penyewaan->kategori_sewa)) {
+                            return $penyewaan->kategori_sewa === 'per jam' ? 'Jam' : 'Hari';
+                        }
+                        return '';
+                    }),
+
+                TextInput::make('tarif')
+                    ->label('Tarif')
+                    ->prefix('Rp')
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
+
+                TextInput::make('sub_total')
+                    ->label('Sub Total')
+                    ->prefix('Rp')
+                    ->disabled()
+                    ->dehydrated(true)
+                    ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
+
+                Select::make('metode_pembayaran')
+                    ->label('Metode Pembayaran')
+                    ->required()
+                    ->options([
+                        'Transfer Bank' => 'Transfer Bank',
+                        'E-Wallet' => 'E-Wallet',
+                        'Kartu Kredit' => 'Kartu Kredit'
+                    ]),
+                Select::make('status')
+                    ->label('Status')
+                    ->default('Pending')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Paid' => 'Paid',
+                        'Failed' => 'Failed'
+                    ])
+                    ->dehydrated(true),
             ]);
     }
 
@@ -111,13 +240,78 @@ class TransaksiResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('id_penyewaan')
+                    ->label('Penyewaan')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+
+                        $penyewaan = Penyewaan::with(['lokasi.tempat'])
+                            ->where('id_penyewaan', $state)
+                            ->first();
+
+                        if ($penyewaan && $penyewaan->lokasi && $penyewaan->lokasi->tempat) {
+
+                            return "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}";
+                        }
+
+                        return $state;
+                    }),
+
+                TextColumn::make('nik')
+                    ->label('Identitas')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('id_billing')
+                    ->label('ID Billing')
+                    ->sortable(),
+
+                TextColumn::make('tgl_booking')
+                    ->label('Tanggal Booking')
+                    ->sortable(),
+
+                TextColumn::make('detail_penyewaan')
+                    ->label('Detail Penyewaan')
+                    ->limit(50)
+                    ->sortable(),
+
+                TextColumn::make('total_durasi')
+                    ->label('Total Durasi')
+                    ->sortable(),
+
+                TextColumn::make('tarif')
+                    ->label('Tarif')
+                    ->formatStateUsing(fn($state) => $state ? 'Rp ' . number_format((float)$state, 2, '.', ',') : null)
+                    ->sortable(),
+
+                TextColumn::make('sub_total')
+                    ->label('Sub Total')
+                    ->formatStateUsing(fn($state) => $state ? 'Rp ' . number_format((float)$state, 2, '.', ',') : null)
+                    ->sortable(),
+
+                SelectColumn::make('metode_pembayaran')
+                    ->label('Metode Pembayaran')
+                    ->sortable()
+                    ->options([
+                        'Transfer Bank' => 'Transfer Bank',
+                        'E-Wallet' => 'E-Wallet',
+                        'Kartu Kredit' => 'Kartu Kredit',
+                    ]),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

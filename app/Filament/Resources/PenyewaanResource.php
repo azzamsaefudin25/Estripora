@@ -80,7 +80,6 @@ class PenyewaanResource extends Resource
     {
         return $form
             ->schema([
-
                 Select::make('nik')
                     ->required()
                     ->searchable()
@@ -332,9 +331,14 @@ class PenyewaanResource extends Resource
                         }
                     }),
 
-                TextInput::make('status')
+                Select::make('status')
                     ->label('Status')
                     ->default('Pending')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Confirmed' => 'Confirmed',
+                        'Canceled' => 'Canceled'
+                    ])
                     ->dehydrated(true),
             ]);
     }
