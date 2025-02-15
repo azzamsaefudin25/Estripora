@@ -16,7 +16,6 @@ use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
-use App\Rules\StrictRentalOverlapRule;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +30,7 @@ use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\PenyewaanResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PenyewaanResource\RelationManagers;
+use App\Rules\PenyewaanRule;
 
 class PenyewaanResource extends Resource
 {
@@ -167,7 +167,7 @@ class PenyewaanResource extends Resource
                     ])
                     ->rules([
                         'array',
-                        fn($get) => new StrictRentalOverlapRule(
+                        fn($get) => new PenyewaanRule(
                             $get('id_lokasi'),
                             'per jam',
                             $get('record.id')
@@ -225,7 +225,7 @@ class PenyewaanResource extends Resource
                     ])
                     ->rules([
                         'array',
-                        fn($get) => new StrictRentalOverlapRule(
+                        fn($get) => new PenyewaanRule(
                             $get('id_lokasi'),
                             'per hari',
                             $get('record.id')

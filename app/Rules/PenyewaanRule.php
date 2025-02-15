@@ -7,7 +7,7 @@ use App\Models\Penyewaan;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\Validation\Rule;
 
-class StrictRentalOverlapRule implements Rule
+class PenyewaanRule implements Rule
 {
     protected $existingRentals;
     protected $kategoriSewa;
