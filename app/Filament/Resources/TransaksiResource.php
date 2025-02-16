@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use App\Models\Penyewaan;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -34,17 +35,21 @@ class TransaksiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Transactions'; // Ganti dengan nama yang kamu inginkan
+        return 'Transaksi'; // Ganti dengan nama yang kamu inginkan
     }
     public static function getPluralLabel(): string
     {
-        return 'Transactions'; // Ganti dengan nama yang sesuai
+        return 'Transaksi'; // Ganti dengan nama yang sesuai
     }
     public static function getModelLabel(): string
     {
-        return 'Transaction';
+        return 'Transaksi';
     }
 
+    public static function getnavigationGroup(): ?string
+    {
+        return 'Sewa & Keuangan';
+    }
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -80,14 +85,15 @@ class TransaksiResource extends Resource
                     ->searchable()
                     ->preload()
                     ->options(function () {
-                        return User::whereHas('penyewaan') // Pastikan ada relasi dengan penyewaan
-                            ->pluck('name', 'nik') // Ambil nama dan nik
+                        return User::whereHas('penyewaan')
+                            ->pluck('name', 'nik')
                             ->mapWithKeys(function ($name, $nik) {
-                                return [$nik => "{$nik} - {$name}"]; // Format nik - nama
+                                return [$nik => "{$nik} - {$name}"];
                             })
                             ->toArray();
                     })
                     ->live()
+                    ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->afterStateUpdated(function ($set, $state) {
                         if (!$state) {
                             $set('id_penyewaan', null);
@@ -100,7 +106,6 @@ class TransaksiResource extends Resource
                             return;
                         }
 
-                        // Get penyewaan for selected NIK
                         $penyewaanList = Penyewaan::with(['lokasi.tempat'])
                             ->where('nik', $state)
                             ->get()
@@ -177,7 +182,19 @@ class TransaksiResource extends Resource
                             $set('tarif', $penyewaan->tarif);
                             $set('sub_total', $penyewaan->sub_total);
                         }
-                    }),
+                    })
+                    ->rules([
+                        function (callable $get) {
+                            return Rule::unique('transaksi', 'id_penyewaan')
+                                ->where(function ($query) {
+                                    return $query->whereIn('status', ['Pending', 'Paid']);
+                                })
+                                ->ignore($get('id'), 'id');
+                        },
+                    ])
+                    ->validationMessages([
+                        'unique' => 'Transaksi yang sama sudah dibuat.  Harap cek status transaksi.',
+                    ]),
 
                 TextInput::make('tgl_booking')
                     ->label('Tanggal Booking')
@@ -201,20 +218,22 @@ class TransaksiResource extends Resource
                         }
                         return '';
                     }),
-
+                TextInput::make('luas')
+                    ->label('Luas')
+                    ->required(),
                 TextInput::make('tarif')
                     ->label('Tarif')
                     ->prefix('Rp')
                     ->disabled()
-                    ->dehydrated(true)
-                    ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
+                    ->dehydrated(true),
+                // ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
 
                 TextInput::make('sub_total')
                     ->label('Sub Total')
                     ->prefix('Rp')
                     ->disabled()
-                    ->dehydrated(true)
-                    ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
+                    ->dehydrated(true),
+                // ->formatStateUsing(fn($state) => $state ? number_format((float)$state, 2, '.', ',') : null),
 
                 Select::make('metode_pembayaran')
                     ->label('Metode Pembayaran')
@@ -240,6 +259,12 @@ class TransaksiResource extends Resource
     {
         return $table
             ->columns([
+
+                TextColumn::make('penyewaan.user.name')
+                    ->label('Identitas')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('id_penyewaan')
                     ->label('Penyewaan')
                     ->sortable()
@@ -252,17 +277,11 @@ class TransaksiResource extends Resource
 
                         if ($penyewaan && $penyewaan->lokasi && $penyewaan->lokasi->tempat) {
 
-                            return "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}";
+                            return "{$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}";
                         }
 
                         return $state;
                     }),
-
-                TextColumn::make('nik')
-                    ->label('Identitas')
-                    ->searchable()
-                    ->sortable(),
-
                 TextColumn::make('id_billing')
                     ->label('ID Billing')
                     ->sortable(),
@@ -279,7 +298,9 @@ class TransaksiResource extends Resource
                 TextColumn::make('total_durasi')
                     ->label('Total Durasi')
                     ->sortable(),
-
+                TextColumn::make('luas')
+                    ->label('Luas')
+                    ->sortable(),
                 TextColumn::make('tarif')
                     ->label('Tarif')
                     ->formatStateUsing(fn($state) => $state ? 'Rp ' . number_format((float)$state, 2, '.', ',') : null)

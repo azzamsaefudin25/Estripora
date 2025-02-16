@@ -12,8 +12,10 @@ use Filament\Forms\Form;
 use App\Models\Penyewaan;
 use Filament\Tables\Table;
 use Ramsey\Uuid\Type\Time;
+use App\Rules\PenyewaanRule;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
@@ -30,7 +32,6 @@ use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\PenyewaanResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PenyewaanResource\RelationManagers;
-use App\Rules\PenyewaanRule;
 
 class PenyewaanResource extends Resource
 {
@@ -40,15 +41,20 @@ class PenyewaanResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Bookings'; // Ganti dengan nama yang kamu inginkan
+        return 'Penyewaan'; // Ganti dengan nama yang kamu inginkan
     }
     public static function getPluralLabel(): string
     {
-        return 'Bookings'; // Ganti dengan nama yang sesuai
+        return 'Penyewaan'; // Ganti dengan nama yang sesuai
     }
     public static function getModelLabel(): string
     {
-        return 'Booking';
+        return 'Penyewaan';
+    }
+
+    public static function getnavigationGroup(): ?string
+    {
+        return 'Sewa & Keuangan';
     }
 
     public static function canAccess(): bool
@@ -81,10 +87,13 @@ class PenyewaanResource extends Resource
         return $form
             ->schema([
                 Select::make('nik')
+                    ->label('Identitas')
                     ->required()
                     ->searchable()
+                    ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->preload()
-                    ->relationship('user', 'name'),
+                    ->relationship('user')
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nik} - {$record->name}"),
 
                 Select::make('id_lokasi')
                     ->label('Lokasi & Tempat')
@@ -163,15 +172,47 @@ class PenyewaanResource extends Resource
                         TimePicker::make('jam_selesai')
                             ->label('Jam Selesai')
                             ->required()
-                            ->rules(['required', 'different:jam_mulai'])
+                            ->rules([
+                                'required',
+                                'different:jam_mulai',
+                                function ($get) {
+                                    return function ($attribute, $value, $fail) use ($get) {
+                                        $jamMulai = $get('jam_mulai');
+                                        if (empty($jamMulai) || empty($value)) {
+                                            return;
+                                        }
+
+                                        try {
+                                            $baseDate = date('Y-m-d');
+                                            $startTime = \Carbon\Carbon::parse($baseDate . ' ' . $jamMulai);
+                                            $endTime = \Carbon\Carbon::parse($baseDate . ' ' . $value);
+
+                                            // Handle overnight booking
+                                            if ($endTime->lt($startTime)) {
+                                                return;
+                                            }
+
+                                            if ($startTime->eq($endTime)) {
+                                                $fail('Jam selesai tidak boleh sama dengan jam mulai.');
+                                            }
+                                        } catch (\Exception $e) {
+                                            $fail('Format waktu tidak valid.');
+                                        }
+                                    };
+                                }
+                            ])
                     ])
                     ->rules([
                         'array',
-                        fn($get) => new PenyewaanRule(
-                            $get('id_lokasi'),
-                            'per jam',
-                            $get('record.id')
-                        )
+                        function ($get, $livewire) {
+                            $currentId = $livewire->record?->id_penyewaan;
+
+                            return new PenyewaanRule(
+                                $get('id_lokasi'),
+                                'per jam',
+                                $currentId
+                            );
+                        }
                     ])
                     ->minItems(1)
                     ->maxItems(10)
@@ -189,9 +230,8 @@ class PenyewaanResource extends Resource
                                     $jamSelesai->addDay();
                                 }
 
-                                // Hitung selisih dalam jam
                                 $selisihJam = abs((int)$jamSelesai->diffInHours($jamMulai));
-                                $totalJam += $selisihJam;;
+                                $totalJam += $selisihJam;
                             }
                         }
 
@@ -202,7 +242,6 @@ class PenyewaanResource extends Resource
                             $set('sub_total', $subTotal);
                         }
                     })
-
                     ->columnSpanFull(),
 
                 Repeater::make('penyewaan_per_hari')
@@ -214,22 +253,43 @@ class PenyewaanResource extends Resource
                             ->label('Tanggal Mulai')
                             ->required()
                             ->rules(['required', 'date', 'after_or_equal:today'])
-                            ->format('Y-m-d') // Changed format to match Carbon's expected format
-                            ->displayFormat('d-m-Y'), // Added display format for user-friendly view
+                            ->format('Y-m-d')
+                            ->displayFormat('d-m-Y'),
                         DatePicker::make('tgl_selesai')
                             ->label('Tanggal Selesai')
                             ->required()
-                            ->rules(['required', 'date', 'after_or_equal:tgl_mulai'])
+                            ->rules([
+                                'required',
+                                'date',
+                                'after_or_equal:tgl_mulai',
+                                function ($get) {
+                                    return function ($attribute, $value, $fail) use ($get) {
+                                        $tglMulai = $get('tgl_mulai');
+                                        if (empty($tglMulai) || empty($value)) {
+                                            return;
+                                        }
+
+                                        $startDate = \Carbon\Carbon::parse($tglMulai);
+                                        $endDate = \Carbon\Carbon::parse($value);
+
+                                        if ($endDate->lt($startDate)) {
+                                            $fail('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
+                                        }
+                                    };
+                                }
+                            ])
                             ->format('Y-m-d') // Changed format to match Carbon's expected format
                             ->displayFormat('d-m-Y'), // Added display format for user-friendly view
                     ])
                     ->rules([
                         'array',
-                        fn($get) => new PenyewaanRule(
-                            $get('id_lokasi'),
-                            'per hari',
-                            $get('record.id')
-                        )
+                        function ($get, $livewire) {
+                            return new PenyewaanRule(
+                                $get('id_lokasi'),
+                                'per hari',
+                                $livewire->record?->id_penyewaan
+                            );
+                        }
                     ])
                     ->minItems(1)
                     ->maxItems(10)
@@ -256,6 +316,8 @@ class PenyewaanResource extends Resource
                                         // Jika tanggal sama, langsung tambahkan 1 hari
                                         if ($tglMulai->isSameDay($tglSelesai)) {
                                             $selisihHari = 1;
+                                        } elseif ($tglSelesai < $tglMulai) {
+                                            $selisihHari = 0;
                                         } else {
                                             // Jika tanggal berbeda, hitung selisih dan tambah 1
                                             $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
@@ -296,17 +358,14 @@ class PenyewaanResource extends Resource
 
                 TextInput::make('tarif')
                     ->label('Tarif')
-                    ->numeric()
                     ->prefix('Rp')
                     ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? '/Jam' : '/Hari')
                     ->live()
                     ->disabled()
                     ->dehydrated(true)
                     ->formatStateUsing(function ($state) {
-                        // Only format if state is not null
                         return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
                     })
-                    // Add this to ensure proper state handling
                     ->afterStateHydrated(function ($component, $state) {
                         if (!is_null($state)) {
                             $component->state((float)$state);
@@ -315,16 +374,13 @@ class PenyewaanResource extends Resource
 
                 TextInput::make('sub_total')
                     ->label('Sub Total')
-                    ->numeric()
                     ->prefix('Rp')
                     ->disabled()
                     ->dehydrated(true)
                     ->live()
                     ->formatStateUsing(function ($state) {
-                        // Only format if state is not null
                         return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
                     })
-                    // Add this to ensure proper state handling
                     ->afterStateHydrated(function ($component, $state) {
                         if (!is_null($state)) {
                             $component->state((float)$state);

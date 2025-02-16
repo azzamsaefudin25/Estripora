@@ -5,6 +5,7 @@ namespace App\Rules;
 use Carbon\Carbon;
 use App\Models\Penyewaan;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Validation\Rule;
 
 class PenyewaanRule implements Rule
@@ -24,11 +25,21 @@ class PenyewaanRule implements Rule
 
     protected function loadExistingRentals()
     {
-        $this->existingRentals = Penyewaan::where('id_lokasi', $this->idLokasi)
-            ->when($this->currentId, function ($query) {
-                return $query->where('id', '!=', $this->currentId);
-            })
-            ->get();
+        $query = Penyewaan::where('id_lokasi', $this->idLokasi);
+
+        if ($this->currentId) {
+            $query->where('id_penyewaan', '!=', $this->currentId);
+        }
+
+        $this->existingRentals = $query->get();
+
+        // Debuglog
+        Log::info('Loading existing rentals', [
+            'id_lokasi' => $this->idLokasi,
+            'current_id' => $this->currentId,
+            'count' => $this->existingRentals->count(),
+            'rentals' => $this->existingRentals->toArray()
+        ]);
     }
 
     public function passes($attribute, $value): bool
@@ -37,41 +48,102 @@ class PenyewaanRule implements Rule
             return true;
         }
 
-        // Konversi semua tanggal dan waktu ke timestamps untuk perbandingan
-        $newTimeRanges = $this->getTimeRanges($value, $this->kategoriSewa);
-        $existingTimeRanges = $this->getExistingTimeRanges();
+        try {
+            // Debuglog input value
+            Log::info('Validating new rental', [
+                'attribute' => $attribute,
+                'value' => $value,
+                'kategori_sewa' => $this->kategoriSewa
+            ]);
 
-        // Cek overlap antara rentang waktu baru
-        if (!$this->validateInternalOverlap($newTimeRanges)) {
+            $newTimeRanges = $this->getTimeRanges($value, $this->kategoriSewa);
+            $existingTimeRanges = $this->getExistingTimeRanges();
+
+            // Debuglog time ranges
+            Log::info('Time ranges', [
+                'new' => $newTimeRanges,
+                'existing' => $existingTimeRanges
+            ]);
+
+            // Jika hanya ada satu rentang waktu, tidak perlu cek internal overlap
+            if (count($newTimeRanges) <= 1) {
+                $hasOverlap = $this->hasOverlap($newTimeRanges, $existingTimeRanges);
+
+                // Debuglog overlap check result
+                Log::info('Single time range overlap check', [
+                    'has_overlap' => $hasOverlap
+                ]);
+
+                return !$hasOverlap;
+            }
+
+            // Cek overlap antara rentang waktu baru
+            if (!$this->validateInternalOverlap($newTimeRanges)) {
+                Log::info('Internal overlap detected');
+                return false;
+            }
+
+            $hasOverlap = $this->hasOverlap($newTimeRanges, $existingTimeRanges);
+            Log::info('Multiple time ranges overlap check', [
+                'has_overlap' => $hasOverlap
+            ]);
+
+            return !$hasOverlap;
+        } catch (\Exception $e) {
+            Log::error('PenyewaanRule validation error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
-
-        // Cek overlap dengan rentang waktu yang sudah ada
-        return !$this->hasOverlap($newTimeRanges, $existingTimeRanges);
     }
 
     protected function getTimeRanges($rentals, $type): array
     {
         $ranges = [];
+        $rentals = is_array($rentals) ? $rentals : [$rentals];
+
         foreach ($rentals as $rental) {
-            if ($type === 'per jam') {
-                $startDate = Carbon::parse($rental['tgl_mulai']);
-                $start = Carbon::parse($rental['tgl_mulai'] . ' ' . $rental['jam_mulai']);
-                $end = Carbon::parse($rental['tgl_mulai'] . ' ' . $rental['jam_selesai']);
+            try {
+                if ($type === 'per jam') {
+                    if (empty($rental['tgl_mulai']) || empty($rental['jam_mulai']) || empty($rental['jam_selesai'])) {
+                        continue;
+                    }
 
-                // Handle kasus melewati tengah malam
-                if ($end->lt($start)) {
-                    $end->addDay();
+                    $start = Carbon::parse($rental['tgl_mulai'] . ' ' . $rental['jam_mulai']);
+                    $end = Carbon::parse($rental['tgl_mulai'] . ' ' . $rental['jam_selesai']);
+
+                    // Handle kasus melewati tengah malam
+                    if ($end->lt($start)) {
+                        $end->addDay();
+                    }
+
+                    // Debuglog time parsing
+                    Log::info('Parsed time range', [
+                        'original' => $rental,
+                        'start' => $start->toDateTimeString(),
+                        'end' => $end->toDateTimeString()
+                    ]);
+                } else { // per hari
+                    if (empty($rental['tgl_mulai']) || empty($rental['tgl_selesai'])) {
+                        continue;
+                    }
+
+                    $start = Carbon::parse($rental['tgl_mulai'])->startOfDay();
+                    $end = Carbon::parse($rental['tgl_selesai'])->endOfDay();
                 }
-            } else { // per hari
-                $start = Carbon::parse($rental['tgl_mulai'])->startOfDay();
-                $end = Carbon::parse($rental['tgl_selesai'])->endOfDay();
-            }
 
-            $ranges[] = [
-                'start' => $start->timestamp,
-                'end' => $end->timestamp
-            ];
+                $ranges[] = [
+                    'start' => $start->timestamp,
+                    'end' => $end->timestamp
+                ];
+            } catch (\Exception $e) {
+                Log::error('Error parsing rental time', [
+                    'rental' => $rental,
+                    'error' => $e->getMessage()
+                ]);
+                continue;
+            }
         }
         return $ranges;
     }
@@ -80,20 +152,32 @@ class PenyewaanRule implements Rule
     {
         $ranges = [];
         foreach ($this->existingRentals as $rental) {
-            // Process per jam rentals
-            if (!empty($rental->penyewaan_per_jam)) {
-                $hourlyRentals = $rental->penyewaan_per_jam; // Data sudah dalam bentuk array
-                if (is_array($hourlyRentals)) {
-                    $ranges = array_merge($ranges, $this->getTimeRanges($hourlyRentals, 'per jam'));
-                }
-            }
+            try {
+                if (!empty($rental->penyewaan_per_jam)) {
+                    $hourlyRentals = is_string($rental->penyewaan_per_jam)
+                        ? json_decode($rental->penyewaan_per_jam, true)
+                        : $rental->penyewaan_per_jam;
 
-            // Process per hari rentals
-            if (!empty($rental->penyewaan_per_hari)) {
-                $dailyRentals = $rental->penyewaan_per_hari; // Data sudah dalam bentuk array
-                if (is_array($dailyRentals)) {
-                    $ranges = array_merge($ranges, $this->getTimeRanges($dailyRentals, 'per hari'));
+                    if (is_array($hourlyRentals)) {
+                        $ranges = array_merge($ranges, $this->getTimeRanges($hourlyRentals, 'per jam'));
+                    }
                 }
+
+                if (!empty($rental->penyewaan_per_hari)) {
+                    $dailyRentals = is_string($rental->penyewaan_per_hari)
+                        ? json_decode($rental->penyewaan_per_hari, true)
+                        : $rental->penyewaan_per_hari;
+
+                    if (is_array($dailyRentals)) {
+                        $ranges = array_merge($ranges, $this->getTimeRanges($dailyRentals, 'per hari'));
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Error processing existing rental', [
+                    'rental_id' => $rental->id_penyewaan,
+                    'error' => $e->getMessage()
+                ]);
+                continue;
             }
         }
         return $ranges;
@@ -117,6 +201,17 @@ class PenyewaanRule implements Rule
         foreach ($newRanges as $new) {
             foreach ($existingRanges as $existing) {
                 if ($this->isOverlapping($new, $existing)) {
+                    // Debuglog when overlap is found
+                    Log::info('Overlap detected', [
+                        'new_range' => [
+                            'start' => date('Y-m-d H:i:s', $new['start']),
+                            'end' => date('Y-m-d H:i:s', $new['end'])
+                        ],
+                        'existing_range' => [
+                            'start' => date('Y-m-d H:i:s', $existing['start']),
+                            'end' => date('Y-m-d H:i:s', $existing['end'])
+                        ]
+                    ]);
                     return true;
                 }
             }

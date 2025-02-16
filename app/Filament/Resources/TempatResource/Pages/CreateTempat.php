@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTempat extends CreateRecord
 {
     protected static string $resource = TempatResource::class;
+
+    protected static ?string $title = 'Tambah Tempat ';
 }

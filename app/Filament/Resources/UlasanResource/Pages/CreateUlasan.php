@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateUlasan extends CreateRecord
 {
     protected static string $resource = UlasanResource::class;
+
+    protected static ?string $title = 'Tambah Ulasan';
 }

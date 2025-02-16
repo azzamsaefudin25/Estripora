@@ -2,22 +2,55 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\LaporResource\Pages;
-use App\Filament\Resources\LaporResource\RelationManagers;
-use App\Models\Lapor;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Lapors;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\LaporResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\LaporResource\RelationManagers;
 
 class LaporResource extends Resource
 {
-    protected static ?string $model = Lapor::class;
+    protected static ?string $model = Lapors::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-inbox';
+
+    public static function getnavigationGroup(): ?string
+    {
+        return 'Feedback & Laporan';
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
 
     public static function form(Form $form): Form
     {

@@ -26,17 +26,20 @@ class LokasiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Locations'; // Ganti dengan nama yang kamu inginkan
+        return 'Lokasi'; // Ganti dengan nama yang kamu inginkan
     }
     public static function getPluralLabel(): string
     {
-        return 'Locations'; // Ganti dengan nama yang sesuai
+        return 'Lokasi'; // Ganti dengan nama yang sesuai
     }
     public static function getModelLabel(): string
     {
-        return 'Location';
+        return 'Lokasi';
     }
-
+    public static function getnavigationGroup(): ?string
+    {
+        return 'Kelola Tempat & Area';
+    }
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -70,6 +73,7 @@ class LokasiResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->relationship('tempat', 'nama'),
                 TextInput::make('nama_lokasi')
                     ->label('Nama Lokasi')

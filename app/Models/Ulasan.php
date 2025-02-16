@@ -15,14 +15,14 @@ class Ulasan extends Model
     protected $keyType = 'int';
     protected $fillable = ['id_penyewaan','nik','ulasan','rating' ];
 
-    public function penyewaanid()
+    public function penyewaan()
     {
-        return $this->belongsTo(Tempat::class, 'id_penyewaan');
+        return $this->belongsTo(Penyewaan::class, 'id_penyewaan');
     }
 
-    public function penyewaannik()
+    public function user()
     {
-        return $this->belongsTo(Tempat::class, 'nik');
+        return $this->belongsTo(Penyewaan::class, 'nik');
     }
     
 }

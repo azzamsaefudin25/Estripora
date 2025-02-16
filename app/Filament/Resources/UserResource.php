@@ -8,26 +8,41 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Gate;
 use Filament\Forms\FormsComponent;
 use Filament\Resources\Pages\Page;
 use Forms\Component\DateTimePicker;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
-use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Pengguna'; 
+    }
+    public static function getPluralLabel(): string
+    {
+        return 'Pengguna'; 
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Pengguna';
+    }
 
     public static function canAccess(): bool
     {
@@ -58,38 +73,39 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nik')
+                TextInput::make('nik')
                     ->label('NIK')
                     ->unique(ignoreRecord: true)
+                    ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->required(),
 
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label('Nama')
                     ->required(),
 
-                Forms\Components\TextInput::make('phone')
+                TextInput::make('phone')
                     ->label('No HP')
                     ->tel(),
 
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->label('Email')
                     ->email()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
                     ->required(),
 
-                Forms\Components\TextInput::make('username')
+                TextInput::make('username')
                     ->label('Username')
                     ->unique(ignoreRecord: true)
                     ->required(),
 
-                Forms\Components\TextInput::make('password')
+                TextInput::make('password')
                     ->label('Password')
                     ->password()
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(Page $livewire): bool =>  $livewire instanceof CreateRecord),
 
-                Forms\Components\Select::make('role')
+                Select::make('role')
                     ->label('Role')
                     ->options([
                         'admin' => 'admin',
@@ -105,13 +121,13 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nik')->label('NIK')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('name')->label('Nama')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('phone')->label('No HP')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('email')->label('Email')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('username')->label('Username')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('role')->label('Role')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
+                TextColumn::make('nik')->label('NIK')->sortable()->searchable(),
+                TextColumn::make('name')->label('Nama')->sortable()->searchable(),
+                TextColumn::make('phone')->label('No HP')->sortable()->searchable(),
+                TextColumn::make('email')->label('Email')->sortable()->searchable(),
+                TextColumn::make('username')->label('Username')->sortable()->searchable(),
+                TextColumn::make('role')->label('Role')->sortable()->searchable(),
+                TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
 
             ])
             ->filters([
@@ -143,7 +159,7 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
+            'create' => Pages\CreateUser::route('/index'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }

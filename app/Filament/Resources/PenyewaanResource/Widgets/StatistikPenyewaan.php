@@ -14,8 +14,7 @@ class StatistikPenyewaan extends BaseWidget
         return [
             Stat::make('Penyewaan Masuk', Penyewaan::query()->where('status', 'Pending')->count()),
             Stat::make('Penyewaan Dikonfirmasi', Penyewaan::query()->where('status', 'Confirmed')->count()),
-            Stat::make('Penyewaan Dibatalkan', Transaksi::query()->where('status', 'Canceled')->count()),
-            Stat::make('Total Pemasukan', Transaksi::query()->where('status', 'paid')->sum('sub_total'))
+            Stat::make('Total Pemasukan', "Rp " . number_format(Transaksi::query()->where('status', 'paid')->sum('sub_total'), 2, ',', '.'))
         ];
     }
 }

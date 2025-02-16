@@ -32,17 +32,20 @@ class TempatResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Places'; // Ganti dengan nama yang kamu inginkan
+        return 'Tempat'; // Ganti dengan nama yang kamu inginkan
     }
     public static function getPluralLabel(): string
     {
-        return 'Places'; // Ganti dengan nama yang sesuai
+        return 'Tempat'; // Ganti dengan nama yang sesuai
     }
     public static function getModelLabel(): string
     {
-        return 'Place';
+        return 'Tempat';
     }
-
+    public static function getnavigationGroup(): ?string
+    {
+        return 'Kelola Tempat & Area';
+    }
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -77,6 +80,7 @@ class TempatResource extends Resource
                         ->schema([
                             TextInput::make('nama')
                                 ->label('Nama')
+                                ->disabled(fn(string $operation): bool => $operation === 'edit')
                                 ->required(),
                             TextInput::make('kategori')
                                 ->label('Kategori')
