@@ -9,6 +9,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTransaksi extends CreateRecord
 {
     protected static string $resource = TransaksiResource::class;
-    
+
     protected static ?string $title = 'Tambah Transaksi';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

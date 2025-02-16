@@ -11,4 +11,9 @@ class CreateUlasan extends CreateRecord
     protected static string $resource = UlasanResource::class;
 
     protected static ?string $title = 'Tambah Ulasan';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

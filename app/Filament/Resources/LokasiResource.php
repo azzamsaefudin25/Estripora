@@ -7,6 +7,7 @@ use Filament\Tables;
 use App\Models\Lokasi;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
@@ -77,12 +78,21 @@ class LokasiResource extends Resource
                     ->relationship('tempat', 'nama'),
                 TextInput::make('nama_lokasi')
                     ->label('Nama Lokasi')
-                    ->required(),
+                    ->required()
+                    ->rules([
+                        function (callable $get) {
+                            return Rule::unique('lokasi', 'nama_lokasi')
+                                ->where('id_tempat', $get('id_tempat'))
+                                ->ignore($get('id_lokasi'), 'id_lokasi');
+                        },
+                    ])
+                    ->validationMessages([
+                        'unique' => 'Lokasi yang sama sudah dibuat untuk tempat ini.',
+                    ]),
                 TextInput::make('tarif')
                     ->label('Tarif')
                     ->numeric()
                     ->prefix('Rp')
-                    ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.'))
                     ->required(),
             ]);
     }

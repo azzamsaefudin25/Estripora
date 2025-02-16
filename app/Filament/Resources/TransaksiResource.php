@@ -219,8 +219,8 @@ class TransaksiResource extends Resource
                         return '';
                     }),
                 TextInput::make('luas')
-                    ->label('Luas')
-                    ->required(),
+                    ->label('Luas'),
+                    
                 TextInput::make('tarif')
                     ->label('Tarif')
                     ->prefix('Rp')

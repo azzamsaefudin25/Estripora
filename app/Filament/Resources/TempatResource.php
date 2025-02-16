@@ -7,6 +7,7 @@ use Filament\Tables;
 use App\Models\Tempat;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
@@ -81,7 +82,15 @@ class TempatResource extends Resource
                             TextInput::make('nama')
                                 ->label('Nama')
                                 ->disabled(fn(string $operation): bool => $operation === 'edit')
-                                ->required(),
+                                ->required()->rules([
+                                    function (callable $get) {
+                                        return Rule::unique('tempat', 'nama')
+                                            ->ignore($get('id'), 'id');
+                                    },
+                                ])
+                                ->validationMessages([
+                                    'unique' => 'Tempat yang sama sudah dibuat.',
+                                ]),
                             TextInput::make('kategori')
                                 ->label('Kategori')
                                 ->required(),

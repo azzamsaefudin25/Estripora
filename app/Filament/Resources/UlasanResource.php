@@ -32,11 +32,11 @@ class UlasanResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Ulasan'; 
+        return 'Ulasan';
     }
     public static function getPluralLabel(): string
     {
-        return 'Ulasan'; 
+        return 'Ulasan';
     }
     public static function getModelLabel(): string
     {
@@ -129,7 +129,16 @@ class UlasanResource extends Resource
                             $set('rating', null);
                             return;
                         }
-                    }),
+                    })
+                    ->rules([
+                        function (callable $get) {
+                            return Rule::unique('ulasan', 'id_penyewaan')
+                                ->ignore($get('id_ulasan'), 'id_ulasan');
+                        },
+                    ])
+                    ->validationMessages([
+                        'unique' => 'Ulasan yang sama sudah dibuat.',
+                    ]),
 
                 Select::make('rating')
                     ->label('Rating')
@@ -144,7 +153,6 @@ class UlasanResource extends Resource
 
                 Textarea::make('ulasan')
                     ->label('Ulasan')
-                    ->required()
                     ->rows(3)
                     ->maxLength(255),
             ]);

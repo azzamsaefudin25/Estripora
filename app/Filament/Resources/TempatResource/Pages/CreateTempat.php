@@ -11,4 +11,9 @@ class CreateTempat extends CreateRecord
     protected static string $resource = TempatResource::class;
 
     protected static ?string $title = 'Tambah Tempat ';
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
