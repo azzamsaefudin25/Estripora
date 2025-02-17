@@ -35,11 +35,11 @@ class TransaksiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Transaksi'; // Ganti dengan nama yang kamu inginkan
+        return 'Transaksi'; 
     }
     public static function getPluralLabel(): string
     {
-        return 'Transaksi'; // Ganti dengan nama yang sesuai
+        return 'Transaksi'; 
     }
     public static function getModelLabel(): string
     {
@@ -50,6 +50,8 @@ class TransaksiResource extends Resource
     {
         return 'Sewa & Keuangan';
     }
+
+
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -220,7 +222,7 @@ class TransaksiResource extends Resource
                     }),
                 TextInput::make('luas')
                     ->label('Luas'),
-                    
+
                 TextInput::make('tarif')
                     ->label('Tarif')
                     ->prefix('Rp')

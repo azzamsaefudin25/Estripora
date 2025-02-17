@@ -41,11 +41,11 @@ class PenyewaanResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Penyewaan'; // Ganti dengan nama yang kamu inginkan
+        return 'Penyewaan';
     }
     public static function getPluralLabel(): string
     {
-        return 'Penyewaan'; // Ganti dengan nama yang sesuai
+        return 'Penyewaan'; 
     }
     public static function getModelLabel(): string
     {

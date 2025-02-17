@@ -33,11 +33,11 @@ class TempatResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Tempat'; // Ganti dengan nama yang kamu inginkan
+        return 'Tempat'; 
     }
     public static function getPluralLabel(): string
     {
-        return 'Tempat'; // Ganti dengan nama yang sesuai
+        return 'Tempat'; 
     }
     public static function getModelLabel(): string
     {
@@ -47,6 +47,9 @@ class TempatResource extends Resource
     {
         return 'Kelola Tempat & Area';
     }
+
+
+
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';

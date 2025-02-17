@@ -57,3 +57,5 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [Login::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+    

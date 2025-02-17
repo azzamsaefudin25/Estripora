@@ -25,7 +25,6 @@ class LaporResource extends Resource
     {
         return 'Feedback & Laporan';
     }
-
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';

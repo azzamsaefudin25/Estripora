@@ -27,11 +27,11 @@ class LokasiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Lokasi'; // Ganti dengan nama yang kamu inginkan
+        return 'Lokasi'; 
     }
     public static function getPluralLabel(): string
     {
-        return 'Lokasi'; // Ganti dengan nama yang sesuai
+        return 'Lokasi'; 
     }
     public static function getModelLabel(): string
     {
