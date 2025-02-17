@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('nik');
             $table->foreign('nik')->references('nik')->on('penyewaan')->onDelete('cascade');
-            $table->string('ulasan');
+            $table->string('ulasan')->nullable();
             $table->tinyInteger('rating')->unsigned()->check('rating BETWEEN 1 AND 5');
             $table->timestamps();
         });
