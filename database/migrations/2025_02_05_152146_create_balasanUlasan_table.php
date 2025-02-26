@@ -17,8 +17,6 @@ return new class extends Migration
             $table->foreign('id_ulasan')->references('id_ulasan')->on('ulasan')->onDelete('cascade');
             $table->unsignedBigInteger('id_penyewaan');
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
-            $table->string('nik');
-            $table->foreign('nik')->references('nik')->on('users')->onDelete('cascade');
             $table->integer('parent_id');
             $table->string('ulasan');
             $table->string('reaksi');

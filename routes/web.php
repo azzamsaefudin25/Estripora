@@ -5,12 +5,15 @@ use App\Livewire\Users;
 use App\Livewire\Settings;
 use App\Livewire\Dashboard;
 use App\Livewire\Keranjang;
+use App\Livewire\DetailTempat;
 use App\Livewire\Lapor;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Profile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\PenyewaanPerJam;
+use App\Livewire\PenyewaanPerHari;
 
 Route::get('/', function () {
     return redirect('dashboard');
@@ -47,6 +50,10 @@ Route::get('/keranjang', Keranjang::class)->name('keranjang');
 Route::get('/settings', Settings::class)->name('settings');
 Route::get('/profile', Profile::class)->name('profile');
 Route::get('/lapor', Lapor::class)->name('lapor');
+
+Route::get('/detail-tempat/{id}', DetailTempat::class)->name('detail-tempat');
+Route::get('/penyewaan/per-jam/{id_lokasi}', PenyewaanPerJam::class)->name('penyewaan.perjam');
+Route::get('/penyewaan-perhari/{id_lokasi}', PenyewaanPerHari::class)->name('penyewaan.perhari');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', Register::class)->name('register');

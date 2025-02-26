@@ -19,9 +19,9 @@
                     <!-- Kontainer Harga & Tombol -->
                     <div class="flex justify-between items-center px-4 py-3 bg-indigo-100">
                         <p class="text-gray-700 font-semibold">{{ $tempat['harga'] }}</p>
-                        <button class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-600 transition">
+                        <a href="{{ route('detail-tempat', ['id' => $tempat['id']]) }}" class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-600 transition">
                             DETAIL
-                        </button>
+                        </a>
                     </div>
                 </div>
             @endforeach
