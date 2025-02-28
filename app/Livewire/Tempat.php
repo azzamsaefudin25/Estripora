@@ -11,18 +11,21 @@ class Tempat extends Component
 
     public $tempatList = [
         [
+            "id" => "1",
             "kategori" => "A",
             "nama" => "Gedung Pertemuan Manunggal Jati",
             "img" => "/images/gedung.png",
             "harga" => "Rp. 2,5jt - 5jt",
         ],
         [
+            "id" => "2",
             "kategori" => "A",
             "nama" => "Kantin Manunggal Jati",
             "img" => "/images/gedung.png",
             "harga" => "Rp. 2,5jt - 5jt",
         ],
         [
+            "id" => "3",
             "kategori" => "B",
             "nama" => "Gedung Pertemuan Tembalang",
             "img" => "/images/gedung.png",

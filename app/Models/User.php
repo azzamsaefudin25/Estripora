@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @method static User|null user()
+ */
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -40,6 +44,7 @@ class User extends Authenticatable
 
     public function penyewaan()
     {
-        return $this->hasMany(Penyewaan::class, 'nik', 'nik');
+        return $this->hasMany(Penyewaan::class, 'id_user', 'id');
     }
+    
 }
