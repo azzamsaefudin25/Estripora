@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_penyewaan');
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
             $table->string('id_billing');
+            $table->string('nik');
             $table->date('tgl_booking');
             $table->json('detail_penyewaan');
             $table->integer('total_durasi');

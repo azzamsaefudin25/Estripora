@@ -21,6 +21,15 @@ class Transaksi extends Model
         'detail_penyewaan' => 'array',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($transaksi) {
+            Penyewaan::where('id_penyewaan', $transaksi->id_penyewaan)
+                ->update(['status' => 'Confirmed']);
+        });
+    }
+
+
     public function penyewaan()
     {
         return $this->belongsTo(Penyewaan::class, 'id_penyewaan');

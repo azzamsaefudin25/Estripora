@@ -14,7 +14,8 @@ class Penyewaan extends Model
     public $incrementing = true;
     protected $keyType = 'int';
     protected $fillable = [
-        'id_user', // Perbaiki ini, pakai id_user bukan nik
+        'id_user', 
+        'nik',
         'id_lokasi',
         'tgl_booking',
         'kategori_sewa',

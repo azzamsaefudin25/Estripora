@@ -297,9 +297,6 @@ class TransaksiResource extends Resource
                     ->limit(50)
                     ->sortable(),
 
-                TextColumn::make('total_durasi')
-                    ->label('Total Durasi')
-                    ->sortable(),
                 TextColumn::make('luas')
                     ->label('Luas')
                     ->sortable(),

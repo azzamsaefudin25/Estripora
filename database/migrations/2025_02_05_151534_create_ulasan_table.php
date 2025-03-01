@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_ulasan');
             $table->unsignedBigInteger('id_penyewaan');
             $table->foreign('id_penyewaan')->references('id_penyewaan')->on('penyewaan')->onDelete('cascade');
+            $table->string('nik');
             $table->string('ulasan')->nullable();
             $table->tinyInteger('rating')->unsigned()->check('rating BETWEEN 1 AND 5');
             $table->timestamps();

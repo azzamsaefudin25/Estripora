@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use Closure;
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
 use App\Models\Lokasi;
 use Filament\Forms\Get;
@@ -45,7 +46,7 @@ class PenyewaanResource extends Resource
     }
     public static function getPluralLabel(): string
     {
-        return 'Penyewaan'; 
+        return 'Penyewaan';
     }
     public static function getModelLabel(): string
     {
@@ -86,14 +87,29 @@ class PenyewaanResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('nik')
+                Select::make('id_user')
                     ->label('Identitas')
                     ->required()
                     ->searchable()
                     ->disabled(fn(string $operation): bool => $operation === 'edit')
                     ->preload()
                     ->relationship('user')
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nik} - {$record->name}"),
+                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nik} - {$record->name}")
+                    ->afterStateUpdated(function (Set $set, $state) {
+                        $set('nik', null);
+                        if ($state) {
+                            $user = User::where('id', $state)->first();
+                            if ($user) {
+                                $set('nik', $user->nik);
+                            }
+                        }
+                    }),
+
+                TextInput::make('nik')
+                    ->label('NIK')
+                    ->disabled()
+                    ->live()
+                    ->dehydrated(true),
 
                 Select::make('id_lokasi')
                     ->label('Lokasi & Tempat')
@@ -464,6 +480,7 @@ class PenyewaanResource extends Resource
 
                 TextColumn::make('tarif')
                     ->label('Tarif')
+                    ->sortable()
                     ->getStateUsing(function ($record) {
                         $tarif = $record->tarif;
 
@@ -479,8 +496,7 @@ class PenyewaanResource extends Resource
                         }
 
                         return '';
-                    })
-                    ->sortable(),
+                    }),
 
                 TextColumn::make('sub_total')
                     ->label('Sub Total')

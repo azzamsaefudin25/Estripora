@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_penyewaan');
             $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->string('nik');
             $table->unsignedBigInteger('id_lokasi');
             $table->foreign('id_lokasi')->references('id_lokasi')->on('lokasi')->onDelete('cascade');
             $table->enum('kategori_sewa', ['per jam', 'per hari']);
