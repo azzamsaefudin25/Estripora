@@ -4,16 +4,20 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Tempat;
+use App\Models\Lokasi;
 
 class DetailTempat extends Component
 {
     public $tempatId;
     public $tempat;
+    public $lokasi = [];
+    public $selectedLokasi = null;
 
     public function mount($id)
     {
         $this->tempatId = $id;
         $this->tempat = $this->getTempatDetail();
+        $this->loadLokasi();
     }
 
     public function render()
@@ -23,19 +27,30 @@ class DetailTempat extends Component
 
     private function getTempatDetail()
     {
-        // Gunakan data dari database jika tersedia
         $tempat = Tempat::find($this->tempatId);
-        
+
         if ($tempat) {
-            return $tempat; // Jika ada di database, kembalikan sebagai objek
+            return $tempat;
         }
 
-        // Jika tidak ada di database, gunakan data dummy sebagai objek
         return (object) [
             'id' => $this->tempatId,
-            'nama' => 'Gedung Manunggal Jati',
-            'deskripsi' => 'Deskripsi detail tempat...',
-            'img' => 'path/to/gedung.png'
+            'nama' => 'Tempat Tidak Ditemukan',
+            'deskripsi' => 'Deskripsi tidak tersedia.',
+            'image' => 'images/default.jpg'
         ];
+    }
+
+    private function loadLokasi()
+    {
+        // Ambil semua lokasi berdasarkan id_tempat
+        if ($this->tempat && isset($this->tempat->id)) {
+            $this->lokasi = Lokasi::where('id_tempat', $this->tempat->id)->get();
+        }
+    }
+
+    public function updatedSelectedLokasi($value)
+    {
+        $this->selectedLokasi = $value;
     }
 }

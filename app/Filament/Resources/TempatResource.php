@@ -84,7 +84,6 @@ class TempatResource extends Resource
                         ->schema([
                             TextInput::make('nama')
                                 ->label('Nama')
-                                ->disabled(fn(string $operation): bool => $operation === 'edit')
                                 ->required()->rules([
                                     function (callable $get) {
                                         return Rule::unique('tempat', 'nama')

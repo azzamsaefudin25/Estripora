@@ -2,9 +2,11 @@
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <!-- Logo -->
         <div class="inline-flex items-center">
-            <img src="{{ asset('images/estriporalogo.png') }}" alt="Estripora Logo" class="w-10 h-10">
+            <a href="{{ route('dashboard') }}">
+                <img src="{{ asset('images/estriporalogo.png') }}" alt="Estripora Logo" class="w-10 h-10">
+            </a>
         </div>
-        <a href="/dashboard" class="text-2xl font-bold text-blue-500">Estripora Kota Semarang</a>
+        <a href="{{ route('dashboard') }}" class="text-2xl font-bold text-blue-500">Estripora Kota Semarang</a>
 
         <!-- Auth Buttons / Profile Dropdown -->
         <div class="hidden md:flex items-center">
@@ -20,10 +22,10 @@
                     <!-- Dropdown Menu -->
                     <div x-show="open" @click.away="open = false"
                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Profile
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('keranjang') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Orders
                         </a>
                         <hr class="my-1">

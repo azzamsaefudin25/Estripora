@@ -9,6 +9,7 @@ use App\Livewire\DetailTempat;
 use App\Livewire\Lapor;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Checkout;
 use App\Livewire\Profile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -52,7 +53,7 @@ Route::get('/profile', Profile::class)->name('profile');
 Route::get('/lapor', Lapor::class)->name('lapor');
 
 Route::get('/detail-tempat/{id}', DetailTempat::class)->name('detail-tempat');
-Route::get('/penyewaan/per-jam/{id_lokasi}', PenyewaanPerJam::class)->name('penyewaan.perjam');
+Route::get('/penyewaan-perjam/{id_lokasi}', PenyewaanPerJam::class)->name('penyewaan.perjam');
 Route::get('/penyewaan-perhari/{id_lokasi}', PenyewaanPerHari::class)->name('penyewaan.perhari');
 
 Route::middleware('guest')->group(function () {
