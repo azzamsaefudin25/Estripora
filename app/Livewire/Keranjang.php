@@ -72,7 +72,7 @@ class Keranjang extends Component
         // Cek apakah user sudah login
         if (!Auth::check()) {
             // Simpan URL saat ini ke session untuk redirect kembali setelah login
-            Session::put('url.intended', route('keranjang.penyewaan'));
+            Session::put('url.intended', route('keranjang'));
 
             session()->flash('error', 'Silakan login terlebih dahulu untuk melanjutkan checkout.');
 
