@@ -19,8 +19,11 @@ use App\Livewire\Kalenderperhari;
 use App\Livewire\PenyewaanPerJam;
 use App\Livewire\PenyewaanPerHari;
 use App\Http\Controllers\TransaksiPdfController;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+=======
+>>>>>>> 1b8cb2ee3b5cf5ec2904aa5678cd463f1b681108
 
 Route::get('/', function () {
     return redirect('dashboard');
