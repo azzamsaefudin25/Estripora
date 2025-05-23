@@ -46,5 +46,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Penyewaan::class, 'id_user', 'id');
     }
-    
+
+
 }
