@@ -18,6 +18,7 @@ use App\Livewire\RiwayatPesanan;
 use App\Livewire\Kalenderperhari;
 use App\Livewire\PenyewaanPerJam;
 use App\Livewire\PenyewaanPerHari;
+use App\Http\Controllers\TransaksiPdfController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +68,17 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', Register::class)->name('register');
     Route::get('/login', Login::class)->name('login');
 });
+
+Route::middleware(['auth'])->get('/profil', Profile::class)->name('profile.show');
+
+Route::get('/profil', Profile::class)
+    ->middleware('auth') // <= Ini yang penting
+    ->name('profile.show');
+
+    // routes/web.php
+
+
+Route::post('/cetak-transaksi-pdf', [TransaksiPdfController::class, 'generate'])->name('cetak.transaksi.pdf');
 
 // Logout Route
 Route::post('/logout', [Login::class, 'logout'])

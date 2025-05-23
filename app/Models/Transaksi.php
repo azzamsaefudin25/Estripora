@@ -18,6 +18,7 @@ class Transaksi extends Model
     protected $fillable = ['id_penyewaan', 'id_billing', 'nik', 'tgl_booking', 'detail_penyewaan', 'total_durasi', 'luas', 'tarif', 'sub_total', 'metode_pembayaran', 'status'];
 
     protected $casts = [
+        'tgl_booking' => 'date',
         'detail_penyewaan' => 'array',
     ];
 
@@ -32,7 +33,7 @@ class Transaksi extends Model
 
     public function penyewaan()
     {
-        return $this->belongsTo(Penyewaan::class, 'id_penyewaan');
+        return $this->belongsTo(Penyewaan::class, 'id_penyewaan', 'id_penyewaan');
     }
     
 }
