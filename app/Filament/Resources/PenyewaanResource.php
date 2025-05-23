@@ -444,6 +444,10 @@ class PenyewaanResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('tgl_booking')
+                    ->label('Tanggal Booking')
+                    ->sortable(),
+
                 TextColumn::make('penyewaan')
                     ->label('Detail Penyewaan')
                     ->getStateUsing(function ($record) {
@@ -513,6 +517,7 @@ class PenyewaanResource extends Resource
                     ->badge()
                     ->sortable(),
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 SelectFilter::make('kategori_sewa')
                     ->label('Filter Kategori Sewa')

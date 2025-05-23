@@ -1,20 +1,25 @@
 <?php
 
 use App\Livewire\Cetak;
+use App\Livewire\Lapor;
 use App\Livewire\Users;
+use App\Livewire\Ulasan;
+use App\Livewire\Profile;
+use App\Livewire\Checkout;
+use App\Livewire\Kalender;
 use App\Livewire\Settings;
 use App\Livewire\Dashboard;
 use App\Livewire\Keranjang;
-use App\Livewire\DetailTempat;
-use App\Livewire\Lapor;
 use App\Livewire\Auth\Login;
+use App\Livewire\DetailTempat;
 use App\Livewire\Auth\Register;
-use App\Livewire\Checkout;
-use App\Livewire\Profile;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
+use App\Livewire\Kalenderperjam;
+use App\Livewire\RiwayatPesanan;
+use App\Livewire\Kalenderperhari;
 use App\Livewire\PenyewaanPerJam;
 use App\Livewire\PenyewaanPerHari;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect('dashboard');
@@ -48,10 +53,12 @@ Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
 Route::get('/cetak', Cetak::class)->name('cetak');
 Route::get('/keranjang', Keranjang::class)->name('keranjang');
-Route::get('/settings', Settings::class)->name('settings');
+Route::get('/riwayat', RiwayatPesanan::class)->name('riwayat');
 Route::get('/profile', Profile::class)->name('profile');
 Route::get('/lapor', Lapor::class)->name('lapor');
-
+Route::get('/ulasan', Ulasan::class)->name('ulasan');
+Route::get('/kalenderperhari', Kalenderperhari::class)->name('kalenderperhari');
+Route::get('/kalenderperjam', Kalenderperjam::class)->name('kalenderperjam');
 Route::get('/detail-tempat/{id}', DetailTempat::class)->name('detail-tempat');
 Route::get('/penyewaan-perjam/{id_lokasi}', PenyewaanPerJam::class)->name('penyewaan.perjam');
 Route::get('/penyewaan-perhari/{id_lokasi}', PenyewaanPerHari::class)->name('penyewaan.perhari');

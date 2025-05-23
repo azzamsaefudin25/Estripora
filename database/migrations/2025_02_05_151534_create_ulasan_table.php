@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('nik');
             $table->string('ulasan')->nullable();
             $table->tinyInteger('rating')->unsigned()->check('rating BETWEEN 1 AND 5');
+            $table->integer('like')->default(0);       
+            $table->integer('dislike')->default(0);      
             $table->timestamps();
         });
     }

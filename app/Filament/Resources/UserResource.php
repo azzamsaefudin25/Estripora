@@ -130,6 +130,7 @@ class UserResource extends Resource
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
 
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])

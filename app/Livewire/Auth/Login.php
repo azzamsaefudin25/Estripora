@@ -34,7 +34,7 @@ class Login extends Component
         Session::invalidate();
         Session::regenerateToken();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('success', "Anda berhasil logout!");
     }
 
     public function render()

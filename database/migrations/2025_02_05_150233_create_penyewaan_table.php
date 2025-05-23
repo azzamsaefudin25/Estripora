@@ -24,8 +24,8 @@ return new class extends Migration
             $table->json('penyewaan_per_hari')->nullable();
             $table->text('deskripsi')->nullable();
             $table->integer('total_durasi');
-            $table->decimal('tarif', 10, 2);
-            $table->decimal('sub_total', 10, 2)->default(0);
+            $table->decimal('tarif', 16, 2);
+            $table->decimal('sub_total', 16, 2)->default(0);
             $table->enum('status', ['Pending', 'Confirmed', 'Canceled'])->default('Pending');
             $table->timestamps();
         });

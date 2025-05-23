@@ -13,6 +13,7 @@ use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
@@ -35,11 +36,11 @@ class TransaksiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Transaksi'; 
+        return 'Transaksi';
     }
     public static function getPluralLabel(): string
     {
-        return 'Transaksi'; 
+        return 'Transaksi';
     }
     public static function getModelLabel(): string
     {
@@ -126,15 +127,38 @@ class TransaksiResource extends Resource
                 TextInput::make('id_billing')
                     ->label('ID Billing')
                     ->required(),
-
                 Select::make('id_penyewaan')
                     ->label('Penyewaan')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn(Get $get): array => $get('penyewaan_options') ?? [])
+                    ->options(function (Get $get): array {
+                        // Get all penyewaan where NIK matches
+                        $penyewaanQuery = Penyewaan::where('nik', $get('nik'))
+                            ->where(function ($query) {
+                                // Exclude penyewaan with status 'Pending' or 'Paid'
+                                $query->whereIn('status', ['Pending', 'Paid']);
+                            })
+                            ->whereNotExists(function ($query) {
+                                // Exclude penyewaan that already have transactions with status 'Pending' or 'Paid'
+                                $query->select(DB::raw(1))
+                                    ->from('transaksi')
+                                    ->whereColumn('transaksi.id_penyewaan', 'penyewaan.id_penyewaan')
+                                    ->wherenotIn('transaksi.status', ['Pending', 'Paid']);
+                            })
+                            ->get();
+
+                        // Format options
+                        $options = [];
+                        foreach ($penyewaanQuery as $penyewaan) {
+                            $options[$penyewaan->id_penyewaan] = "ID: {$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama}";
+                        }
+
+                        return $options;
+                    })
                     ->live()
                     ->afterStateUpdated(function ($set, $get, $state) {
+                        // Rest of your existing code remains the same
                         if (!$state) {
                             $set('tgl_booking', null);
                             $set('detail_penyewaan', null);
@@ -195,7 +219,7 @@ class TransaksiResource extends Resource
                         },
                     ])
                     ->validationMessages([
-                        'unique' => 'Transaksi yang sama sudah dibuat.  Harap cek status transaksi.',
+                        'unique' => 'Transaksi yang sama sudah dibuat. Harap cek status transaksi.',
                     ]),
 
                 TextInput::make('tgl_booking')
@@ -323,6 +347,7 @@ class TransaksiResource extends Resource
                     ->badge()
                     ->sortable(),
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])

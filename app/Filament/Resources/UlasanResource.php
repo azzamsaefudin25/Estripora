@@ -102,9 +102,11 @@ class UlasanResource extends Resource
                             return;
                         }
 
+                        // Get penyewaan that are confirmed but don't have reviews yet
                         $penyewaanList = Penyewaan::with(['lokasi.tempat'])
                             ->where('nik', $state)
                             ->where('status', 'confirmed')
+                            ->whereDoesntHave('ulasan') // This ensures no review exists yet
                             ->get()
                             ->mapWithKeys(function ($penyewaan) {
                                 $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
@@ -191,7 +193,14 @@ class UlasanResource extends Resource
                     ->label('Ulasan')
                     ->limit(50)
                     ->searchable(),
+                TextColumn::make('like')
+                    ->label('Like')
+                    ->searchable(),
+                TextColumn::make('dislike')
+                    ->label('Dislike')
+                    ->searchable(),
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])

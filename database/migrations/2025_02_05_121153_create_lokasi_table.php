@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('id_tempat')->constrained('tempat')->onDelete('cascade');
             $table->string('nama_lokasi');
             $table->string('luas')->nullable();
-            $table->decimal('tarif', 10, 2)->nullable();
+            $table->decimal('tarif', 16, 2)->nullable();
             $table->timestamps();
         });
     }

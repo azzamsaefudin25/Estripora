@@ -25,8 +25,8 @@
                         <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             My Profile
                         </a>
-                        <a href="{{ route('keranjang') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            My Orders
+                        <a href="{{ route('riwayat') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            My Orders History
                         </a>
                         <hr class="my-1">
                         <form method="POST" action="{{ route('logout') }}">

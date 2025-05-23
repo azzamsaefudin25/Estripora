@@ -21,8 +21,8 @@ return new class extends Migration
             $table->json('detail_penyewaan');
             $table->integer('total_durasi');
             $table->integer('luas')->nullable();
-            $table->decimal('tarif', 10, 2);
-            $table->decimal('sub_total', 10, 2);
+            $table->decimal('tarif', 16, 2);
+            $table->decimal('sub_total', 16, 2);
             $table->enum('metode_pembayaran', ['Transfer Bank', 'E-Wallet', 'Kartu Kredit'])->nullable();
             $table->enum('status', ['Pending', 'Paid', 'Failed'])->default('Pending');
             $table->timestamps();

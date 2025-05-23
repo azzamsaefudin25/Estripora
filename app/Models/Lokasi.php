@@ -20,4 +20,9 @@ class Lokasi extends Model
     {
         return $this->belongsTo(Tempat::class, 'id_tempat', 'id');
     }
+
+    public function penyewaan()
+    {
+        return $this->hasMany(Penyewaan::class, 'id_lokasi', 'id_lokasi');
+    }
 }

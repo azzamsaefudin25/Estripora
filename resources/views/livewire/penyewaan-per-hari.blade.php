@@ -71,6 +71,16 @@
         @endif
 
         <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
+
+            <!-- Bagian yang dimodifikasi untuk integrasi kalender -->
+            <div class="mt-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Tanggal Yang Sudah Di-booking</h3>
+                    <p class="text-sm text-gray-600 mb-3">Berikut adalah tanggal-tanggal yang sudah dipesan untuk lokasi
+                        ini:</p>
+                    @livewire('kalenderperhari', ['locationId' => $lokasi->id_lokasi])
+                </div>
+            </div>
             <form wire:submit.prevent="simpanKeKeranjang">
                 <!-- Date Range Repeater -->
                 <div class="mb-6">

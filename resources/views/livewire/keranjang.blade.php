@@ -2,16 +2,39 @@
 
     <h1 class="text-3xl font-bold mb-4">Keranjang Penyewaan</h1>
 
-    <!-- Notifikasi -->
-    @if (session()->has('error'))
-        <div class="mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 w-full max-w-4xl rounded">
-            {{ session('error') }}
+    @if (session()->has('success'))
+        <div x-data="{ show: true }" x-show="show"
+            class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
+            <div class="flex items-center justify-between">
+                <p class="text-green-800 text-sm font-medium">
+                    {{ session('success') }}
+                </p>
+                <button @click="show = false" class="text-green-400 hover:opacity-75 transition-opacity duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
     @endif
 
-    @if (session()->has('success'))
-        <div class="mt-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 w-full max-w-4xl rounded">
-            {{ session('success') }}
+    @if (session()->has('error'))
+        <div x-data="{ show: true }" x-show="show"
+            class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r shadow-md relative">
+            <div class="flex items-center justify-between">
+                <p class="text-red-800 text-sm font-medium">
+                    {{ session('error') }}
+                </p>
+                <button @click="show = false" class="text-red-400 hover:opacity-75 transition-opacity duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
     @endif
 

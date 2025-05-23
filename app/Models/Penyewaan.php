@@ -14,7 +14,7 @@ class Penyewaan extends Model
     public $incrementing = true;
     protected $keyType = 'int';
     protected $fillable = [
-        'id_user', 
+        'id_user',
         'nik',
         'id_lokasi',
         'tgl_booking',
@@ -26,7 +26,7 @@ class Penyewaan extends Model
         'sub_total',
         'status'
     ];
-    
+
     protected $casts = [
         'penyewaan_per_jam' => 'array',
         'penyewaan_per_hari' => 'array',
@@ -35,10 +35,20 @@ class Penyewaan extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
     }
-    
+
 
     public function lokasi()
     {
         return $this->belongsTo(Lokasi::class, 'id_lokasi');
+    }
+
+    public function ulasan()
+    {
+        return $this->hasOne(Ulasan::class, 'id_penyewaan', 'id_penyewaan');
+    }
+
+    public function transaksi()
+    {
+        return $this->hasOne(Ulasan::class, 'id_penyewaan', 'id_penyewaan');
     }
 }

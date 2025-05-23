@@ -144,6 +144,7 @@ class TempatResource extends Resource
                 TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])
