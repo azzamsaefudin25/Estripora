@@ -24,7 +24,6 @@
                             'Waktu: ' + info.event.start.toLocaleTimeString('id-ID') + ' - ' +
                             info.event.end.toLocaleTimeString('id-ID') + '\n' +
                             'Tempat: ' + info.event.extendedProps.tempat + '\n' +
-                            // 'Penyewa: ' + info.event.title.replace('Penyewa: ', '') + '\n' +
                             'Lokasi: ' + info.event.extendedProps.lokasi
                         );
                     },
