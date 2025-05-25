@@ -1,17 +1,6 @@
 <div>
     <div id='calendar' class="mb-4"></div>
 
-    <div class="flex items-center justify-center space-x-4 text-sm">
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-[#E57373] rounded-full mr-1"></div>
-            <span>Confirmed</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-[#FFB74D] rounded-full mr-1"></div>
-            <span>Pending</span>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             buatKalender();
@@ -31,14 +20,17 @@
                     eventClick: function(info) {
                         alert(
                             'Tanggal: ' + info.event.start.toLocaleDateString('id-ID') + '\n' +
-                            'Status: ' + info.event.extendedProps.status + '\n' +
-                            // 'Penyewa: ' + info.event.title.replace('Penyewa: ', '') + '\n' +
-                            'Kategori: ' + info.event.extendedProps.kategori
+                            'Tempat: ' + info.event.extendedProps.tempat + '\n' +
+                            'Lokasi: ' + info.event.extendedProps.lokasi
                         );
                     },
                     eventContent: function(arg) {
                         return {
-                            html: '<div class="fc-event-title text-xs font-medium" style="white-space: normal;">' +
+                            html: '<div class="fc-event-title text-xs font-medium" style="' +
+                                'white-space: normal; ' +
+                                'display: flex; ' +
+                                'justify-content: center;' +
+                                '">' +
                                 arg.event.title +
                                 '</div>'
                         };

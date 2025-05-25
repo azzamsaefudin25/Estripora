@@ -83,11 +83,11 @@ class Kalenderperjam extends Component
                 'title' => 'Booked',
                 'start' => $startDateTime->format('Y-m-d\TH:i:s'),
                 'end' => $endDateTime->format('Y-m-d\TH:i:s'),
-                'color' => $penyewaan->status == 'Confirmed' ? '#E57373' : '#FFB74D',  // Merah untuk confirmed, oranye untuk pending
                 'textColor' => '#000000',
+                'backgroundColor' => '#ffffff',
+                'borderColor' => 'transparent',
                 'extendedProps' => [
-                    'kategori' => $penyewaan->kategori_sewa,
-                    'status' => $penyewaan->status,
+                    'tempat' => $penyewaan->lokasi->tempat->nama,
                     'lokasi' => $penyewaan->lokasi->nama_lokasi
                 ]
             ];

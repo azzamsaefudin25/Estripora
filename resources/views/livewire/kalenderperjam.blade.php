@@ -2,17 +2,6 @@
 
     <div id='calendar' class="mb-4"></div>
 
-    <div class="flex items-center justify-center space-x-4 text-sm">
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-[#E57373] rounded-full mr-1"></div>
-            <span>Confirmed</span>
-        </div>
-        <div class="flex items-center">
-            <div class="w-4 h-4 bg-[#FFB74D] rounded-full mr-1"></div>
-            <span>Pending</span>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             buatKalender();
@@ -34,14 +23,22 @@
                             'Tanggal: ' + info.event.start.toLocaleDateString('id-ID') + '\n' +
                             'Waktu: ' + info.event.start.toLocaleTimeString('id-ID') + ' - ' +
                             info.event.end.toLocaleTimeString('id-ID') + '\n' +
-                            'Status: ' + info.event.extendedProps.status + '\n' +
+                            'Tempat: ' + info.event.extendedProps.tempat + '\n' +
                             // 'Penyewa: ' + info.event.title.replace('Penyewa: ', '') + '\n' +
-                            'Kategori: ' + info.event.extendedProps.kategori
+                            'Lokasi: ' + info.event.extendedProps.lokasi
                         );
                     },
                     eventContent: function(arg) {
                         return {
-                            html: '<div class="fc-event-title text-xs font-medium" style="white-space: normal;">' +
+                            html: '<div class="fc-event-title text-xs font-medium" style="' +
+                                'white-space: normal; ' +
+                                'display: flex; ' +
+                                'align-items: center; ' +
+                                'justify-content: center;' +
+                                'height: 100%; ' +
+                                'width: 100%; ' +
+                                'padding: 2px;' +
+                                '">' +
                                 arg.event.title +
                                 '</div>'
                         };
