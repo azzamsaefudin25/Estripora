@@ -75,25 +75,25 @@ class LatestOrders extends BaseWidget
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('tarif')
-                    ->label('Tarif')
-                    ->getStateUsing(function ($record) {
-                        $tarif = $record->tarif;
+                // TextColumn::make('tarif')
+                //     ->label('Tarif')
+                //     ->getStateUsing(function ($record) {
+                //         $tarif = $record->tarif;
 
-                        // Format tarif menjadi format Rupiah
-                        $formattedTarif = 'Rp ' . number_format($tarif, 2, ',', '.');
+                //         // Format tarif menjadi format Rupiah
+                //         $formattedTarif = 'Rp ' . number_format($tarif, 2, ',', '.');
 
-                        if ($record->kategori_sewa === 'per jam') {
-                            // Menampilkan tarif dengan satuan per jam
-                            return "{$formattedTarif} / jam";
-                        } elseif ($record->kategori_sewa === 'per hari') {
-                            // Menampilkan tarif dengan satuan per hari
-                            return "{$formattedTarif} / hari";
-                        }
+                //         if ($record->kategori_sewa === 'per jam') {
+                //             // Menampilkan tarif dengan satuan per jam
+                //             return "{$formattedTarif} / jam";
+                //         } elseif ($record->kategori_sewa === 'per hari') {
+                //             // Menampilkan tarif dengan satuan per hari
+                //             return "{$formattedTarif} / hari";
+                //         }
 
-                        return '';
-                    })
-                    ->sortable(),
+                //         return '';
+                //     })
+                //     ->sortable(),
 
                 TextColumn::make('sub_total')
                     ->label('Sub Total')

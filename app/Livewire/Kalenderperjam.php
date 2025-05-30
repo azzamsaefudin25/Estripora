@@ -80,7 +80,7 @@ class Kalenderperjam extends Component
             $endDateTime = Carbon::parse($tanggal . ' ' . $jamSelesai);
 
             $events[] = [
-                'title' => 'Booked',
+                'title' => 'Tidak Tersedia',
                 'start' => $startDateTime->format('Y-m-d\TH:i:s'),
                 'end' => $endDateTime->format('Y-m-d\TH:i:s'),
                 'textColor' => '#000000',

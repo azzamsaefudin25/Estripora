@@ -81,7 +81,7 @@
 
         <!-- Footer -->
         <footer class="bg-white text-center py-4 shadow mt-auto">
-            <p class="text-gray-600">&copy; 2025 Estripora. All rights reserved.</p>
+            <p class="text-gray-600">2025 ESPTRD Kota Semarang.</p>
         </footer>
     </div>
 

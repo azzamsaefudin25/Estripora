@@ -92,7 +92,7 @@ class Kalenderperhari extends Component
             // Tambahkan event untuk setiap hari dalam rentang
             for ($date = clone $start; $date->lte($end); $date->addDay()) {
                 $events[] = [
-                    'title' => 'Booked',
+                    'title' => 'Tidak Tersedia',
                     'start' => $date->format('Y-m-d'),
                     'textColor' => '#000000',
                     'backgroundColor' => 'transparent', 

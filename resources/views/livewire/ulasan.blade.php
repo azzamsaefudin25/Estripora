@@ -29,7 +29,7 @@
                                 <h4 class="text-lg font-semibold text-gray-600">{{ $ulasan->penyewaan->user->name }}
                                 </h4>
                                 <!-- Menambahkan nama lokasi -->
-                                <p class="text-xs text-blue-600">Lokasi: {{ $ulasan->penyewaan->lokasi->nama_lokasi }}
+                                <p class="text-xs text-gray-600">{{ $ulasan->penyewaan->lokasi->tempat->nama}} - {{ $ulasan->penyewaan->lokasi->nama_lokasi }}
                                 </p>
                             </div>
                             <div class="flex items-center">

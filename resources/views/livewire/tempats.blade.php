@@ -14,7 +14,7 @@
     @else
         @foreach ($groupedTempats as $kategori => $tempats)
             <!-- Nama Kategori -->
-            <h2 class="text-lg font-bold text-gray-800 mt-6">{{ $kategori }}</h2>
+            <h2 class="text-lg font-bold text-red-500 mt-6">{{ $kategori }}</h2>
 
             <!-- List Tempat dalam Kategori -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
@@ -38,8 +38,7 @@
                         <div class="flex flex-col px-4 py-3 bg-indigo-100">
                             <!-- Baris Pertama: Harga dan Rating -->
                             <div class="flex justify-between items-center mb-2">
-                                <p class="text-gray-700 font-semibold">{{ $tempat['rentang_harga'] }} /
-                                    {{ $tempat['kategori_sewa'] }}</p>
+                                <p class="text-red-600 font-semibold">{{ $tempat['rentang_harga'] }}</p>
 
                             </div>
 

@@ -12,13 +12,13 @@
             class="w-full max-w-[500px] px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-300 focus:outline-none">
 
         <div class="relative">
-            <button wire:click="search" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <button wire:click="search" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700 transition">
                 Search
             </button>
 
             <!-- Efek Loading -->
             <div wire:loading wire:target="search, query, kategori" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0116 0h-2a6 6 0 00-12 0H4z"></path>
                 </svg>

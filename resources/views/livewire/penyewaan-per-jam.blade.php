@@ -26,7 +26,6 @@
             </a>
         </div>
 
-        <h1 class="text-3xl font-bold mb-4">Penyewaan Per Jam</h1>
         @if (session()->has('success'))
             <div x-data="{ show: true }" x-show="show"
                 class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
@@ -65,7 +64,7 @@
         @endif
         @if ($lokasi)
             <div class="mb-6 bg-white p-4 rounded-lg shadow-md w-full max-w-2xl">
-                <h2 class="text-xl font-semibold mb-2">{{ $lokasi->nama_lokasi }}</h2>
+                <h2 class="text-xl font-semibold mb-2">{{ $lokasi->tempat->nama }} - {{ $lokasi->nama_lokasi }}</h2>
                 <p>Tarif per jam: Rp {{ number_format($lokasi->tarif, 0, ',', '.') }}</p>
             </div>
         @endif
@@ -83,12 +82,12 @@
             <form wire:submit.prevent="simpanKeKeranjang">
                 <!-- Hour Range Repeater -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-4">Pilih Jadwal Jam</h3>
+                    <h3 class="text-lg font-semibold mb-4">Pilih Rentang Jam</h3>
 
                     @foreach ($hourRanges as $index => $range)
                         <div class="bg-gray-50 p-4 rounded-md mb-4 border border-gray-200">
                             <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-medium">Jadwal {{ $index + 1 }}</h4>
+                                <h4 class="font-medium">Rentang Jam {{ $index + 1 }}</h4>
                                 @if (count($hourRanges) > 1)
                                     <button type="button" wire:click="removeHourRange({{ $index }})"
                                         class="text-red-500 hover:text-red-700">
@@ -117,7 +116,7 @@
                             <div class="mb-4">
                                 <label class="block text-gray-700 text-sm font-medium mb-1">Jam Mulai</label>
                                 <select wire:model="hourRanges.{{ $index }}.startHour"
-                                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                                    class="w-72 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 "
                                     wire:change="updateHourRange">
                                     <option value="">Pilih Jam Mulai</option>
                                     @foreach ($availableHours[$index] ?? [] as $hour)
@@ -132,7 +131,7 @@
                             <div>
                                 <label class="block text-gray-700 text-sm font-medium mb-1">Jam Selesai</label>
                                 <select wire:model="hourRanges.{{ $index }}.endHour"
-                                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                                    class="w-72 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
                                     wire:change="updateHourRange">
                                     <option value="">Pilih Jam Selesai</option>
                                     @foreach ($endHoursOptions[$index] ?? [] as $hour)
@@ -152,7 +151,7 @@
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
-                        Tambah Jadwal Jam
+                        Tambah Rentang Jam
                     </button>
                 </div>
 
@@ -165,7 +164,7 @@
 
                 <!-- Summary -->
                 <div class="bg-gray-50 p-4 rounded-md mb-6">
-                    <h3 class="font-semibold mb-2">Ringkasan Pemesanan</h3>
+                    <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
                     <div class="flex justify-between mb-1">
                         <span>Total Jam</span>
                         <span>{{ $totalJam }} jam</span>

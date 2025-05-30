@@ -1,6 +1,6 @@
 <div class="min-h-screen flex flex-col items-center p-6 bg-gray-100">
 
-    <h1 class="text-3xl font-bold mb-4">Keranjang Penyewaan</h1>
+    <h1 class="text-3xl font-bold mb-4">Keranjang</h1>
 
     @if (session()->has('success'))
         <div x-data="{ show: true }" x-show="show"

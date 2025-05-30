@@ -26,7 +26,6 @@
             </a>
         </div>
 
-        <h1 class="text-3xl font-bold mb-4">Penyewaan Per Hari</h1>
         @if (session()->has('success'))
             <div x-data="{ show: true }" x-show="show"
                 class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
@@ -65,7 +64,7 @@
         @endif
         @if ($lokasi)
             <div class="mb-6 bg-white p-4 rounded-lg shadow-md w-full max-w-2xl">
-                <h2 class="text-xl font-semibold mb-2">{{ $lokasi->nama_lokasi }}</h2>
+                <h2 class="text-xl font-semibold mb-2">{{ $lokasi->tempat->nama }} - {{ $lokasi->nama_lokasi }}</h2>
                 <p>Tarif per hari: Rp {{ number_format($lokasi->tarif, 0, ',', '.') }}</p>
             </div>
         @endif
@@ -144,7 +143,7 @@
 
                 <!-- Summary -->
                 <div class="bg-gray-50 p-4 rounded-md mb-6">
-                    <h3 class="font-semibold mb-2">Ringkasan Pemesanan</h3>
+                    <h3 class="font-semibold mb-2">Ringkasan Pesanan</h3>
                     <div class="flex justify-between mb-1">
                         <span>Total Hari</span>
                         <span>{{ $totalHari }} hari</span>

@@ -1,7 +1,7 @@
 <aside class="w-64 bg-gray-800 text-white fixed h-full transition-all duration-300" id="sidebar">
     <div class="p-5 flex justify-between items-center">
         <a href="{{ route('dashboard') }}">
-            <span class="font-bold text-lg">Estripora</span>
+            <span class="font-bold text-lg">ESTRIPORA</span>
         </a>
         <!-- Tombol Tutup Sidebar (Mobile) -->
         <button class="md:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">
