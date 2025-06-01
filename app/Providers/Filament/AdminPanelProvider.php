@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\PenyewaanResource;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -41,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                PenyewaanResource\Widgets\StatistikPenyewaan::class,
             ])
             ->middleware([
                 EncryptCookies::class,
