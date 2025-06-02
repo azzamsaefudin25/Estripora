@@ -165,11 +165,11 @@ class UlasanResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('penyewaan.user.name')
-                    ->label('Identitas')
+                    ->label('Nama')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('id_penyewaan')
-                    ->label('Penyewaan')
+                    ->label('Tempat - Lokasi')
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(function ($state) {
@@ -190,7 +190,7 @@ class UlasanResource extends Resource
                     ->formatStateUsing(fn(int $state): string => str_repeat('⭐', $state))
                     ->sortable(),
                 TextColumn::make('ulasan')
-                    ->label('Ulasan')
+                    ->label('komentar')
                     ->limit(50)
                     ->searchable(),
                 TextColumn::make('like')

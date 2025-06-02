@@ -12,7 +12,7 @@ class Register extends Component
 {
     public $nik, $name, $username, $email, $phone, $otp, $password, $captcha;
 
-    public function save()
+    public function register()
     {
         $this->validate([
             'nik' => 'required|unique:users|max:16',
@@ -20,7 +20,7 @@ class Register extends Component
             'username' => 'required|unique:users|max:255',
             'email' => 'required|email|unique:users|max:255',
             'phone' => 'required|unique:users|max:13',
-            'password' => 'required|min:8|max:255',
+            'password' => 'required|min:6|max:255',
 
         ]);
 
