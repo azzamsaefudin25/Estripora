@@ -12,7 +12,9 @@ use App\Livewire\Dashboard;
 use App\Livewire\Keranjang;
 use App\Livewire\Auth\Login;
 use App\Livewire\DetailTempat;
+use App\Livewire\Profile\Edit;
 use App\Livewire\Auth\Register;
+use App\Livewire\Profile\Index;
 use App\Livewire\Kalenderperjam;
 use App\Livewire\RiwayatPesanan;
 use App\Livewire\Kalenderperhari;
@@ -56,7 +58,8 @@ Route::get('/dashboard', Dashboard::class)->name('dashboard');
 Route::get('/cetak', Cetak::class)->name('cetak');
 Route::get('/keranjang', Keranjang::class)->name('keranjang');
 Route::get('/riwayat', RiwayatPesanan::class)->name('riwayat');
-Route::get('/profile', Profile::class)->name('profile');
+Route::get('/indexprofile', Index::class)->name('indexProfile');
+Route::get('/editprofile', Edit::class)->name('editProfile');
 Route::get('/ubahpassword', UbahPassword::class)->name('ubahpassword');
 Route::get('/lapor', Lapor::class)->name('lapor');
 Route::get('/ulasan', Ulasan::class)->name('ulasan');
@@ -71,13 +74,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
 });
 
-Route::middleware(['auth'])->get('/profil', Profile::class)->name('profile.show');
+// Route::middleware(['auth'])->get('/profil', Profile::class)->name('profile.show');
 
-Route::get('/profil', Profile::class)
-    ->middleware('auth') // <= Ini yang penting
-    ->name('profile.show');
+// Route::get('/profil', Profile::class)
+//     ->middleware('auth') // <= Ini yang penting
+//     ->name('profile.show');
 
-    // routes/web.php
+//     // routes/web.php
 
 
 Route::post('/cetak-transaksi-pdf', [TransaksiPdfController::class, 'generate'])->name('cetak.transaksi.pdf');

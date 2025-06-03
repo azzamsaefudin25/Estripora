@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 
-class Profile extends Component
+class Index extends Component
 {
     public $user;
 
@@ -16,6 +16,6 @@ class Profile extends Component
 
     public function render()
     {
-        return view('livewire.profile');
+        return view('livewire.profile.index');
     }
 }

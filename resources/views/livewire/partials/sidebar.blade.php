@@ -21,7 +21,7 @@
             <span class="text-white text-lg">Dashboard</span>
         </a>
 
-        <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 gap-x-3">
+        <a href="{{ route('indexProfile') }}" class="flex items-center px-4 py-3 hover:bg-gray-700 gap-x-3">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
                 stroke="currentColor" class="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round"
