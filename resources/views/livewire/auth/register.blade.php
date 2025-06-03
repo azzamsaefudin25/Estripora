@@ -25,15 +25,6 @@
                                     <input type="text" id="nik" wire:model="nik" placeholder="NIK"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="nik-error">
-                                    @error('nik')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('nik')
                                     <p class="text-xs text-red-600 mt-2" id="nik-error">{{ $message }}</p>
@@ -47,15 +38,6 @@
                                     <input type="text" id="name" wire:model="name" placeholder="Nama Lengkap"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="name-error">
-                                    @error('name')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('name')
                                     <p class="text-xs text-red-600 mt-2" id="name-error">{{ $message }}</p>
@@ -69,15 +51,6 @@
                                     <input type="text" id="phone" wire:model="phone" placeholder="No HP/Telephone"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="phone-error">
-                                    @error('phone')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('phone')
                                     <p class="text-xs text-red-600 mt-2" id="phone-error">{{ $message }}</p>
@@ -91,15 +64,6 @@
                                     <input type="email" id="email" wire:model="email" placeholder="Email"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="email-error">
-                                    @error('email')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('email')
                                     <p class="text-xs text-red-600 mt-2" id="email-error">{{ $message }}</p>
@@ -113,15 +77,6 @@
                                     <input type="text" id="username" wire:model="username" placeholder="Username"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="username-error">
-                                    @error('username')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('username')
                                     <p class="text-xs text-red-600 mt-2" id="username-error">{{ $message }}</p>
@@ -145,15 +100,6 @@
                                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                     </button>
-                                    @error('password')
-                                        <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-                                            <svg class="h-5 w-5 text-red-500" width="16" height="16"
-                                                fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </div>
-                                    @enderror
                                 </div>
                                 @error('password')
                                     <p class="text-xs text-red-600 mt-2" id="password-error">{{ $message }}</p>

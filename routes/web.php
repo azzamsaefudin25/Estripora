@@ -18,9 +18,10 @@ use App\Livewire\RiwayatPesanan;
 use App\Livewire\Kalenderperhari;
 use App\Livewire\PenyewaanPerJam;
 use App\Livewire\PenyewaanPerHari;
-use App\Http\Controllers\TransaksiPdfController;
+use App\Livewire\Auth\UbahPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TransaksiPdfController;
 
 Route::get('/', function () {
     return redirect('dashboard');
@@ -56,6 +57,7 @@ Route::get('/cetak', Cetak::class)->name('cetak');
 Route::get('/keranjang', Keranjang::class)->name('keranjang');
 Route::get('/riwayat', RiwayatPesanan::class)->name('riwayat');
 Route::get('/profile', Profile::class)->name('profile');
+Route::get('/ubahpassword', UbahPassword::class)->name('ubahpassword');
 Route::get('/lapor', Lapor::class)->name('lapor');
 Route::get('/ulasan', Ulasan::class)->name('ulasan');
 Route::get('/kalenderperhari', Kalenderperhari::class)->name('kalenderperhari');

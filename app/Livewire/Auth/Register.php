@@ -22,6 +22,18 @@ class Register extends Component
             'phone' => 'required|unique:users|max:13',
             'password' => 'required|min:6|max:255',
 
+        ],[
+            'nik.required' => 'NIK wajib diisi',
+            'nik.unique' => 'NIK sudah di terdaftar',
+            'name.required' => 'Nama wajib diisi',
+            'username.required' => 'Username wajib diisi',
+            'username.unique' => 'Username sudah di terdaftar',
+            'email.required' => 'Email wajib diisi',
+            'email.unique' => 'Email sudah di terdaftar',
+            'phone.required' => 'Phone wajib diisi',
+            'phone.unique' => 'Phone sudah di terdaftar',
+            'password.required' => 'Password wajib diisi',
+             'password.min' => 'Password minimal terdiri dari 6 karakter.',
         ]);
 
         $user = User::create([

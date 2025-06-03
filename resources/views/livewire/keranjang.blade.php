@@ -169,7 +169,7 @@
             <p class="text-gray-600 mb-4">Belum ada penyewaan yang ditambahkan ke keranjang.</p>
             <a href="{{ route('dashboard') }}"
                 class="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
-                Lihat Lokasi
+                Lihat Tempat
             </a>
         </div>
     @endif

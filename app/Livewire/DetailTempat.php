@@ -17,7 +17,7 @@ class DetailTempat extends Component
     {
         $this->tempatId = $id;
         $this->tempat = $this->getTempatDetail();
-        $this->loadLokasi();
+        $this->getLokasi();
     }
 
     public function render()
@@ -41,7 +41,7 @@ class DetailTempat extends Component
         ];
     }
 
-    private function loadLokasi()
+    private function getLokasi()
     {
         // Ambil semua lokasi berdasarkan id_tempat
         if ($this->tempat && isset($this->tempat->id)) {
@@ -49,7 +49,7 @@ class DetailTempat extends Component
         }
     }
 
-    public function updatedSelectedLokasi($value)
+    public function selectedLokasi($value)
     {
         $this->selectedLokasi = $value;
     }
