@@ -241,7 +241,6 @@ class Cetak extends Component
 
         // Pastikan hanya bisa hapus transaksi miliknya
         if ($transaksi && $transaksi->penyewaan->id_user == $userId) {
-            // Hapus file bukti bayar jika ada
             if ($transaksi->bukti_bayar && Storage::disk('public')->exists($transaksi->bukti_bayar)) {
                 Storage::disk('public')->delete($transaksi->bukti_bayar);
             }
@@ -271,45 +270,46 @@ class Cetak extends Component
         $this->selectAll = count($this->selectedTransaksis) === $transaksiCollection->count() && $transaksiCollection->count() > 0;
     }
 
-    public function cetakPDF()
-    {
-        if (empty($this->selectedTransaksis)) {
-            session()->flash('error', 'Pilih transaksi yang akan diprint!');
-            return;
-        }
-
-        $userId = Auth::id();
-
-        $transaksis = Transaksi::with('penyewaan')
-            ->whereIn('id', $this->selectedTransaksis)
-            ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
-            ->get();
-
-        if ($transaksis->isEmpty()) {
-            session()->flash('error', 'Transaksi tidak ditemukan atau tidak berhak mengakses.');
-            return;
-        }
-
-        try {
-            $pdf = Pdf::loadView('pdf.transaksi', [
-                'transaksis' => $transaksis,
-            ]);
-
-            $pdf->setPaper('A4', 'landscape');
-            
-            $filename = 'transaksi_' . date('Y-m-d_H-i-s') . '.pdf';
-            
-            return response()->streamDownload(function () use ($pdf) {
-                echo $pdf->output();
-            }, $filename, [
-                'Content-Type' => 'application/pdf',
-            ]);
-
-        } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membuat PDF: ' . $e->getMessage());
-            return;
-        }
+public function cetakPDF()
+{
+    if (empty($this->selectedTransaksis)) {
+        session()->flash('error', 'Pilih transaksi yang akan diprint!');
+        return;
     }
+
+    $userId = Auth::id();
+
+    $transaksis = Transaksi::with([
+        'penyewaan.lokasi',
+        'penyewaan.lokasi.tempat', // Eksplisit load tempat
+    ])
+        ->whereIn('id', $this->selectedTransaksis)
+        ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
+        ->get();
+    if ($transaksis->isEmpty()) {
+        session()->flash('error', 'Transaksi tidak ditemukan atau tidak berhak mengakses.');
+        return;
+    }
+
+    try {
+        foreach ($transaksis as $transaksi) {
+            $pdf = Pdf::loadView('pdf.validasi-penyewaan', compact('transaksi'));
+            $pdf->setPaper('A4', 'portrait');
+        }
+        
+        $filename = 'validasi_penyewaan_' . date('Y-m-d_H-i-s') . '.pdf';
+        
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+
+    } catch (\Exception $e) {
+        session()->flash('error', 'Gagal membuat PDF: ' . $e->getMessage());
+        return;
+    }
+}
 
     public function render()
     {

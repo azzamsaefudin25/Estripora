@@ -49,6 +49,7 @@ class Penyewaan extends Model
 
     public function transaksi()
     {
-        return $this->hasOne(Ulasan::class, 'id_penyewaan', 'id_penyewaan');
+        return $this->hasOne(Transaksi::class, 'id_penyewaan', 'id_penyewaan');
     }
+
 }
