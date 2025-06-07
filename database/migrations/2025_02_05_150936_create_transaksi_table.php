@@ -23,8 +23,11 @@ return new class extends Migration
             $table->integer('luas')->nullable();
             $table->decimal('tarif', 16, 2);
             $table->decimal('sub_total', 16, 2);
-            $table->enum('metode_pembayaran', ['Transfer Bank', 'E-Wallet', 'Kartu Kredit'])->nullable();
+            $table->enum('metode_pembayaran', ['ATM', 'Mobile Banking', 'Teller Bank'])->nullable();
             $table->enum('status', ['Pending', 'Paid', 'Failed'])->default('Pending');
+            $table->string('bukti_bayar')->nullable();
+            $table->timestamp('expired_at')->nullable();
+            $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +37,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaksi');
+        Schema::table('transaksi', function (Blueprint $table) {
+            $table->dropColumn('expired_at');
+        });
     }
 };
