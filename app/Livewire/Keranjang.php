@@ -125,7 +125,6 @@ class Keranjang extends Component
 
             session()->flash('success', 'Checkout berhasil! Semua penyewaan telah diproses.');
 
-            // Redirect ke halaman daftar penyewaan user
             return redirect()->route('cetak');
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
