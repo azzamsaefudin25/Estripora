@@ -1,4 +1,4 @@
-<div class="h-screen w-full bg-gray-100 flex flex-col relative">
+<div class="min-h-screen w-full bg-gray-100 flex flex-col relative ">
     <!-- Tombol Kembali (Pojok Kiri Atas) -->
     <div class="absolute top-4 left-4 flex gap-2 z-10">
         <!-- Tombol Kembali ke Dashboard -->
@@ -11,7 +11,7 @@
     </div>
 
     <!-- Header -->
-    <div class="bg-white shadow-md p-4 flex items-center justify-center">
+    <div class="bg-white shadow-md p-4 flex items-center justify-center overflow-auto">
         <h1 class="text-xl font-bold text-gray-900">{{ $tempat->nama ?? 'Tempat Tidak Ditemukan' }}</h1>
     </div>
 
@@ -19,9 +19,9 @@
     <div class="flex flex-col lg:flex-row flex-grow overflow-auto">
         <div class="lg:w-1/2 w-full h-60 lg:h-auto flex items-center justify-center bg-gray-200">
             <img src="{{ asset('storage/' . $tempat->image ?? '/images/default.jpg') }}" alt="Gambar Tempat"
-                class="w-auto h-full object-cover shadow-lg">
+                class="lg:h-1/2 w-auto h-full object-cover shadow-lg">
         </div>
-        <div class="lg:w-1/2 w-full p-8 flex flex-col space-y-6 overflow-y-auto">
+        <div class="lg:w-1/2 w-full p-8 flex flex-col space-y-6 ">
             <p class="text-lg text-gray-700 leading-relaxed">{{ $tempat->deskripsi ?? 'Deskripsi tidak tersedia.' }}</p>
             <div>
                 <label for="id_lokasi" class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi</label>

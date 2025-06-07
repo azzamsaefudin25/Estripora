@@ -1,4 +1,4 @@
-<div class="flex flex-col relative">
+<div class="min-h-screen w-full flex flex-col relative">
     <div class="flex-grow flex flex-col items-center p-6">
         <!-- Tombol Kembali dan Keranjang -->
         <div class="absolute top-4 left-4 flex space-x-2">

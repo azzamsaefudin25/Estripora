@@ -31,7 +31,7 @@
         @livewire('partials.sidebar')
 
         <!-- Layout Utama -->
-        <div class="md:ml-64 flex flex-col flex-1 min-h-screen">
+        <div class="md:ml-64 flex flex-col flex-1 min-h-screen ">
 
             <!-- Header -->
             @livewire('partials.header')
@@ -135,7 +135,8 @@
                         </div>
 
                         <!-- Link Terkait Section -->
-                        <div class="flex flex-col justify-start items-center md:text-left">
+                        <div class="flex flex-col justify-start text-left md:items-center md:text-left">
+
                             <h3 class="text-sm font-bold uppercase tracking-wide mb-6 text-black">LINK TERKAIT</h3>
                             <ul class="space-y-3">
                                 <li><a href="#"
@@ -145,7 +146,8 @@
                         </div>
 
                         <!-- Sitemap Section -->
-                        <div class="flex flex-col justify-start items-end md:text-right">
+                        <div class="flex flex-col justify-start items-start text-left md:items-end md:text-right">
+                            
                             <h3 class="text-sm font-bold uppercase tracking-wide mb-6 text-black">SITEMAP</h3>
                             <ul class="space-y-3">
                                 <li><a href="#"

@@ -18,7 +18,7 @@
     </div>
 
     @if (count($ulasans) > 0)
-        <div class="max-h-96 overflow-y-auto pr-2">
+        <div class="max-h-96 overflow-auto pr-2">
             <div class="space-y-6">
                 @foreach ($ulasans as $ulasan)
                     <div class="bg-white rounded-lg shadow-md p-6">

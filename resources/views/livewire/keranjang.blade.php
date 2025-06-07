@@ -2,7 +2,7 @@
 
     <h1 class="text-3xl font-bold mb-4">Keranjang</h1>
 
-    @if (session()->has('success'))
+    {{-- @if (session()->has('success'))
         <div x-data="{ show: true }" x-show="show"
             class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
             <div class="flex items-center justify-between">
@@ -18,7 +18,7 @@
                 </button>
             </div>
         </div>
-    @endif
+    @endif --}}
 
     @if (session()->has('error'))
         <div x-data="{ show: true }" x-show="show"

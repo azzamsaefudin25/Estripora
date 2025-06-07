@@ -373,8 +373,9 @@ class PenyewaanPerJam extends Component
             Session::put('keranjang', $keranjang);
 
             session()->flash('success', 'Pemesanan berhasil ditambahkan ke keranjang! Total pemesanan: ' . $totalHours .
-                ' jam dengan biaya Rp ' . number_format($subTotal, 0, ',', '.'));
+                ' jam dengan biaya Rp ' . number_format($subTotal, 0, ',', '.'). ', Silakan melakukan checkout!');
 
+            return redirect()->route('keranjang');
             // Reset form
             $this->deskripsi = '';
             // Reset to a single empty hour range

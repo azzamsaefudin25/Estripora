@@ -7,11 +7,24 @@ use Illuminate\Support\Facades\Auth;
 
 class Header extends Component
 {
-    // public function logout()
-    // {
-    //     Auth::logout();
-    //     return redirect()->route('login');
-    // }
+    public $showMobileMenu = false;
+
+    protected $listeners = ['closeMobileMenus' => 'closeMobileMenu'];
+
+    public function toggleMobileMenu()
+    {
+        $this->showMobileMenu = !$this->showMobileMenu;
+
+        // agar saat header dibuka otomatis menutup sidebar
+        if ($this->showMobileMenu) {
+            $this->dispatch('closeSidebar');
+        }
+    }
+
+    public function closeMobileMenu()
+    {
+        $this->showMobileMenu = false;
+    }
 
     public function render()
     {
