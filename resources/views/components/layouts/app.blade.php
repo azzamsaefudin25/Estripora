@@ -31,23 +31,23 @@
         @livewire('partials.sidebar')
 
         <!-- Layout Utama -->
-        <div class="md:ml-64 flex flex-col flex-1 min-h-screen ">
+        <div class="w-full md:ml-64 flex flex-col flex-1 min-h-screen">
 
             <!-- Header -->
             @livewire('partials.header')
 
             <!-- Konten Utama -->
-            <main class="flex-1 container mx-auto p-5">
+            <main class="flex-1 container mx-auto p-3 sm:p-4 md:p-5 w-full max-w-full overflow-x-hidden">
 
                 @if (session()->has('success'))
                     <div x-data="{ show: true }" x-show="show"
-                        class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
+                        class="bg-green-50 border-l-4 border-green-400 p-3 sm:p-4 rounded-r shadow-md relative mb-4">
                         <div class="flex items-center justify-between">
-                            <p class="text-green-800 text-sm font-medium">
+                            <p class="text-green-800 text-xs sm:text-sm font-medium pr-2">
                                 {{ session('success') }}
                             </p>
                             <button @click="show = false"
-                                class="text-green-400 hover:opacity-75 transition-opacity duration-150">
+                                class="text-green-400 hover:opacity-75 transition-opacity duration-150 flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round">
@@ -61,13 +61,13 @@
 
                 @if (session()->has('error'))
                     <div x-data="{ show: true }" x-show="show"
-                        class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r shadow-md relative">
+                        class="bg-red-50 border-l-4 border-red-400 p-3 sm:p-4 rounded-r shadow-md relative mb-4">
                         <div class="flex items-center justify-between">
-                            <p class="text-red-800 text-sm font-medium">
+                            <p class="text-red-800 text-xs sm:text-sm font-medium pr-2">
                                 {{ session('error') }}
                             </p>
                             <button @click="show = false"
-                                class="text-red-400 hover:opacity-75 transition-opacity duration-150">
+                                class="text-red-400 hover:opacity-75 transition-opacity duration-150 flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round">
@@ -84,82 +84,86 @@
 
             <!-- Footer -->
             <footer class="bg-white text-black mt-auto">
-                <div class="container mx-auto px-5 py-10">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
+                <div class="container mx-auto px-3 sm:px-4 md:px-5 py-6 sm:py-8 md:py-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-12 items-start">
                         <!-- Kontak Kami Section -->
                         <div class="flex flex-col justify-start">
-                            <h3 class="text-sm font-bold uppercase tracking-wide mb-6 text-black">KONTAK KAMI</h3>
+                            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide mb-4 sm:mb-6 text-black">
+                                KONTAK KAMI</h3>
 
-                            <div class="space-y-4">
+                            <div class="space-y-3 sm:space-y-4">
                                 <div class="flex items-start">
-                                    <div class="flex-shrink-0 mt-1 mr-4">
-                                        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex-shrink-0 mt-1 mr-3 sm:mr-4">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path
                                                 d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-semibold mb-1 text-black">Telepon</h4>
-                                        <p class="text-sm text-gray-600">(024) 3513366</p>
+                                        <h4 class="text-xs sm:text-sm font-semibold mb-1 text-black">Telepon</h4>
+                                        <p class="text-xs sm:text-sm text-gray-600">(024) 3513366</p>
                                     </div>
                                 </div>
 
                                 <div class="flex items-start">
-                                    <div class="flex-shrink-0 mt-1 mr-4">
-                                        <svg class="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex-shrink-0 mt-1 mr-3 sm:mr-4">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-900" fill="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path
                                                 d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-semibold mb-1 text-black">Email</h4>
-                                        <p class="text-sm text-red-600">info@semarang.go.id</p>
+                                        <h4 class="text-xs sm:text-sm font-semibold mb-1 text-black">Email</h4>
+                                        <p class="text-xs sm:text-sm text-red-600 break-all">info@semarang.go.id</p>
                                     </div>
                                 </div>
 
                                 <div class="flex items-start">
-                                    <div class="flex-shrink-0 mt-1 mr-4">
-                                        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex-shrink-0 mt-1 mr-3 sm:mr-4">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path
                                                 d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-semibold mb-1 text-black">Alamat</h4>
-                                        <p class="text-sm text-gray-600 leading-relaxed">Jl. Pemuda No.148, Sekayu,
-                                            Semarang
-                                            Tengah</p>
+                                        <h4 class="text-xs sm:text-sm font-semibold mb-1 text-black">Alamat</h4>
+                                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Jl. Pemuda No.148,
+                                            Sekayu,
+                                            Semarang Tengah</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Link Terkait Section -->
-                        <div class="flex flex-col justify-start text-left md:items-center md:text-left">
-
-                            <h3 class="text-sm font-bold uppercase tracking-wide mb-6 text-black">LINK TERKAIT</h3>
-                            <ul class="space-y-3">
+                        <div class="flex flex-col text-left lg:justify-start lg:text-center">
+                            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide mb-4 sm:mb-6 text-black">
+                                LINK TERKAIT</h3>
+                            <ul class="space-y-2 sm:space-y-3">
                                 <li><a href="#"
-                                        class="text-sm text-gray-600 hover:text-red-600 transition-colors duration-300">BKD
+                                        class="text-xs sm:text-sm text-gray-600 hover:text-red-600 transition-colors duration-300">BKD
                                         Kota Semarang</a></li>
                             </ul>
                         </div>
 
                         <!-- Sitemap Section -->
-                        <div class="flex flex-col justify-start items-start text-left md:items-end md:text-right">
-                            
-                            <h3 class="text-sm font-bold uppercase tracking-wide mb-6 text-black">SITEMAP</h3>
-                            <ul class="space-y-3">
+                        <div class="flex flex-col text-left lg:justify-start lg:text-right">
+                            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wide mb-4 sm:mb-6 text-black">
+                                SITEMAP</h3>
+                            <ul class="space-y-2 sm:space-y-3">
                                 <li><a href="#"
-                                        class="text-sm text-gray-600 hover:text-red-600 transition-colors duration-300">ESTRIPORA
+                                        class="text-xs sm:text-sm text-gray-600 hover:text-red-600 transition-colors duration-300">ESTRIPORA
                                         Kota Semarang</a></li>
                             </ul>
                         </div>
                     </div>
 
                     <!-- Footer Bottom -->
-                    <div class="border-t border-gray-300 mt-10 pt-8 text-center">
-                        <p class="text-sm font-semibold text-black">2025 ESPTRD Kota Semarang</p>
+                    <div class="border-t border-gray-300 mt-6 sm:mt-8 md:mt-10 pt-6 sm:pt-8 text-center">
+                        <p class="text-xs sm:text-sm font-semibold text-black">2025 ESPTRD Kota Semarang</p>
                     </div>
                 </div>
             </footer>

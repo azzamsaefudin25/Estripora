@@ -2,7 +2,7 @@
     <h2 class="text-2xl font-bold mb-6">Ulasan Pengunjung</h2>
 
     <!-- Filter buttons -->
-    <div class="flex space-x-4 mb-6">
+    <div class="flex flex-col space-y-4 sm:space-x-4 sm:space-y-0 sm:flex-row mb-6">
         <button wire:click="setFilter('all')"
             class="px-4 py-2 rounded-lg transition-colors {{ $ratingFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800' }}">
             Semua
