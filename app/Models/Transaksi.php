@@ -17,17 +17,27 @@ class Transaksi extends Model
         'total_durasi',
         'tarif',
         'sub_total',
+        'metode_pembayaran',
         'status',
+        'bukti_bayar',
+        'expired_at',
+        'reviewed_at'
     ];
 
     protected $casts = [
         'tgl_booking' => 'date',
         'detail_penyewaan' => 'array',
+        'expired_at' => 'datetime',
+        'reviewed_at' => 'datetime'
     ];
 
     public function penyewaan()
     {
         return $this->belongsTo(Penyewaan::class, 'id_penyewaan', 'id_penyewaan');
     }
-    
+
+    public function user()
+    {
+    return $this->belongsTo(User::class, 'id_user');
+    }
 }
