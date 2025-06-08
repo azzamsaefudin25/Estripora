@@ -16,9 +16,11 @@ use Ramsey\Uuid\Type\Time;
 use App\Rules\PenyewaanRule;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -87,331 +89,337 @@ class PenyewaanResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('id_user')
-                    ->label('Identitas')
-                    ->required()
-                    ->searchable()
-                    ->disabled(fn(string $operation): bool => $operation === 'edit')
-                    ->preload()
-                    ->relationship('user')
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nik} - {$record->name}")
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        $set('nik', null);
-                        if ($state) {
-                            $user = User::where('id', $state)->first();
-                            if ($user) {
-                                $set('nik', $user->nik);
-                            }
-                        }
-                    }),
-
-                TextInput::make('nik')
-                    ->label('NIK')
-                    ->disabled()
-                    ->live()
-                    ->dehydrated(true),
-
-                Select::make('id_lokasi')
-                    ->label('Lokasi & Tempat')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->relationship(
-                        name: 'lokasi',
-                        titleAttribute: 'nama_lokasi',
-                        modifyQueryUsing: fn($query) => $query->with('tempat')
-                    )
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
-                    ->afterStateUpdated(function ($set, $get, $state) {
-
-                        $set('penyewaan_per_jam', []);
-                        $set('penyewaan_per_hari', []);
-                        $set('total_durasi', 0);
-                        $set('sub_total', 0);
-                        $set('kategori_sewa', null);
-
-                        if ($state) {
-                            $lokasi = Lokasi::with('tempat')->where('id_lokasi', $state)->first();
-
-                            if ($lokasi && $lokasi->tempat) {
-
-                                $kategoriSewa = $lokasi->tempat->kategori_sewa;
-                                $set('kategori_sewa', $kategoriSewa);
-                                $set('tarif', floatval($lokasi->tarif));
-
-                                if ($kategoriSewa === 'per jam') {
-
-                                    $entry = [
-                                        'tgl_mulai' => '',
-                                        'jam_mulai' => '',
-                                        'jam_selesai' => ''
-                                    ];
-
-                                    $set('penyewaan_per_jam', [$entry]);
-                                } elseif ($kategoriSewa === 'per hari') {
-
-                                    $entry = [
-                                        'tgl_mulai' => '',
-                                        'tgl_selesai' => ''
-                                    ];
-
-                                    $set('penyewaan_per_hari', [$entry]);
-                                }
-                            }
-                        }
-                    }),
-
-                TextInput::make('kategori_sewa')
-                    ->label('Kategori Sewa')
-                    ->disabled()
-                    ->live()
-                    ->dehydrated(true),
-
-                DateTimePicker::make('tgl_booking')
-                    ->label('Tanggal Booking')
-                    ->default(now())
-                    ->required(),
-
-                Repeater::make('penyewaan_per_jam')
-                    ->label('Pilih Hari dan Jam')
-                    ->live()
-                    ->hidden(fn($get) => $get('kategori_sewa') !== 'per jam')
-                    ->schema([
-                        DatePicker::make('tgl_mulai')
-                            ->label('Tanggal Pemakaian')
-                            ->required()
-                            ->rules(['required', 'date', 'after_or_equal:today']),
-                        TimePicker::make('jam_mulai')
-                            ->label('Jam Mulai')
-                            ->required(),
-                        TimePicker::make('jam_selesai')
-                            ->label('Jam Selesai')
-                            ->required()
-                            ->rules([
-                                'required',
-                                'different:jam_mulai',
-                                function ($get) {
-                                    return function ($attribute, $value, $fail) use ($get) {
-                                        $jamMulai = $get('jam_mulai');
-                                        if (empty($jamMulai) || empty($value)) {
-                                            return;
+                Section::make([
+                    Grid::make()
+                        ->schema([
+                            Select::make('id_user')
+                                ->label('Identitas')
+                                ->required()
+                                ->searchable()
+                                ->disabled(fn(string $operation): bool => $operation === 'edit')
+                                ->preload()
+                                ->relationship('user')
+                                ->getOptionLabelFromRecordUsing(fn($record) => "{$record->nik} - {$record->name}")
+                                ->afterStateUpdated(function (Set $set, $state) {
+                                    $set('nik', null);
+                                    if ($state) {
+                                        $user = User::where('id', $state)->first();
+                                        if ($user) {
+                                            $set('nik', $user->nik);
                                         }
-
-                                        try {
-                                            $baseDate = date('Y-m-d');
-                                            $startTime = \Carbon\Carbon::parse($baseDate . ' ' . $jamMulai);
-                                            $endTime = \Carbon\Carbon::parse($baseDate . ' ' . $value);
-
-                                            // Handle overnight booking
-                                            if ($endTime->lt($startTime)) {
-                                                return;
-                                            }
-
-                                            if ($startTime->eq($endTime)) {
-                                                $fail('Jam selesai tidak boleh sama dengan jam mulai.');
-                                            }
-                                        } catch (\Exception $e) {
-                                            $fail('Format waktu tidak valid.');
-                                        }
-                                    };
-                                }
-                            ])
-                    ])
-                    ->rules([
-                        'array',
-                        function ($get, $livewire) {
-                            $currentId = $livewire->record?->id_penyewaan;
-
-                            return new PenyewaanRule(
-                                $get('id_lokasi'),
-                                'per jam',
-                                $currentId
-                            );
-                        }
-                    ])
-                    ->minItems(1)
-                    ->maxItems(10)
-                    ->afterStateUpdated(function ($set, $get) {
-                        $totalJam = 0;
-                        $penyewaanPerJam = $get('penyewaan_per_jam') ?? [];
-
-                        foreach ($penyewaanPerJam as $penyewaan) {
-                            if (isset($penyewaan['jam_mulai'], $penyewaan['jam_selesai'])) {
-                                $baseDate = date('Y-m-d');
-                                $jamMulai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_mulai']);
-                                $jamSelesai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_selesai']);
-
-                                if ($jamSelesai->lt($jamMulai)) {
-                                    $jamSelesai->addDay();
-                                }
-
-                                $selisihJam = abs((int)$jamSelesai->diffInHours($jamMulai));
-                                $totalJam += $selisihJam;
-                            }
-                        }
-
-                        $set('total_durasi', $totalJam);
-
-                        if ($get('tarif')) {
-                            $subTotal = floatval($get('tarif')) * $totalJam;
-                            $set('sub_total', $subTotal);
-                        }
-                    })
-                    ->columnSpanFull(),
-
-                Repeater::make('penyewaan_per_hari')
-                    ->label('Pilih Tanggal')
-                    ->live()
-                    ->hidden(fn($get) => $get('kategori_sewa') !== 'per hari')
-                    ->schema([
-                        DatePicker::make('tgl_mulai')
-                            ->label('Tanggal Mulai')
-                            ->required()
-                            ->rules(['required', 'date', 'after_or_equal:today'])
-                            ->format('Y-m-d')
-                            ->displayFormat('d-m-Y'),
-                        DatePicker::make('tgl_selesai')
-                            ->label('Tanggal Selesai')
-                            ->required()
-                            ->rules([
-                                'required',
-                                'date',
-                                'after_or_equal:tgl_mulai',
-                                function ($get) {
-                                    return function ($attribute, $value, $fail) use ($get) {
-                                        $tglMulai = $get('tgl_mulai');
-                                        if (empty($tglMulai) || empty($value)) {
-                                            return;
-                                        }
-
-                                        $startDate = \Carbon\Carbon::parse($tglMulai);
-                                        $endDate = \Carbon\Carbon::parse($value);
-
-                                        if ($endDate->lt($startDate)) {
-                                            $fail('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
-                                        }
-                                    };
-                                }
-                            ])
-                            ->format('Y-m-d') // Changed format to match Carbon's expected format
-                            ->displayFormat('d-m-Y'), // Added display format for user-friendly view
-                    ])
-                    ->rules([
-                        'array',
-                        function ($get, $livewire) {
-                            return new PenyewaanRule(
-                                $get('id_lokasi'),
-                                'per hari',
-                                $livewire->record?->id_penyewaan
-                            );
-                        }
-                    ])
-                    ->minItems(1)
-                    ->maxItems(10)
-                    ->afterStateUpdated(function ($set, $get) {
-                        try {
-                            $totalHari = 0;
-                            $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
-
-                            foreach ($penyewaanPerHari as $penyewaan) {
-                                if (
-                                    isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai']) &&
-                                    !empty($penyewaan['tgl_mulai']) &&
-                                    !empty($penyewaan['tgl_selesai'])
-                                ) {
-                                    try {
-                                        $tglMulai = Carbon::parse($penyewaan['tgl_mulai']);
-                                        $tglSelesai = Carbon::parse($penyewaan['tgl_selesai']);
-
-                                        // Validate dates
-                                        if (!$tglMulai || !$tglSelesai) {
-                                            continue;
-                                        }
-
-                                        // Jika tanggal sama, langsung tambahkan 1 hari
-                                        if ($tglMulai->isSameDay($tglSelesai)) {
-                                            $selisihHari = 1;
-                                        } elseif ($tglSelesai < $tglMulai) {
-                                            $selisihHari = 0;
-                                        } else {
-                                            // Jika tanggal berbeda, hitung selisih dan tambah 1
-                                            $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
-                                        }
-
-                                        $totalHari += $selisihHari;
-                                    } catch (\Exception $e) {
-                                        // Skip invalid dates
-                                        continue;
                                     }
-                                }
-                            }
+                                }),
 
-                            $set('total_durasi', $totalHari);
+                            TextInput::make('nik')
+                                ->label('NIK')
+                                ->disabled()
+                                ->live()
+                                ->dehydrated(true),
 
-                            if ($get('tarif')) {
-                                $tarif = floatval($get('tarif'));
-                                if ($tarif > 0 && $totalHari > 0) {
-                                    $subTotal = $tarif * $totalHari;
-                                    $set('sub_total', $subTotal);
-                                }
-                            }
-                        } catch (\Exception $e) {
-                            // Handle any unexpected errors
-                            $set('total_durasi', 0);
-                            $set('sub_total', 0);
-                        }
-                    })
-                    ->columnSpanFull(),
+                            Select::make('id_lokasi')
+                                ->label('Lokasi & Tempat')
+                                ->required()
+                                ->searchable()
+                                ->preload()
+                                ->live()
+                                ->relationship(
+                                    name: 'lokasi',
+                                    titleAttribute: 'nama_lokasi',
+                                    modifyQueryUsing: fn($query) => $query->with('tempat')
+                                )
+                                ->getOptionLabelFromRecordUsing(fn($record) => "{$record->tempat->nama} - {$record->nama_lokasi}")
+                                ->afterStateUpdated(function ($set, $get, $state) {
 
-                TextInput::make('total_durasi')
-                    ->label('Total Durasi')
-                    ->numeric()
-                    ->disabled()
-                    ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? 'Jam' : 'Hari')
-                    ->live()
-                    ->dehydrated(true),
+                                    $set('penyewaan_per_jam', []);
+                                    $set('penyewaan_per_hari', []);
+                                    $set('total_durasi', 0);
+                                    $set('sub_total', 0);
+                                    $set('kategori_sewa', null);
 
-                TextInput::make('tarif')
-                    ->label('Tarif')
-                    ->prefix('Rp')
-                    ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? '/Jam' : '/Hari')
-                    ->live()
-                    ->disabled()
-                    ->dehydrated(true)
-                    ->formatStateUsing(function ($state) {
-                        return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
-                    })
-                    ->afterStateHydrated(function ($component, $state) {
-                        if (!is_null($state)) {
-                            $component->state((float)$state);
-                        }
-                    }),
+                                    if ($state) {
+                                        $lokasi = Lokasi::with('tempat')->where('id_lokasi', $state)->first();
 
-                TextInput::make('sub_total')
-                    ->label('Sub Total')
-                    ->prefix('Rp')
-                    ->disabled()
-                    ->dehydrated(true)
-                    ->live()
-                    ->formatStateUsing(function ($state) {
-                        return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
-                    })
-                    ->afterStateHydrated(function ($component, $state) {
-                        if (!is_null($state)) {
-                            $component->state((float)$state);
-                        }
-                    }),
+                                        if ($lokasi && $lokasi->tempat) {
 
-                Select::make('status')
-                    ->label('Status')
-                    ->default('Pending')
-                    ->options([
-                        'Pending' => 'Pending',
-                        'Confirmed' => 'Confirmed',
-                        'Canceled' => 'Canceled'
-                    ])
-                    ->dehydrated(true),
+                                            $kategoriSewa = $lokasi->tempat->kategori_sewa;
+                                            $set('kategori_sewa', $kategoriSewa);
+                                            $set('tarif', floatval($lokasi->tarif));
+
+                                            if ($kategoriSewa === 'per jam') {
+
+                                                $entry = [
+                                                    'tgl_mulai' => '',
+                                                    'jam_mulai' => '',
+                                                    'jam_selesai' => ''
+                                                ];
+
+                                                $set('penyewaan_per_jam', [$entry]);
+                                            } elseif ($kategoriSewa === 'per hari') {
+
+                                                $entry = [
+                                                    'tgl_mulai' => '',
+                                                    'tgl_selesai' => ''
+                                                ];
+
+                                                $set('penyewaan_per_hari', [$entry]);
+                                            }
+                                        }
+                                    }
+                                }),
+
+                            TextInput::make('kategori_sewa')
+                                ->label('Kategori Sewa')
+                                ->disabled()
+                                ->live()
+                                ->dehydrated(true),
+
+                            DateTimePicker::make('tgl_booking')
+                                ->label('Tanggal Booking')
+                                ->default(now())
+                                ->required(),
+
+                            Repeater::make('penyewaan_per_jam')
+                                ->label('Pilih Hari dan Jam')
+                                ->live()
+                                ->hidden(fn($get) => $get('kategori_sewa') !== 'per jam')
+                                ->schema([
+                                    DatePicker::make('tgl_mulai')
+                                        ->label('Tanggal Pemakaian')
+                                        ->required()
+                                        ->rules(['required', 'date', 'after_or_equal:today']),
+                                    TimePicker::make('jam_mulai')
+                                        ->label('Jam Mulai')
+                                        ->required(),
+                                    TimePicker::make('jam_selesai')
+                                        ->label('Jam Selesai')
+                                        ->required()
+                                        ->rules([
+                                            'required',
+                                            'different:jam_mulai',
+                                            function ($get) {
+                                                return function ($attribute, $value, $fail) use ($get) {
+                                                    $jamMulai = $get('jam_mulai');
+                                                    if (empty($jamMulai) || empty($value)) {
+                                                        return;
+                                                    }
+
+                                                    try {
+                                                        $baseDate = date('Y-m-d');
+                                                        $startTime = \Carbon\Carbon::parse($baseDate . ' ' . $jamMulai);
+                                                        $endTime = \Carbon\Carbon::parse($baseDate . ' ' . $value);
+
+                                                        // Handle overnight booking
+                                                        if ($endTime->lt($startTime)) {
+                                                            return;
+                                                        }
+
+                                                        if ($startTime->eq($endTime)) {
+                                                            $fail('Jam selesai tidak boleh sama dengan jam mulai.');
+                                                        }
+                                                    } catch (\Exception $e) {
+                                                        $fail('Format waktu tidak valid.');
+                                                    }
+                                                };
+                                            }
+                                        ])
+                                ])
+                                ->rules([
+                                    'array',
+                                    function ($get, $livewire) {
+                                        $currentId = $livewire->record?->id_penyewaan;
+
+                                        return new PenyewaanRule(
+                                            $get('id_lokasi'),
+                                            'per jam',
+                                            $currentId
+                                        );
+                                    }
+                                ])
+                                ->minItems(1)
+                                ->maxItems(10)
+                                ->afterStateUpdated(function ($set, $get) {
+                                    $totalJam = 0;
+                                    $penyewaanPerJam = $get('penyewaan_per_jam') ?? [];
+
+                                    foreach ($penyewaanPerJam as $penyewaan) {
+                                        if (isset($penyewaan['jam_mulai'], $penyewaan['jam_selesai'])) {
+                                            $baseDate = date('Y-m-d');
+                                            $jamMulai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_mulai']);
+                                            $jamSelesai = Carbon::parse($baseDate . ' ' . $penyewaan['jam_selesai']);
+
+                                            if ($jamSelesai->lt($jamMulai)) {
+                                                $jamSelesai->addDay();
+                                            }
+
+                                            $selisihJam = abs((int)$jamSelesai->diffInHours($jamMulai));
+                                            $totalJam += $selisihJam;
+                                        }
+                                    }
+
+                                    $set('total_durasi', $totalJam);
+
+                                    if ($get('tarif')) {
+                                        $subTotal = floatval($get('tarif')) * $totalJam;
+                                        $set('sub_total', $subTotal);
+                                    }
+                                })
+                                ->columnSpanFull(),
+
+                            Repeater::make('penyewaan_per_hari')
+                                ->label('Pilih Tanggal')
+                                ->live()
+                                ->hidden(fn($get) => $get('kategori_sewa') !== 'per hari')
+                                ->schema([
+                                    DatePicker::make('tgl_mulai')
+                                        ->label('Tanggal Mulai')
+                                        ->required()
+                                        ->rules(['required', 'date', 'after_or_equal:today'])
+                                        ->format('Y-m-d')
+                                        ->displayFormat('d-m-Y'),
+                                    DatePicker::make('tgl_selesai')
+                                        ->label('Tanggal Selesai')
+                                        ->required()
+                                        ->rules([
+                                            'required',
+                                            'date',
+                                            'after_or_equal:tgl_mulai',
+                                            function ($get) {
+                                                return function ($attribute, $value, $fail) use ($get) {
+                                                    $tglMulai = $get('tgl_mulai');
+                                                    if (empty($tglMulai) || empty($value)) {
+                                                        return;
+                                                    }
+
+                                                    $startDate = \Carbon\Carbon::parse($tglMulai);
+                                                    $endDate = \Carbon\Carbon::parse($value);
+
+                                                    if ($endDate->lt($startDate)) {
+                                                        $fail('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
+                                                    }
+                                                };
+                                            }
+                                        ])
+                                        ->format('Y-m-d') // Changed format to match Carbon's expected format
+                                        ->displayFormat('d-m-Y'), // Added display format for user-friendly view
+                                ])
+                                ->rules([
+                                    'array',
+                                    function ($get, $livewire) {
+                                        return new PenyewaanRule(
+                                            $get('id_lokasi'),
+                                            'per hari',
+                                            $livewire->record?->id_penyewaan
+                                        );
+                                    }
+                                ])
+                                ->minItems(1)
+                                ->maxItems(10)
+                                ->afterStateUpdated(function ($set, $get) {
+                                    try {
+                                        $totalHari = 0;
+                                        $penyewaanPerHari = $get('penyewaan_per_hari') ?? [];
+
+                                        foreach ($penyewaanPerHari as $penyewaan) {
+                                            if (
+                                                isset($penyewaan['tgl_mulai'], $penyewaan['tgl_selesai']) &&
+                                                !empty($penyewaan['tgl_mulai']) &&
+                                                !empty($penyewaan['tgl_selesai'])
+                                            ) {
+                                                try {
+                                                    $tglMulai = Carbon::parse($penyewaan['tgl_mulai']);
+                                                    $tglSelesai = Carbon::parse($penyewaan['tgl_selesai']);
+
+                                                    // Validate dates
+                                                    if (!$tglMulai || !$tglSelesai) {
+                                                        continue;
+                                                    }
+
+                                                    // Jika tanggal sama, langsung tambahkan 1 hari
+                                                    if ($tglMulai->isSameDay($tglSelesai)) {
+                                                        $selisihHari = 1;
+                                                    } elseif ($tglSelesai < $tglMulai) {
+                                                        $selisihHari = 0;
+                                                    } else {
+                                                        // Jika tanggal berbeda, hitung selisih dan tambah 1
+                                                        $selisihHari = $tglMulai->diffInDays($tglSelesai) + 1;
+                                                    }
+
+                                                    $totalHari += $selisihHari;
+                                                } catch (\Exception $e) {
+                                                    // Skip invalid dates
+                                                    continue;
+                                                }
+                                            }
+                                        }
+
+                                        $set('total_durasi', $totalHari);
+
+                                        if ($get('tarif')) {
+                                            $tarif = floatval($get('tarif'));
+                                            if ($tarif > 0 && $totalHari > 0) {
+                                                $subTotal = $tarif * $totalHari;
+                                                $set('sub_total', $subTotal);
+                                            }
+                                        }
+                                    } catch (\Exception $e) {
+                                        // Handle any unexpected errors
+                                        $set('total_durasi', 0);
+                                        $set('sub_total', 0);
+                                    }
+                                })
+                                ->columnSpanFull(),
+
+                            TextInput::make('total_durasi')
+                                ->label('Total Durasi')
+                                ->numeric()
+                                ->disabled()
+                                ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? 'Jam' : 'Hari')
+                                ->live()
+                                ->dehydrated(true),
+
+                            TextInput::make('tarif')
+                                ->label('Tarif')
+                                ->prefix('Rp')
+                                ->suffix(fn($get) => $get('kategori_sewa') === 'per jam' ? '/Jam' : '/Hari')
+                                ->live()
+                                ->disabled()
+                                ->dehydrated(true)
+                                ->formatStateUsing(function ($state) {
+                                    return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
+                                })
+                                ->afterStateHydrated(function ($component, $state) {
+                                    if (!is_null($state)) {
+                                        $component->state((float)$state);
+                                    }
+                                }),
+
+                            TextInput::make('sub_total')
+                                ->label('Sub Total')
+                                ->prefix('Rp')
+                                ->disabled()
+                                ->dehydrated(true)
+                                ->live()
+                                ->formatStateUsing(function ($state) {
+                                    return !is_null($state) ? number_format((float)$state, 2, '.', ',') : null;
+                                })
+                                ->afterStateHydrated(function ($component, $state) {
+                                    if (!is_null($state)) {
+                                        $component->state((float)$state);
+                                    }
+                                }),
+
+                            Select::make('status')
+                                ->label('Status')
+                                ->default('Pending')
+                                ->options([
+                                    'Pending' => 'Pending',
+                                    'Confirmed' => 'Confirmed',
+                                    'Canceled' => 'Canceled'
+                                ])
+                                ->dehydrated(true),
+                        ])
+
+                ]),
             ]);
     }
 

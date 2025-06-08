@@ -115,7 +115,7 @@ class TempatResource extends Resource
                                 ->placeholder('Masukkan deskripsi...')
                                 ->columnSpanFull(),
                             Select::make('kategori_sewa')
-                                ->label('Kategori')
+                                ->label('Kategori Sewa')
                                 ->options([
                                     'per jam' => 'per jam',
                                     'per hari' => 'per hari',

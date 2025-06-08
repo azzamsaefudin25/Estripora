@@ -9,8 +9,10 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
@@ -27,11 +29,11 @@ class LokasiResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Lokasi'; 
+        return 'Lokasi';
     }
     public static function getPluralLabel(): string
     {
-        return 'Lokasi'; 
+        return 'Lokasi';
     }
     public static function getModelLabel(): string
     {
@@ -70,30 +72,36 @@ class LokasiResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('id_tempat')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->disabled(fn(string $operation): bool => $operation === 'edit')
-                    ->relationship('tempat', 'nama'),
-                TextInput::make('nama_lokasi')
-                    ->label('Nama Lokasi')
-                    ->required()
-                    ->rules([
-                        function (callable $get) {
-                            return Rule::unique('lokasi', 'nama_lokasi')
-                                ->where('id_tempat', $get('id_tempat'))
-                                ->ignore($get('id_lokasi'), 'id_lokasi');
-                        },
-                    ])
-                    ->validationMessages([
-                        'unique' => 'Lokasi yang sama sudah dibuat untuk tempat ini.',
-                    ]),
-                TextInput::make('tarif')
-                    ->label('Tarif')
-                    ->numeric()
-                    ->prefix('Rp')
-                    ->required(),
+                Section::make([
+                    Grid::make()
+                        ->schema([
+                            Select::make('id_tempat')
+                                ->label('Pilih Tempat')
+                                ->required()
+                                ->searchable()
+                                ->preload()
+                                ->disabled(fn(string $operation): bool => $operation === 'edit')
+                                ->relationship('tempat', 'nama'),
+                            TextInput::make('nama_lokasi')
+                                ->label('Nama Lokasi')
+                                ->required()
+                                ->rules([
+                                    function (callable $get) {
+                                        return Rule::unique('lokasi', 'nama_lokasi')
+                                            ->where('id_tempat', $get('id_tempat'))
+                                            ->ignore($get('id_lokasi'), 'id_lokasi');
+                                    },
+                                ])
+                                ->validationMessages([
+                                    'unique' => 'Lokasi yang sama sudah dibuat untuk tempat ini.',
+                                ]),
+                            TextInput::make('tarif')
+                                ->label('Tarif')
+                                ->numeric()
+                                ->prefix('Rp')
+                                ->required(),
+                        ])
+                ]),
             ]);
     }
 

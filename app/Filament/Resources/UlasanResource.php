@@ -13,9 +13,11 @@ use App\Models\Penyewaan;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Rating;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -78,85 +80,90 @@ class UlasanResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('nik')
-                    ->label('Identitas')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->options(function () {
-                        return User::whereHas('penyewaan', function ($query) {
-                            $query->where('status', 'confirmed');
-                        })
-                            ->pluck('name', 'nik')
-                            ->mapWithKeys(function ($name, $nik) {
-                                return [$nik => "{$nik} - {$name}"];
-                            })
-                            ->toArray();
-                    })
-                    ->live()
-                    ->afterStateUpdated(function ($set, $state) {
-                        if (!$state) {
-                            $set('id_penyewaan', null);
-                            $set('ulasan', null);
-                            $set('rating', null);
-                            return;
-                        }
+                Section::make([
+                    Grid::make()
+                        ->schema([
+                            Select::make('nik')
+                                ->label('Identitas')
+                                ->required()
+                                ->searchable()
+                                ->preload()
+                                ->options(function () {
+                                    return User::whereHas('penyewaan', function ($query) {
+                                        $query->where('status', 'confirmed');
+                                    })
+                                        ->pluck('name', 'nik')
+                                        ->mapWithKeys(function ($name, $nik) {
+                                            return [$nik => "{$nik} - {$name}"];
+                                        })
+                                        ->toArray();
+                                })
+                                ->live()
+                                ->afterStateUpdated(function ($set, $state) {
+                                    if (!$state) {
+                                        $set('id_penyewaan', null);
+                                        $set('ulasan', null);
+                                        $set('rating', null);
+                                        return;
+                                    }
 
-                        // Get penyewaan that are confirmed but don't have reviews yet
-                        $penyewaanList = Penyewaan::with(['lokasi.tempat'])
-                            ->where('nik', $state)
-                            ->where('status', 'confirmed')
-                            ->whereDoesntHave('ulasan') // This ensures no review exists yet
-                            ->get()
-                            ->mapWithKeys(function ($penyewaan) {
-                                $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
-                                    ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
-                                    : "Penyewaan #{$penyewaan->id_penyewaan}";
-                                return [$penyewaan->id_penyewaan => $label];
-                            })
-                            ->toArray();
-                        $set('penyewaan_options', $penyewaanList);
-                    }),
+                                    // Get penyewaan that are confirmed but don't have reviews yet
+                                    $penyewaanList = Penyewaan::with(['lokasi.tempat'])
+                                        ->where('nik', $state)
+                                        ->where('status', 'confirmed')
+                                        ->whereDoesntHave('ulasan') // This ensures no review exists yet
+                                        ->get()
+                                        ->mapWithKeys(function ($penyewaan) {
+                                            $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
+                                                ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
+                                                : "Penyewaan #{$penyewaan->id_penyewaan}";
+                                            return [$penyewaan->id_penyewaan => $label];
+                                        })
+                                        ->toArray();
+                                    $set('penyewaan_options', $penyewaanList);
+                                }),
 
-                Select::make('id_penyewaan')
-                    ->label('Penyewaan')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->options(fn(Get $get): array => $get('penyewaan_options') ?? [])
-                    ->live()
-                    ->afterStateUpdated(function ($set, $get, $state) {
-                        if (!$state) {
-                            $set('ulasan', null);
-                            $set('rating', null);
-                            return;
-                        }
-                    })
-                    ->rules([
-                        function (callable $get) {
-                            return Rule::unique('ulasan', 'id_penyewaan')
-                                ->ignore($get('id_ulasan'), 'id_ulasan');
-                        },
-                    ])
-                    ->validationMessages([
-                        'unique' => 'Ulasan yang sama sudah dibuat.',
-                    ]),
+                            Select::make('id_penyewaan')
+                                ->label('Penyewaan')
+                                ->required()
+                                ->searchable()
+                                ->preload()
+                                ->options(fn(Get $get): array => $get('penyewaan_options') ?? [])
+                                ->live()
+                                ->afterStateUpdated(function ($set, $get, $state) {
+                                    if (!$state) {
+                                        $set('ulasan', null);
+                                        $set('rating', null);
+                                        return;
+                                    }
+                                })
+                                ->rules([
+                                    function (callable $get) {
+                                        return Rule::unique('ulasan', 'id_penyewaan')
+                                            ->ignore($get('id_ulasan'), 'id_ulasan');
+                                    },
+                                ])
+                                ->validationMessages([
+                                    'unique' => 'Ulasan yang sama sudah dibuat.',
+                                ]),
 
-                Select::make('rating')
-                    ->label('Rating')
-                    ->required()
-                    ->options([
-                        1 => '⭐ (1)',
-                        2 => '⭐⭐ (2)',
-                        3 => '⭐⭐⭐ (3)',
-                        4 => '⭐⭐⭐⭐ (4)',
-                        5 => '⭐⭐⭐⭐⭐ (5)',
-                    ]),
+                            Select::make('rating')
+                                ->label('Rating')
+                                ->required()
+                                ->options([
+                                    1 => '⭐ (1)',
+                                    2 => '⭐⭐ (2)',
+                                    3 => '⭐⭐⭐ (3)',
+                                    4 => '⭐⭐⭐⭐ (4)',
+                                    5 => '⭐⭐⭐⭐⭐ (5)',
+                                ]),
 
-                Textarea::make('ulasan')
-                    ->label('Ulasan')
-                    ->rows(3)
-                    ->maxLength(255),
+                            Textarea::make('ulasan')
+                                ->label('Komentar')
+                                ->rows(3)
+                                ->maxLength(255),
+                        ])
+                ]),
             ]);
     }
 
