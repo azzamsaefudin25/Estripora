@@ -124,7 +124,7 @@ class UlasanResource extends Resource
                                 }),
 
                             Select::make('id_penyewaan')
-                                ->label('Penyewaan')
+                                ->label('Pilih Penyewaan')
                                 ->required()
                                 ->searchable()
                                 ->preload()
@@ -148,7 +148,7 @@ class UlasanResource extends Resource
                                 ]),
 
                             Select::make('rating')
-                                ->label('Rating')
+                                ->label('Pilih Rating')
                                 ->required()
                                 ->options([
                                     1 => '⭐ (1)',
