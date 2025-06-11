@@ -14,11 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::create('lapor', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_lapor');
             $table->string('email');
             $table->unsignedBigInteger('id_penyewaan'); // Relasi dengan tabel Penyewaan
             $table->text('keluhan'); // Keluhan pengguna
             $table->string('foto')->nullable(); // Untuk menyimpan path foto
+            $table->string('foto2')->nullable();
+            $table->string('foto3')->nullable();
             $table->timestamps();
         });
     }
