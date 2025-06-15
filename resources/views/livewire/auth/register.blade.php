@@ -109,7 +109,7 @@
                             <!-- Submit Button -->
                             <div class="mt-4 col-span-2">
                                 <button type="submit"
-                                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors duration-200">
+                                    class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition-colors duration-200">
                                     Daftar
                                 </button>
                             </div>

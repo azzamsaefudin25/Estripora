@@ -53,19 +53,19 @@ class Lapor extends Component
         $foto3Path = $this->foto3 ? $this->foto3->store('lapor_foto', 'public') : null;
 
         Lapors::create([
-                'email' => $this->email,
-                'id_penyewaan' => $this->id_penyewaan,
-                'keluhan' => $this->keluhan,
-                'foto' => $foto1Path,
-                'foto2' => $foto2Path,
-                'foto3' => $foto3Path,
-            ]);
+            'email' => $this->email,
+            'id_penyewaan' => $this->id_penyewaan,
+            'keluhan' => $this->keluhan,
+            'foto' => $foto1Path,
+            'foto2' => $foto2Path,
+            'foto3' => $foto3Path,
+        ]);
         session()->flash('message', 'Laporan berhasil dikirim.');
 
         $this->resetForm();
     }
 
-   
+
     public function removeFotoLama($slot)
     {
         if ($slot === 1) $this->fotoLama1 = null;
@@ -117,11 +117,15 @@ class Lapor extends Component
     private function resetForm()
     {
         $this->reset([
-            'id_penyewaan', 'keluhan',
-            'foto', 'foto2', 'foto3',
-            'fotoLama1', 'fotoLama2', 'fotoLama3', 'isEditing'
+            'id_penyewaan',
+            'keluhan',
+            'foto',
+            'foto2',
+            'foto3',
+            'fotoLama1',
+            'fotoLama2',
+            'fotoLama3',
+            'isEditing'
         ]);
     }
-
-
 }
