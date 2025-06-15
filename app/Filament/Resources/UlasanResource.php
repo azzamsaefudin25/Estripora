@@ -111,7 +111,7 @@ class UlasanResource extends Resource
                                     $penyewaanList = Penyewaan::with(['lokasi.tempat'])
                                         ->where('nik', $state)
                                         ->where('status', 'confirmed')
-                                        ->whereDoesntHave('ulasan') // This ensures no review exists yet
+                                        ->whereDoesntHave('ulasan')
                                         ->get()
                                         ->mapWithKeys(function ($penyewaan) {
                                             $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
@@ -128,7 +128,44 @@ class UlasanResource extends Resource
                                 ->required()
                                 ->searchable()
                                 ->preload()
-                                ->options(fn(Get $get): array => $get('penyewaan_options') ?? [])
+                                ->options(function (Get $get, $record = null): array {
+                                    // Jika ada record (edit mode), load options berdasarkan NIK dari record
+                                    if ($record && $record->nik) {
+                                        $nik = $record->nik;
+                                    } else {
+                                        // Jika create mode, ambil dari state
+                                        $nik = $get('nik');
+                                    }
+
+                                    if (!$nik) {
+                                        return $get('penyewaan_options') ?? [];
+                                    }
+
+                                    // Load penyewaan untuk NIK yang dipilih
+                                    $penyewaanList = Penyewaan::with(['lokasi.tempat'])
+                                        ->where('nik', $nik)
+                                        ->where('status', 'confirmed')
+                                        ->when($record, function ($query) use ($record) {
+                                            // Jika edit mode, termasuk penyewaan yang sudah direview (current record)
+                                            $query->where(function ($q) use ($record) {
+                                                $q->whereDoesntHave('ulasan')
+                                                    ->orWhere('id_penyewaan', $record->id_penyewaan);
+                                            });
+                                        }, function ($query) {
+                                            // Jika create mode, hanya yang belum direview
+                                            $query->whereDoesntHave('ulasan');
+                                        })
+                                        ->get()
+                                        ->mapWithKeys(function ($penyewaan) {
+                                            $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
+                                                ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
+                                                : "Penyewaan #{$penyewaan->id_penyewaan}";
+                                            return [$penyewaan->id_penyewaan => $label];
+                                        })
+                                        ->toArray();
+
+                                    return $penyewaanList;
+                                })
                                 ->live()
                                 ->afterStateUpdated(function ($set, $get, $state) {
                                     if (!$state) {
