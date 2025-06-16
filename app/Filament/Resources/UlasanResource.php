@@ -55,16 +55,24 @@ class UlasanResource extends Resource
         return Auth::check() && Auth::user()->role === 'admin';
     }
 
+    // public static function canCreate(): bool
+    // {
+    //     return Auth::check() && Auth::user()->role === 'admin';
+    // }
+
+    // public static function canEdit(Model $record): bool
+    // {
+    //     return Auth::check() && Auth::user()->role === 'admin';
+    // }
     public static function canCreate(): bool
     {
-        return Auth::check() && Auth::user()->role === 'admin';
+        return false;
     }
 
     public static function canEdit(Model $record): bool
     {
-        return Auth::check() && Auth::user()->role === 'admin';
+        return false;
     }
-
     public static function canDelete(Model $record): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -80,127 +88,7 @@ class UlasanResource extends Resource
     {
         return $form
             ->schema([
-                Section::make([
-                    Grid::make()
-                        ->schema([
-                            Select::make('nik')
-                                ->label('Identitas')
-                                ->required()
-                                ->searchable()
-                                ->preload()
-                                ->options(function () {
-                                    return User::whereHas('penyewaan', function ($query) {
-                                        $query->where('status', 'confirmed');
-                                    })
-                                        ->pluck('name', 'nik')
-                                        ->mapWithKeys(function ($name, $nik) {
-                                            return [$nik => "{$nik} - {$name}"];
-                                        })
-                                        ->toArray();
-                                })
-                                ->live()
-                                ->afterStateUpdated(function ($set, $state) {
-                                    if (!$state) {
-                                        $set('id_penyewaan', null);
-                                        $set('ulasan', null);
-                                        $set('rating', null);
-                                        return;
-                                    }
 
-                                    // Get penyewaan that are confirmed but don't have reviews yet
-                                    $penyewaanList = Penyewaan::with(['lokasi.tempat'])
-                                        ->where('nik', $state)
-                                        ->where('status', 'confirmed')
-                                        ->whereDoesntHave('ulasan')
-                                        ->get()
-                                        ->mapWithKeys(function ($penyewaan) {
-                                            $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
-                                                ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
-                                                : "Penyewaan #{$penyewaan->id_penyewaan}";
-                                            return [$penyewaan->id_penyewaan => $label];
-                                        })
-                                        ->toArray();
-                                    $set('penyewaan_options', $penyewaanList);
-                                }),
-
-                            Select::make('id_penyewaan')
-                                ->label('Pilih Penyewaan')
-                                ->required()
-                                ->searchable()
-                                ->preload()
-                                ->options(function (Get $get, $record = null): array {
-                                    // Jika ada record (edit mode), load options berdasarkan NIK dari record
-                                    if ($record && $record->nik) {
-                                        $nik = $record->nik;
-                                    } else {
-                                        // Jika create mode, ambil dari state
-                                        $nik = $get('nik');
-                                    }
-
-                                    if (!$nik) {
-                                        return $get('penyewaan_options') ?? [];
-                                    }
-
-                                    // Load penyewaan untuk NIK yang dipilih
-                                    $penyewaanList = Penyewaan::with(['lokasi.tempat'])
-                                        ->where('nik', $nik)
-                                        ->where('status', 'confirmed')
-                                        ->when($record, function ($query) use ($record) {
-                                            // Jika edit mode, termasuk penyewaan yang sudah direview (current record)
-                                            $query->where(function ($q) use ($record) {
-                                                $q->whereDoesntHave('ulasan')
-                                                    ->orWhere('id_penyewaan', $record->id_penyewaan);
-                                            });
-                                        }, function ($query) {
-                                            // Jika create mode, hanya yang belum direview
-                                            $query->whereDoesntHave('ulasan');
-                                        })
-                                        ->get()
-                                        ->mapWithKeys(function ($penyewaan) {
-                                            $label = $penyewaan->lokasi && $penyewaan->lokasi->tempat
-                                                ? "{$penyewaan->id_penyewaan} - {$penyewaan->lokasi->tempat->nama} - {$penyewaan->lokasi->nama_lokasi}"
-                                                : "Penyewaan #{$penyewaan->id_penyewaan}";
-                                            return [$penyewaan->id_penyewaan => $label];
-                                        })
-                                        ->toArray();
-
-                                    return $penyewaanList;
-                                })
-                                ->live()
-                                ->afterStateUpdated(function ($set, $get, $state) {
-                                    if (!$state) {
-                                        $set('ulasan', null);
-                                        $set('rating', null);
-                                        return;
-                                    }
-                                })
-                                ->rules([
-                                    function (callable $get) {
-                                        return Rule::unique('ulasan', 'id_penyewaan')
-                                            ->ignore($get('id_ulasan'), 'id_ulasan');
-                                    },
-                                ])
-                                ->validationMessages([
-                                    'unique' => 'Ulasan yang sama sudah dibuat.',
-                                ]),
-
-                            Select::make('rating')
-                                ->label('Pilih Rating')
-                                ->required()
-                                ->options([
-                                    1 => '⭐ (1)',
-                                    2 => '⭐⭐ (2)',
-                                    3 => '⭐⭐⭐ (3)',
-                                    4 => '⭐⭐⭐⭐ (4)',
-                                    5 => '⭐⭐⭐⭐⭐ (5)',
-                                ]),
-
-                            Textarea::make('ulasan')
-                                ->label('Komentar')
-                                ->rows(3)
-                                ->maxLength(255),
-                        ])
-                ]),
             ]);
     }
 
@@ -250,7 +138,7 @@ class UlasanResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
+                    // Tables\Actions\EditAction::make(),
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])
@@ -273,8 +161,8 @@ class UlasanResource extends Resource
     {
         return [
             'index' => Pages\ListUlasans::route('/'),
-            'create' => Pages\CreateUlasan::route('/create'),
-            'edit' => Pages\EditUlasan::route('/{record}/edit'),
+            // 'create' => Pages\CreateUlasan::route('/create'),
+            // 'edit' => Pages\EditUlasan::route('/{record}/edit'),
         ];
     }
 }
