@@ -21,7 +21,7 @@ class Kalenderperhari extends Component
 
         // Filter penyewaan hanya untuk lokasi yang dipilih dan dengan status Pending atau Confirmed
         $query = Penyewaan::with(['user', 'lokasi'])
-            ->whereIn('status', ['Pending', 'Confirmed']);
+            ->whereIn('status', ['Confirmed']);
 
         if ($this->locationId) {
             $query->where('id_lokasi', $this->locationId);

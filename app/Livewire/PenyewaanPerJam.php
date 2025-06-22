@@ -100,6 +100,7 @@ class PenyewaanPerJam extends Component
         // Ambil semua jam yang sudah dipesan (per jam)
         $penyewaan = Penyewaan::where('id_lokasi', $this->id_lokasi)
             ->where('kategori_sewa', 'per jam')
+            ->where('status', 'Confirmed')
             ->get();
 
         $this->jam_dipesan = [];
@@ -165,15 +166,15 @@ class PenyewaanPerJam extends Component
         // Initialize available hours (0-23)
         $hours = range(0, 23);
 
-        // Remove booked hours for the selected date
-        foreach ($this->jam_dipesan as $bookedTime) {
-            if ($bookedTime['date'] == $date) {
-                $key = array_search($bookedTime['hour'], $hours);
-                if ($key !== false) {
-                    unset($hours[$key]);
-                }
-            }
-        }
+        // // Remove booked hours for the selected date
+        // foreach ($this->jam_dipesan as $bookedTime) {
+        //     if ($bookedTime['date'] == $date) {
+        //         $key = array_search($bookedTime['hour'], $hours);
+        //         if ($key !== false) {
+        //             unset($hours[$key]);
+        //         }
+        //     }
+        // }
 
         $this->availableHours[$index] = array_values($hours);
 
@@ -269,7 +270,7 @@ class PenyewaanPerJam extends Component
             for ($hour = $startHour; $hour < $endHour; $hour++) {
                 foreach ($this->jam_dipesan as $bookedTime) {
                     if ($bookedTime['date'] == $date && $bookedTime['hour'] == $hour) {
-                        session()->flash('error', "Jam " . sprintf('%02d:00', $hour) . " pada tanggal " . Carbon::parse($date)->format('d M Y') . " sudah dipesan. Silakan pilih jam lain.");
+                       $this->addError('hourRanges', "Jam " . sprintf('%02d:00', $hour) . " pada tanggal " . Carbon::parse($date)->format('d M Y') . " sudah dipesan. Silakan pilih jam lain.");
                         return false;
                     }
                 }
