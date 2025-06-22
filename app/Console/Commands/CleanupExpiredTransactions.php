@@ -15,13 +15,20 @@ class CleanupExpiredTransactions extends Command
 
     public function handle()
     {
-        $expiredTransaksis = Transaksi::where('status', 'Pending')
+        $expiredTransaksis = Transaksi::whereIn('status', ['Pending','Failed'])
             ->where('expired_at', '<', Carbon::now())
             ->get();
+            
+    if ($expiredTransaksis->isEmpty()) {
+        $this->info("Tidak ada transaksi yang expired.");
+        return 0;
+    }
 
         $count = 0;
         foreach ($expiredTransaksis as $transaksi) {
             // Hapus file bukti bayar jika ada
+            $this->info("Cek: akan hapus transaksi ID {$transaksi->id} status {$transaksi->status}, expired_at: {$transaksi->expired_at}");
+
             if ($transaksi->bukti_bayar && Storage::disk('public')->exists($transaksi->bukti_bayar)) {
                 Storage::disk('public')->delete($transaksi->bukti_bayar);
             }

@@ -215,7 +215,7 @@ class Cetak extends Component
         $userId = Auth::id();
         
         $expiredTransaksis = Transaksi::whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
-            ->where('status', 'Pending')
+            ->whereIn('status', ['Pending', 'Failed'])
             ->where('expired_at', '<', Carbon::now())
             ->get();
 
