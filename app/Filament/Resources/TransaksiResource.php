@@ -302,7 +302,9 @@ class TransaksiResource extends Resource
                     ->label('Durasi')
                     ->sortable()
                     ->formatStateUsing(function ($record) {
-                        $detail = json_decode($record->detail_penyewaan, true);
+                        $detail = is_array($record->detail_penyewaan)
+                            ? $record->detail_penyewaan
+                            : json_decode($record->detail_penyewaan, true);
                         $suffix = isset($detail['tipe']) && $detail['tipe'] === 'per jam' ? ' Jam' : ' Hari';
                         return $record->total_durasi . $suffix;
                     }),
@@ -411,7 +413,54 @@ class TransaksiResource extends Resource
                                 }
                             }
                         }),
+                    Tables\Actions\Action::make('setPaid')
+                        ->label('Set Paid')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->visible(fn($record) => $record->status === 'Pending')
+                        ->requiresConfirmation()
+                        ->modalHeading('Konfirmasi Set Paid')
+                        ->modalDescription('Apakah Anda yakin ingin mengubah status transaksi ini menjadi Paid?')
+                        ->modalSubmitActionLabel('Ya, Set Paid')
+                        ->action(function ($record, $livewire) {
+                            $record->update([
+                                'status' => 'Paid',
+                                'reviewed_at' => now()
+                            ]);
 
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body("Transaksi {$record->id_billing} berhasil diubah menjadi Paid.")
+                                ->success()
+                                ->send();
+
+                            $livewire->resetTable();
+                        }),
+
+                    // Action untuk Set Failed
+                    Tables\Actions\Action::make('setFailed')
+                        ->label('Set Failed')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->visible(fn($record) => $record->status === 'Pending')
+                        ->requiresConfirmation()
+                        ->modalHeading('Konfirmasi Set Failed')
+                        ->modalDescription('Apakah Anda yakin ingin mengubah status transaksi ini menjadi Failed?')
+                        ->modalSubmitActionLabel('Ya, Set Failed')
+                        ->action(function ($record, $livewire) {
+                            $record->update([
+                                'status' => 'Failed',
+                                'reviewed_at' => now()
+                            ]);
+
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body("Transaksi {$record->id_billing} berhasil diubah menjadi Failed.")
+                                ->success()
+                                ->send();
+
+                            $livewire->resetTable();
+                        }),
                     // Action untuk mark as reviewed
                     Tables\Actions\Action::make('markReviewed')
                         ->label('Tandai Sudah Dilihat')
