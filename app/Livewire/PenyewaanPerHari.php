@@ -13,6 +13,7 @@ class PenyewaanPerHari extends Component
 {
     public $id_lokasi;
     public $tanggal_dipesan = [];
+    public $tanggal_keranjang = [];
     public $deskripsi;
     public $lokasi;
     public $tarif;
@@ -20,6 +21,9 @@ class PenyewaanPerHari extends Component
 
     // Array of date ranges
     public $dateRanges = [];
+
+    // Tambahkan key untuk mempertahankan komponen kalender
+    public $kalenderKey;
 
     protected $rules = [
         'dateRanges.*.startDate' => 'required|date|after_or_equal:today',
@@ -34,12 +38,12 @@ class PenyewaanPerHari extends Component
         'dateRanges.*.endDate.after_or_equal' => 'Tanggal selesai tidak boleh kurang dari tanggal mulai',
     ];
 
-
     protected $listeners = ['refreshCalendar' => 'loadTanggalDipesan'];
 
     public function mount($id_lokasi)
     {
         $this->id_lokasi = $id_lokasi;
+        $this->kalenderKey = 'kalender-' . $id_lokasi . '-' . time(); // Unique key
         $this->loadTanggalDipesan();
 
         // Add initial date range
@@ -73,9 +77,10 @@ class PenyewaanPerHari extends Component
 
     public function loadTanggalDipesan()
     {
-        // Ambil semua tanggal yang sudah dipesan (per hari)
+        // Ambil semua tanggal yang sudah dipesan dengan status confirmed
         $penyewaan = Penyewaan::where('id_lokasi', $this->id_lokasi)
             ->where('kategori_sewa', 'per hari')
+            ->where('status', 'Confirmed') // Hanya yang sudah confirmed
             ->get();
 
         $this->tanggal_dipesan = [];
@@ -94,7 +99,21 @@ class PenyewaanPerHari extends Component
             }
         }
 
-        // Tambahkan pengecekan tanggal dari keranjang juga
+        // Load tanggal yang ada di keranjang secara terpisah
+        $this->loadTanggalKeranjang();
+
+        // Gabungkan semua tanggal yang tidak tersedia (confirmed + keranjang)
+        $allBookedDates = array_unique(array_merge($this->tanggal_dipesan, $this->tanggal_keranjang));
+
+        // Use dispatch instead of dispatchBrowserEvent for Livewire 3
+        $this->dispatch('datesUpdated', bookedDates: $allBookedDates);
+    }
+
+    public function loadTanggalKeranjang()
+    {
+        $this->tanggal_keranjang = [];
+
+        // Ambil tanggal dari keranjang session
         if (Session::has('keranjang')) {
             $keranjang = Session::get('keranjang');
             foreach ($keranjang as $item) {
@@ -105,15 +124,12 @@ class PenyewaanPerHari extends Component
 
                         // Generate all dates in the range
                         for ($date = clone $start; $date->lte($end); $date->addDay()) {
-                            $this->tanggal_dipesan[] = $date->format('Y-m-d');
+                            $this->tanggal_keranjang[] = $date->format('Y-m-d');
                         }
                     }
                 }
             }
         }
-
-        // Use dispatch instead of dispatchBrowserEvent for Livewire 3
-        $this->dispatch('datesUpdated', bookedDates: $this->tanggal_dipesan);
     }
 
     public function updateDateRange()
@@ -159,7 +175,8 @@ class PenyewaanPerHari extends Component
 
         foreach ($this->dateRanges as $range) {
             if (empty($range['startDate']) || empty($range['endDate'])) {
-                session()->flash('error', "Silakan pilih semua rentang tanggal terlebih dahulu.");
+                // Gunakan addError untuk error yang tidak akan menyebabkan redirect
+                $this->addError('dateRanges', "Silakan pilih semua rentang tanggal terlebih dahulu.");
                 return false;
             }
 
@@ -167,15 +184,23 @@ class PenyewaanPerHari extends Component
             $end = Carbon::parse($range['endDate']);
 
             if ($start->gt($end)) {
-                session()->flash('error', "Tanggal mulai tidak boleh lebih besar dari tanggal selesai.");
+                $this->addError('dateRanges', "Tanggal mulai tidak boleh lebih besar dari tanggal selesai.");
                 return false;
             }
 
-            // Check if any selected date is already booked
+            // Check if any selected date is already booked (confirmed bookings)
             for ($date = clone $start; $date->lte($end); $date->addDay()) {
                 $currentDate = $date->format('Y-m-d');
+
+                // Validasi 1: Cek tanggal yang sudah confirmed
                 if (in_array($currentDate, $this->tanggal_dipesan)) {
-                    session()->flash('error', "Tanggal {$currentDate} sudah dipesan. Silakan pilih tanggal lain.");
+                    $this->addError('dateRanges', "Tanggal {$currentDate} sudah dipesan. Silakan pilih tanggal lain.");
+                    return false;
+                }
+
+                // Validasi 2: Cek tanggal yang sudah ada di keranjang
+                if (in_array($currentDate, $this->tanggal_keranjang)) {
+                    $this->addError('dateRanges', "Tanggal {$currentDate} sudah ada di keranjang. Silakan pilih tanggal lain atau hapus item keranjang terlebih dahulu.");
                     return false;
                 }
             }
@@ -198,7 +223,7 @@ class PenyewaanPerHari extends Component
                 if (($start->between($compareStart, $compareEnd) ||
                     $end->between($compareStart, $compareEnd) ||
                     ($start->lte($compareStart) && $end->gte($compareEnd)))) {
-                    session()->flash('error', "Rentang tanggal tidak boleh tumpang tindih.");
+                    $this->addError('dateRanges', "Rentang tanggal tidak boleh tumpang tindih.");
                     return false;
                 }
             }
@@ -211,11 +236,14 @@ class PenyewaanPerHari extends Component
     {
         // Check if we have at least one date range
         if (count($this->dateRanges) < 1) {
-            session()->flash('error', 'Silakan pilih setidaknya satu rentang tanggal.');
+            $this->addError('dateRanges', 'Silakan pilih setidaknya satu rentang tanggal.');
             return;
         }
 
         $this->validate();
+
+        // Refresh data keranjang sebelum validasi untuk memastikan data terbaru
+        $this->loadTanggalKeranjang();
 
         if (!$this->checkAvailability()) {
             return;
@@ -273,22 +301,14 @@ class PenyewaanPerHari extends Component
             // Simpan kembali ke session
             Session::put('keranjang', $keranjang);
 
+            // Gunakan session flash success untuk redirect
             session()->flash('success', 'Pemesanan berhasil ditambahkan ke keranjang! Total pemesanan: ' . $totalDays .
                 ' hari dengan biaya Rp ' . number_format($subTotal, 0, ',', '.') . ', Silakan melakukan checkout!');
 
+            // Redirect ke keranjang
             return redirect()->route('keranjang');
-            // Reset form
-            $this->deskripsi = '';
-            // Reset to a single empty date range
-            $this->dateRanges = [];
-            $this->addDateRange();
-
-            $this->loadTanggalDipesan();
-
-            // Perbarui jumlah item di keranjang (bisa digunakan untuk badge notifikasi)
-            $this->dispatch('keranjangUpdated', count: count($keranjang));
         } catch (\Exception $e) {
-            session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            $this->addError('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 

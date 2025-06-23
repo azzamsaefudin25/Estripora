@@ -62,6 +62,26 @@
                 </div>
             </div>
         @endif
+
+        <!-- Tampilkan error Livewire jika ada -->
+        @error('dateRanges')
+            <div x-data="{ show: true }" x-show="show"
+                class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r shadow-md relative mb-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-red-800 text-sm font-medium">
+                        {{ $message }}
+                    </p>
+                    <button @click="show = false" class="text-red-400 hover:opacity-75 transition-opacity duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @enderror
+
         @if ($lokasi)
             <div class="mb-6 bg-white p-4 rounded-lg shadow-md w-full max-w-2xl">
                 <h2 class="text-xl font-semibold mb-2">{{ $lokasi->tempat->nama }} - {{ $lokasi->nama_lokasi }}</h2>
@@ -71,22 +91,29 @@
 
         <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
 
-            <!-- Bagian yang dimodifikasi untuk integrasi kalender -->
+            <!-- Kalender dengan key yang konsisten -->
             <div class="mt-6">
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
                     <h3 class="text-lg font-semibold mb-2">Tanggal Yang Sudah Di-booking</h3>
-                    <p class="text-sm text-gray-600 mb-3">Berikut adalah tanggal-tanggal yang sudah dipesan untuk lokasi
+                    <p class="text-sm text-gray-600 mb-3">Berikut adalah tanggal-tanggal yang sudah dipesan untuk
+                        lokasi
                         ini:</p>
-                    @livewire('kalenderperhari', ['locationId' => $lokasi->id_lokasi])
+
+                    <!-- Gunakan wire:key untuk mempertahankan komponen kalender -->
+                    <div wire:key="kalender-{{ $lokasi->id_lokasi }}">
+                        @livewire('kalenderperhari', ['locationId' => $lokasi->id_lokasi], key('kalender-' . $lokasi->id_lokasi))
+                    </div>
                 </div>
             </div>
+
             <form wire:submit.prevent="simpanKeKeranjang">
                 <!-- Date Range Repeater -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold mb-4">Pilih Rentang Tanggal</h3>
 
                     @foreach ($dateRanges as $index => $range)
-                        <div class="bg-gray-50 p-4 rounded-md mb-4 border border-gray-200">
+                        <div class="bg-gray-50 p-4 rounded-md mb-4 border border-gray-200"
+                            wire:key="range-{{ $index }}">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-medium">Rentang Tanggal {{ $index + 1 }}</h4>
                                 @if (count($dateRanges) > 1)

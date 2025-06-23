@@ -11,6 +11,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "filament/filament": "3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
+        "laravel/breeze": "^2.3",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
@@ -18,6 +19,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.14",
+        "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
         "laravel/pint": "^1.13",

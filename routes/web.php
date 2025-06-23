@@ -24,6 +24,7 @@ use App\Livewire\Auth\UbahPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TransaksiPdfController;
+use App\Livewire\Auth\LupaPassword;
 
 Route::get('/', function () {
     return redirect('dashboard');
@@ -61,6 +62,7 @@ Route::get('/riwayat', RiwayatPesanan::class)->name('riwayat');
 Route::get('/indexprofile', Index::class)->name('indexProfile');
 Route::get('/editprofile', Edit::class)->name('editProfile');
 Route::get('/ubahpassword', UbahPassword::class)->name('ubahpassword');
+Route::get('/lupapassword', LupaPassword::class)->name('lupapassword');
 Route::get('/lapor', Lapor::class)->name('lapor');
 Route::get('/ulasan', Ulasan::class)->name('ulasan');
 Route::get('/kalenderperhari', Kalenderperhari::class)->name('kalenderperhari');

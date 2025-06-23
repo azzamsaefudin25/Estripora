@@ -217,7 +217,27 @@ class TransaksiResource extends Resource
                         'Pending' => 'Pending',
                         'Paid' => 'Paid',
                         'Failed' => 'Failed'
-                    ]),
+                    ])
+                    ->live()
+                    ->afterStateUpdated(function ($state, $record, $get) {
+                        // Update status penyewaan ketika status transaksi diubah jadi 'Paid'
+                        if ($state === 'Paid' && $record && $record->exists) {
+                            $idPenyewaan = $get('id_penyewaan') ?? $record->id_penyewaan;
+
+                            if ($idPenyewaan) {
+                                $penyewaan = Penyewaan::find($idPenyewaan);
+                                if ($penyewaan && $penyewaan->status !== 'Confirmed') {
+                                    $penyewaan->update(['status' => 'Confirmed']);
+
+                                    Notification::make()
+                                        ->title('Status Updated!')
+                                        ->body('Status penyewaan telah diubah menjadi Confirmed.')
+                                        ->success()
+                                        ->send();
+                                }
+                            }
+                        }
+                    }),
 
                 FileUpload::make('bukti_bayar')
                     ->label('Bukti Bayar')
@@ -282,7 +302,9 @@ class TransaksiResource extends Resource
                     ->label('Durasi')
                     ->sortable()
                     ->formatStateUsing(function ($record) {
-                        $detail = json_decode($record->detail_penyewaan, true);
+                        $detail = is_array($record->detail_penyewaan)
+                            ? $record->detail_penyewaan
+                            : json_decode($record->detail_penyewaan, true);
                         $suffix = isset($detail['tipe']) && $detail['tipe'] === 'per jam' ? ' Jam' : ' Hari';
                         return $record->total_durasi . $suffix;
                     }),
@@ -305,7 +327,7 @@ class TransaksiResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Paid' => 'success',
                         'Failed' => 'danger',
@@ -313,20 +335,22 @@ class TransaksiResource extends Resource
                     })
                     ->sortable(),
 
-            TextColumn::make('bukti_bayar')
-                ->label('Bukti Bayar')
-                ->badge()
-                ->color(fn ($record) => 
-                    $record->bukti_bayar && is_null($record->reviewed_at) && $record->status === 'Pending'
-                        ? 'warning' 
-                        : 'gray'
-                )
-                ->formatStateUsing(fn ($record) => 
-                    $record->bukti_bayar 
-                        ? (is_null($record->reviewed_at) && $record->status === 'Pending' ? 'BARU' : 'Ada') 
-                        : 'Belum'
-                )
-                ->sortable(),
+                TextColumn::make('bukti_bayar')
+                    ->label('Bukti Bayar')
+                    ->badge()
+                    ->color(
+                        fn($record) =>
+                        $record->bukti_bayar && is_null($record->reviewed_at) && $record->status === 'Pending'
+                            ? 'warning'
+                            : 'gray'
+                    )
+                    ->formatStateUsing(
+                        fn($record) =>
+                        $record->bukti_bayar
+                            ? (is_null($record->reviewed_at) && $record->status === 'Pending' ? 'BARU' : 'Ada')
+                            : 'Belum'
+                    )
+                    ->sortable(),
 
                 TextColumn::make('reviewed_at')
                     ->label('Direview')
@@ -339,9 +363,10 @@ class TransaksiResource extends Resource
                     ->label('Kadaluarsa')
                     ->dateTime('d M Y H:i')
                     ->sortable()
-                    ->color(fn ($record) => 
-                        $record->expired_at && Carbon::now()->greaterThan($record->expired_at) 
-                            ? 'danger' 
+                    ->color(
+                        fn($record) =>
+                        $record->expired_at && Carbon::now()->greaterThan($record->expired_at)
+                            ? 'danger'
                             : 'gray'
                     )
                     ->toggleable(),
@@ -369,36 +394,99 @@ class TransaksiResource extends Resource
                         'Teller Bank' => 'Teller Bank',
                     ]),
             ])
-->actions([
-            Tables\Actions\ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                
-                // Action untuk mark as reviewed
-                Tables\Actions\Action::make('markReviewed')
-                    ->label('Tandai Sudah Dilihat')
-                    ->icon('heroicon-o-eye')
-                    ->color('success')
-                    ->visible(fn ($record) => 
-                        $record->status === 'Pending' && 
-                        $record->bukti_bayar && 
-                        is_null($record->reviewed_at)
-                    )
-                    ->action(function ($record, $livewire) {
-                        $record->update(['reviewed_at' => now()]);
-                        
-                        Notification::make()
-                            ->title('Berhasil!')
-                            ->body('Transaksi telah ditandai sudah direview.')
-                            ->success()
-                            ->send();
+            ->actions([
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make()
+                        ->after(function ($record, $data) {
+                            // Hook setelah edit record
+                            if (isset($data['status']) && $data['status'] === 'Paid') {
+                                $penyewaan = Penyewaan::find($record->id_penyewaan);
+                                if ($penyewaan && $penyewaan->status !== 'Confirmed') {
+                                    $penyewaan->update(['status' => 'Confirmed']);
 
-                             $livewire->resetTable();
-                    }),
-                    
-                Tables\Actions\DeleteAction::make(),
-            ])
-        ]);
+                                    Notification::make()
+                                        ->title('Status Updated!')
+                                        ->body('Status penyewaan telah diubah menjadi Confirmed.')
+                                        ->success()
+                                        ->send();
+                                }
+                            }
+                        }),
+                    Tables\Actions\Action::make('setPaid')
+                        ->label('Set Paid')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->visible(fn($record) => $record->status === 'Pending')
+                        ->requiresConfirmation()
+                        ->modalHeading('Konfirmasi Set Paid')
+                        ->modalDescription('Apakah Anda yakin ingin mengubah status transaksi ini menjadi Paid?')
+                        ->modalSubmitActionLabel('Ya, Set Paid')
+                        ->action(function ($record, $livewire) {
+                            $record->update([
+                                'status' => 'Paid',
+                                'reviewed_at' => now()
+                            ]);
+
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body("Transaksi {$record->id_billing} berhasil diubah menjadi Paid.")
+                                ->success()
+                                ->send();
+
+                            $livewire->resetTable();
+                        }),
+
+                    // Action untuk Set Failed
+                    Tables\Actions\Action::make('setFailed')
+                        ->label('Set Failed')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->visible(fn($record) => $record->status === 'Pending')
+                        ->requiresConfirmation()
+                        ->modalHeading('Konfirmasi Set Failed')
+                        ->modalDescription('Apakah Anda yakin ingin mengubah status transaksi ini menjadi Failed?')
+                        ->modalSubmitActionLabel('Ya, Set Failed')
+                        ->action(function ($record, $livewire) {
+                            $record->update([
+                                'status' => 'Failed',
+                                'reviewed_at' => now()
+                            ]);
+
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body("Transaksi {$record->id_billing} berhasil diubah menjadi Failed.")
+                                ->success()
+                                ->send();
+
+                            $livewire->resetTable();
+                        }),
+                    // Action untuk mark as reviewed
+                    Tables\Actions\Action::make('markReviewed')
+                        ->label('Tandai Sudah Dilihat')
+                        ->icon('heroicon-o-eye')
+                        ->color('info')
+                        ->visible(
+                            fn($record) =>
+                            $record->status === 'Pending' &&
+                                $record->bukti_bayar &&
+                                is_null($record->reviewed_at)
+                        )
+                        ->action(function ($record, $livewire) {
+                            $record->update(['reviewed_at' => now()]);
+
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->body('Transaksi telah ditandai sudah direview.')
+                                ->success()
+                                ->send();
+
+                            $livewire->resetTable();
+                        }),
+
+                    Tables\Actions\DeleteAction::make(),
+                ])
+            ]);
     }
 
     public static function getRelations(): array
@@ -417,13 +505,13 @@ class TransaksiResource extends Resource
         ];
     }
 
-public static function getNavigationBadge(): ?string
-{
-    $count = \App\Models\Transaksi::where('status', 'Pending')
-        ->whereNotNull('bukti_bayar')
-        ->whereNull('reviewed_at')
-        ->count();
+    public static function getNavigationBadge(): ?string
+    {
+        $count = \App\Models\Transaksi::where('status', 'Pending')
+            ->whereNotNull('bukti_bayar')
+            ->whereNull('reviewed_at')
+            ->count();
 
-    return $count > 0 ? (string)$count : null;
-}
+        return $count > 0 ? (string)$count : null;
+    }
 }

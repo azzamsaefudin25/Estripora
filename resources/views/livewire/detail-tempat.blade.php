@@ -53,7 +53,7 @@
                             @else alert('Silakan pilih lokasi terlebih dahulu!') @endif
                         "
                         href="#"
-                        class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-md">
+                        class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md">
                         Pesan
                     </a>
                 @endif
