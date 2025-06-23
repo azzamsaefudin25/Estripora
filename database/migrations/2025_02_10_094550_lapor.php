@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('foto')->nullable(); // Untuk menyimpan path foto
             $table->string('foto2')->nullable();
             $table->string('foto3')->nullable();
+            $table->text('balasan')->nullable();
             $table->timestamps();
         });
     }
