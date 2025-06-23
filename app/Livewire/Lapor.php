@@ -12,10 +12,9 @@ class Lapor extends Component
     use WithFileUploads;
 
     public $email, $id_penyewaan, $keluhan;
-    public $foto, $foto2, $foto3; // File baru
-    public $fotoLama1, $fotoLama2, $fotoLama3; // Path lama (jika edit)
-    public $isEditing = false;
-    public $showEditModal = false;
+    public $foto, $foto2, $foto3; 
+    public $showBalasanPanel = false;
+    public $currentBalasan;
 
 
 
@@ -28,7 +27,7 @@ class Lapor extends Component
         'foto3' => 'nullable|image|max:2048',
     ];
 
-    public function mount()
+    public function mount($id = null)
     {
         if (!Auth::check()) {
             session()->flash('error', 'Anda harus login terlebih dahulu.');
@@ -36,18 +35,33 @@ class Lapor extends Component
         }
 
         $this->email = auth()->user()->email;
+
     }
 
-    public function removeFoto($field)
-    {
-        if (in_array($field, ['foto', 'foto2', 'foto3'])) {
-            $this->$field = null;
-        }
-    }
+
     public function submit()
     {
         $this->validate();
+        $paths = [];
+        foreach (['foto','foto2','foto3'] as $f) {
+            if ($this->$f) {
+                $paths[$f] = $this->$f->store('lapor_foto','public');
+            }
+        }
+        Lapors::create(array_merge([
+            'email'=>$this->email,
+            'id_penyewaan'=>$this->id_penyewaan,
+            'keluhan'=>$this->keluhan,
+        ], $paths));
 
+<<<<<<< HEAD
+        session()->flash('message','Laporan berhasil dikirim.');
+        $this->reset(['id_penyewaan','keluhan','foto','foto2','foto3']);
+    }
+
+   
+   public function deleteLaporan($id)
+=======
         $foto1Path = $this->foto ? $this->foto->store('lapor_foto', 'public') : null;
         $foto2Path = $this->foto2 ? $this->foto2->store('lapor_foto', 'public') : null;
         $foto3Path = $this->foto3 ? $this->foto3->store('lapor_foto', 'public') : null;
@@ -67,14 +81,30 @@ class Lapor extends Component
 
 
     public function removeFotoLama($slot)
+>>>>>>> 4ea5ba846bcd0e872e98166cc26e391e08c75433
     {
-        if ($slot === 1) $this->fotoLama1 = null;
-        elseif ($slot === 2) $this->fotoLama2 = null;
-        elseif ($slot === 3) $this->fotoLama3 = null;
+        Lapors::findOrFail($id)->delete();
+        session()->flash('message','Laporan berhasil dihapus.');
+    }
+
+    public function viewBalasan($balasan)
+    {
+        $this->currentBalasan = $balasan;
+        $this->showBalasanPanel = true;
+    }
+
+    public function closeBalasan()
+    {
+        $this->showBalasanPanel = false;
     }
 
     public function render()
     {
+<<<<<<< HEAD
+        $riwayat = Lapors::where('email', $this->email)
+            ->orderByDesc('created_at')->get();
+        return view('livewire.lapor', ['laporanSebelumnya' => $riwayat]);
+=======
         $laporanSebelumnya = Lapors::where('email', $this->email)
             ->orderByDesc('created_at')
             ->get();
@@ -127,5 +157,6 @@ class Lapor extends Component
             'fotoLama3',
             'isEditing'
         ]);
+>>>>>>> 4ea5ba846bcd0e872e98166cc26e391e08c75433
     }
 }

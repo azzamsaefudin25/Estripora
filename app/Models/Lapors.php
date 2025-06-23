@@ -15,7 +15,7 @@ class Lapors extends Model
     protected $keyType = 'int';
 
     // Tambahkan 'email' ke dalam fillable
-    protected $fillable = ['email', 'id_penyewaan', 'keluhan', 'foto', 'foto2', 'foto3'];
+    protected $fillable = ['email', 'id_penyewaan', 'keluhan', 'foto', 'foto2', 'foto3', 'balasan'];
 
     public function user()
     {

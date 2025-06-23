@@ -6,7 +6,7 @@ use App\Filament\Resources\LaporResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListLapors extends ListRecords
+class ListLapor extends ListRecords
 {
     protected static string $resource = LaporResource::class;
 
