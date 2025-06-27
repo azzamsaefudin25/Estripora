@@ -87,9 +87,7 @@ class UlasanResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-
-            ]);
+            ->schema([]);
     }
 
     public static function table(Table $table): Table
@@ -133,20 +131,17 @@ class UlasanResource extends Resource
                     ->searchable(),
             ])
             ->defaultPaginationPageOption(5)
-            ->filters([
-                //
-            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters([])
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    // Tables\Actions\EditAction::make(),
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])
+                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\ActionGroup::make([
+                //     // Tables\Actions\EditAction::make(),
+                //     // Tables\Actions\ViewAction::make(),
+                // ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make()
             ]);
     }
 

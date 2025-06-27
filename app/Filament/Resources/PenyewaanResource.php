@@ -528,14 +528,20 @@ class PenyewaanResource extends Resource
             ->defaultPaginationPageOption(5)
             ->filters([
                 SelectFilter::make('kategori_sewa')
-                    ->label('Filter Kategori Sewa')
+                    ->label('Kategori Sewa')
                     ->options([
                         'per jam' => 'Per Jam',
                         'per hari' => 'Per Hari',
                     ]),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'Pending' => 'Pending',
+                        'Confirmed' => 'Confirmed',
+                        'Canceled' => 'Canceled',
+                    ]),
             ])
             ->defaultSort('tgl_booking', 'desc')
-
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
@@ -544,9 +550,8 @@ class PenyewaanResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\BulkActionGroup::make([]),
             ]);
     }
 

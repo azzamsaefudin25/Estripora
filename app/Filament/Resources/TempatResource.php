@@ -19,6 +19,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\TempatResource\Pages;
@@ -33,11 +34,11 @@ class TempatResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Tempat'; 
+        return 'Tempat';
     }
     public static function getPluralLabel(): string
     {
-        return 'Tempat'; 
+        return 'Tempat';
     }
     public static function getModelLabel(): string
     {
@@ -145,8 +146,14 @@ class TempatResource extends Resource
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
             ->defaultPaginationPageOption(5)
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('kategori_sewa')
+                    ->label('Kategori Sewa')
+                    ->options([
+                        'per jam' => 'Per Jam',
+                        'per hari' => 'Per Hari',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -156,9 +163,8 @@ class TempatResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\BulkActionGroup::make([]),
             ]);
     }
 
