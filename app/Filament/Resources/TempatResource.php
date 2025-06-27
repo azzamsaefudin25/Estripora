@@ -49,8 +49,6 @@ class TempatResource extends Resource
         return 'Kelola Tempat & Area';
     }
 
-
-
     public static function canAccess(): bool
     {
         return Auth::check() && Auth::user()->role === 'admin';
@@ -122,14 +120,32 @@ class TempatResource extends Resource
                                     'per hari' => 'per hari',
                                 ]),
                         ]),
-
                     FileUpload::make('image')
                         ->label('Image')
-                        ->image() // Hanya menerima file gambar
-                        ->directory('uploads/tempat') // Menyimpan ke storage
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image2')
+                        ->label('Image 2')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image3')
+                        ->label('Image 3')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image4')
+                        ->label('Image 4')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image5')
+                        ->label('Image 5')
+                        ->image()
+                        ->directory('uploads/tempat')
                         ->nullable(),
                 ])
-
             ]);
     }
 
@@ -139,10 +155,10 @@ class TempatResource extends Resource
             ->columns([
                 TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
                 TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
-                ImageColumn::make('image')->label('Image')->sortable(),
                 TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
                 TextColumn::make('kategori_sewa')->label('Kategori Sewa')->sortable()->searchable(),
                 TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
+                ImageColumn::make('image')->label('Image')->sortable(),
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
             ->defaultPaginationPageOption(5)

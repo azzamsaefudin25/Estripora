@@ -14,7 +14,7 @@ class Tempat extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    protected $fillable = ['nama', 'kategori', 'image', 'deskripsi', 'kategori_sewa', 'rentang_harga'];
+    protected $fillable = ['nama', 'kategori', 'image', 'image2', 'image3', 'image4', 'image5', 'deskripsi', 'kategori_sewa', 'rentang_harga'];
 
     public function lokasi()
     {

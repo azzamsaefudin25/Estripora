@@ -15,10 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('kategori');
-            $table->string('image')->nullable();
             $table->text('deskripsi')->nullable();
             $table->enum('kategori_sewa', ['per jam', 'per hari']);
             $table->string('rentang_harga');
+            $table->string('image')->nullable();
+            $table->string('image2')->nullable();
+            $table->string('image3')->nullable();
+            $table->string('image4')->nullable();
+            $table->string('image5')->nullable();
             $table->timestamps();
         });
     }
