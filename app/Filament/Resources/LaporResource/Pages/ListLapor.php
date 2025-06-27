@@ -37,6 +37,7 @@ class ListLapor extends ListRecords
         ];
     }
 
+    //notifikasi selalu ada jika ada laporan yang belum dibalas
     public function mount(): void
     {
         parent::mount();

@@ -40,7 +40,7 @@ class Lapor extends Component
             // flash error
             session()->flash('error', 'Anda harus login terlebih dahulu untuk mengakses halaman Lapor.');
 
-            // redirect ke dashboard
+            // redirect ke login
             return redirect()->route('login');
         }
 

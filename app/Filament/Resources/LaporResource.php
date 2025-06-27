@@ -131,7 +131,7 @@ class LaporResource extends Resource
                             ->disabled()
                             ->rows(3),
 
-                        // Foto-foto
+                        // Foto-foto 
                         FileUpload::make('foto')
                             ->label('Foto 1')
                             ->disk('public')  
@@ -162,7 +162,7 @@ class LaporResource extends Resource
                             ->previewable(),
                             
 
-                        // Hanya balasan yang bisa diisi/diubah
+                        // Balasan
                         Textarea::make('balasan')
                             ->label('Balasan (admin)')
                             ->rows(4)
@@ -200,6 +200,8 @@ class LaporResource extends Resource
                 TextColumn::make('penyewaan.total_durasi')
                     ->label('Durasi')
                     ->suffix(fn($state, $record) => $record->penyewaan->kategori_sewa === 'per jam' ? ' jam' : ' hari'),
+                
+                //hapus html tag dengan strip_tags
                 TextColumn::make('keluhan')
                     ->label('Keluhan')
                     ->wrap()

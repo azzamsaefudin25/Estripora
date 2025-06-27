@@ -132,6 +132,7 @@
                     <p class="text-sm text-gray-600">Durasi: {{ $lap->penyewaan->total_durasi }} {{ $lap->penyewaan->kategori_sewa == 'per jam' ? 'jam' : 'hari' }}</p>
 
                     {{-- Keluhan --}}
+                    <!--hapus html tag dengan strip_tags-->
                     <p class="text-sm font-semibold text-gray-700 mt-2">
                         Keluhan: {{ strip_tags($lap->keluhan) }}
                     </p>
@@ -171,6 +172,7 @@
     @endif
 
     <!-- Modal Balasan -->
+    <!--hapus html tag dengan strip_tags-->
     @if($showBalasanPanel)
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
@@ -183,14 +185,14 @@
 
 </div>
 
- <!-- script ukuran file foto -->
+ <!-- script tolak ukuran file foto lebih dari 5MB-->
 <script>
     document.querySelectorAll('input[data-validate="image"]').forEach(input => {
         input.addEventListener('change', function() {
         const file = this.files[0];
         if (!file) return;
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-        const maxSize = 5 * 1024 * 1024; // 2MB
+        const maxSize = 5 * 1024 * 1024; // 5MB
 
         if (!allowedTypes.includes(file.type)) {
             alert('Hanya file JPEG, JPG atau PNG yang diizinkan.');
