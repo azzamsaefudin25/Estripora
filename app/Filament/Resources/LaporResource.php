@@ -131,7 +131,7 @@ class LaporResource extends Resource
                             ->disabled()
                             ->rows(3),
 
-                        // Foto-foto — hanya tampilkan
+                        // Foto-foto
                         FileUpload::make('foto')
                             ->label('Foto 1')
                             ->disk('public')  

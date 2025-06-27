@@ -32,7 +32,6 @@ class Lapor extends Component
         'id_penyewaan.required' => 'Anda harus memilih penyewaan.',
         'keluhan.required'      => 'Kolom keluhan tidak boleh kosong.',
         'keluhan.string'        => 'Masukkan teks keluhan yang valid.',
-        
     ];
 
    public function mount()
@@ -45,7 +44,6 @@ class Lapor extends Component
             return redirect()->route('login');
         }
 
-        // user sudah pasti ada
         $this->email = Auth::user()->email;
     }
 
@@ -67,7 +65,7 @@ class Lapor extends Component
 
         // redirect full page dengan flash message
         return redirect()
-            ->route('lapor')   // ganti sesuai nama route Anda
+            ->route('lapor')  
             ->with('message', 'Laporan berhasil dikirim.');
     }
 

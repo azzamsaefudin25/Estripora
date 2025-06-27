@@ -5,6 +5,7 @@
         </div>
     @endif
 
+
     
     <!-- FORM SUBMIT LAPORAN BARU -->
     <form wire:submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -182,6 +183,7 @@
 
 </div>
 
+ <!-- script ukuran file foto -->
 <script>
     document.querySelectorAll('input[data-validate="image"]').forEach(input => {
         input.addEventListener('change', function() {

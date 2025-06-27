@@ -15,7 +15,7 @@ class ListLapor extends ListRecords
 
     public int $notifCount = 0;
 
-    
+    //Tab untuk filter laporan
     public function getTabs(): array
     {
         $pendingCount = Lapors::whereNull('balasan')
