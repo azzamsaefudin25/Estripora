@@ -27,10 +27,10 @@ class Tempat extends Model
         return $this->hasManyThrough(
             Penyewaan::class,
             Lokasi::class,
-            'id_tempat', // Foreign key di tabel lokasi yang mengacu ke tempat
-            'id_lokasi', // Foreign key di tabel penyewaan yang mengacu ke lokasi
-            'id', // Local key di tabel tempat
-            'id_lokasi' // Local key di tabel lokasi
+            'id_tempat', 
+            'id_lokasi', 
+            'id',
+            'id_lokasi' 
         );
     }
 
@@ -41,14 +41,14 @@ class Tempat extends Model
             Ulasan::class,
             [Lokasi::class, Penyewaan::class],
             [
-                'id_tempat', // Foreign key di lokasi yang mengacu ke tempat
-                'id_lokasi', // Foreign key di penyewaan yang mengacu ke lokasi
-                'id_penyewaan' // Foreign key di ulasan yang mengacu ke penyewaan
+                'id_tempat', 
+                'id_lokasi', 
+                'id_penyewaan'
             ],
             [
-                'id', // Local key di tempat
-                'id_lokasi', // Local key di lokasi
-                'id_penyewaan' // Local key di penyewaan
+                'id', 
+                'id_lokasi',
+                'id_penyewaan'
             ]
         );
     }

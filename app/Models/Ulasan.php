@@ -24,10 +24,15 @@ class Ulasan extends Model
     {
         return $this->belongsTo(Penyewaan::class, 'nik');
     }
-    
+
     public function reaksi()
     {
         return $this->hasMany(ReaksiUlasan::class, 'id_ulasan', 'id_ulasan');
+    }
+
+    public function setUlasanAttribute($value)
+    {
+        $this->attributes['ulasan'] = strip_tags(trim($value));
     }
 
     // Helper method to get a user's reaction to this review
