@@ -4,11 +4,7 @@
             {{ session('message') }}
         </div>
     @endif
-    @if (session()->has('error'))
-        <div class="bg-green-200 text-green-800 p-2 rounded mb-4">
-            {{ session('message') }}
-        </div>
-    @endif
+
 
     
     <!-- FORM SUBMIT LAPORAN BARU -->
@@ -67,11 +63,11 @@
 
             <div>
                 <label for="{{ $fotoVar }}" class="block font-semibold">Upload Foto {{ $i }}:</label>
-                <input type="file" wire:model="{{ $fotoVar }}" accept="image/*" class="border p-2 rounded w-full">
+                <input type="file" wire:model="{{ $fotoVar }}" accept=".jpg,.jpeg,.png" class="border p-2 rounded w-full"  data-validate="image">
                 @error($fotoVar) <span class="text-red-500">{{ $message }}</span> @enderror
 
                 <div wire:loading wire:target="{{ $fotoVar }}" class="text-blue-600 font-semibold">
-                    Mengambil preview foto...
+                   Upload foto sedang berlangsung, harap tunggu sampai selesai.
                 </div>
 
                 @if ($this->$fotoVar)
@@ -89,7 +85,12 @@
 
         <!-- Tombol Kirim -->
         <div class="col-span-2">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            <button
+                type="submit"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                wire:loading.attr="disabled"
+                wire:target="foto, foto2, foto3"
+                >
                 Kirim Laporan
             </button>
         </div>
@@ -131,7 +132,10 @@
                     <p class="text-sm text-gray-600">Durasi: {{ $lap->penyewaan->total_durasi }} {{ $lap->penyewaan->kategori_sewa == 'per jam' ? 'jam' : 'hari' }}</p>
 
                     {{-- Keluhan --}}
-                    <p class="text-sm font-semibold text-gray-700 mt-2">Keluhan: {{ $lap->keluhan }}</p>
+                    <!--hapus html tag dengan strip_tags-->
+                    <p class="text-sm font-semibold text-gray-700 mt-2">
+                        Keluhan: {{ strip_tags($lap->keluhan) }}
+                    </p>
                 </div>
 
                 {{-- Foto --}}
@@ -157,7 +161,9 @@
                             Hapus
                         </button>
                     @else
-                        <button wire:click="viewBalasan('{{ addslashes($lap->balasan) }}')" class="px-4 py-2 bg-blue-500 text-white rounded">Lihat Balasan</button>
+                        <button wire:click="viewBalasan('{{ json_encode($lap->balasan) }}')" class="px-4 py-2 bg-blue-500 text-white rounded">
+                            Lihat Balasan
+                        </button>
                     @endif
                 </div>
             </div>
@@ -166,15 +172,38 @@
     @endif
 
     <!-- Modal Balasan -->
+    <!--hapus html tag dengan strip_tags-->
     @if($showBalasanPanel)
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
             <h3 class="text-xl font-semibold mb-4">Balasan</h3>
-            <div class="border p-4 rounded mb-4 whitespace-pre-wrap">{{ $currentBalasan }}</div>
+            <div class="border p-4 rounded mb-4 whitespace-pre-wrap">{{ strip_tags($currentBalasan) }}</div>
             <button wire:click="closeBalasan" class="px-4 py-2 bg-gray-500 text-white rounded">Tutup</button>
         </div>
     </div>
     @endif
 
-
 </div>
+
+ <!-- script tolak ukuran file foto lebih dari 5MB-->
+<script>
+    document.querySelectorAll('input[data-validate="image"]').forEach(input => {
+        input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Hanya file JPEG, JPG atau PNG yang diizinkan.');
+            this.value = '';
+            return;
+        }
+        if (file.size > maxSize) {
+            alert('Maksimum ukuran foto 5 MB.');
+            this.value = '';
+            return;
+        }
+        });
+    });
+</script>
