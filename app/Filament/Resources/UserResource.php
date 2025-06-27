@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\UserResource\Pages;
@@ -32,11 +33,11 @@ class UserResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Pengguna'; 
+        return 'Pengguna';
     }
     public static function getPluralLabel(): string
     {
-        return 'Pengguna'; 
+        return 'Pengguna';
     }
 
     public static function getModelLabel(): string
@@ -131,8 +132,14 @@ class UserResource extends Resource
 
             ])
             ->defaultPaginationPageOption(5)
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('role')
+                    ->label('Role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'customer' => 'Customer',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -142,9 +149,8 @@ class UserResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\BulkActionGroup::make([]),
             ]);
     }
 
