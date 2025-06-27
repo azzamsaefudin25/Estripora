@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\Lapors;
 
 class Lapor extends Component
@@ -22,20 +23,30 @@ class Lapor extends Component
         'email' => 'required|email|exists:users,email',
         'id_penyewaan' => 'required|string',
         'keluhan' => 'required|string',
-        'foto' => 'nullable|image|max:2048',
-        'foto2' => 'nullable|image|max:2048',
-        'foto3' => 'nullable|image|max:2048',
+        'foto' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
+        'foto2' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
+        'foto3' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
     ];
 
-    public function mount($id = null)
+    protected $messages = [
+        'id_penyewaan.required' => 'Anda harus memilih penyewaan.',
+        'keluhan.required'      => 'Kolom keluhan tidak boleh kosong.',
+        'keluhan.string'        => 'Masukkan teks keluhan yang valid.',
+        
+    ];
+
+   public function mount()
     {
-        if (!Auth::check()) {
-            session()->flash('error', 'Anda harus login terlebih dahulu.');
-            return redirect()->route('dashboard');
+        if (! Auth::check()) {
+            // flash error
+            session()->flash('error', 'Anda harus login terlebih dahulu untuk mengakses halaman Lapor.');
+
+            // redirect ke dashboard
+            return redirect()->route('login');
         }
 
-        $this->email = auth()->user()->email;
-
+        // user sudah pasti ada
+        $this->email = Auth::user()->email;
     }
 
 
@@ -54,41 +65,26 @@ class Lapor extends Component
             'keluhan'=>$this->keluhan,
         ], $paths));
 
-<<<<<<< HEAD
-        session()->flash('message','Laporan berhasil dikirim.');
-        $this->reset(['id_penyewaan','keluhan','foto','foto2','foto3']);
+        // redirect full page dengan flash message
+        return redirect()
+            ->route('lapor')   // ganti sesuai nama route Anda
+            ->with('message', 'Laporan berhasil dikirim.');
     }
 
-   
    public function deleteLaporan($id)
-=======
-        $foto1Path = $this->foto ? $this->foto->store('lapor_foto', 'public') : null;
-        $foto2Path = $this->foto2 ? $this->foto2->store('lapor_foto', 'public') : null;
-        $foto3Path = $this->foto3 ? $this->foto3->store('lapor_foto', 'public') : null;
-
-        Lapors::create([
-            'email' => $this->email,
-            'id_penyewaan' => $this->id_penyewaan,
-            'keluhan' => $this->keluhan,
-            'foto' => $foto1Path,
-            'foto2' => $foto2Path,
-            'foto3' => $foto3Path,
-        ]);
-        session()->flash('message', 'Laporan berhasil dikirim.');
-
-        $this->resetForm();
-    }
-
-
-    public function removeFotoLama($slot)
->>>>>>> 4ea5ba846bcd0e872e98166cc26e391e08c75433
     {
         Lapors::findOrFail($id)->delete();
-        session()->flash('message','Laporan berhasil dihapus.');
+        return redirect()
+            ->route('lapor')
+            ->with('message', 'Laporan berhasil dihapus.');
     }
 
     public function viewBalasan($balasan)
     {
+        // Jika dia mulai dan diakhiri dengan tanda kutip ganda, pangkas:
+        if (Str::startsWith($balasan, '"') && Str::endsWith($balasan, '"')) {
+            $balasan = substr($balasan, 1, -1);
+        }
         $this->currentBalasan = $balasan;
         $this->showBalasanPanel = true;
     }
@@ -98,65 +94,21 @@ class Lapor extends Component
         $this->showBalasanPanel = false;
     }
 
+    public function removeFoto($field)
+    {
+        if (in_array($field, ['foto', 'foto2', 'foto3'])) {
+            $this->$field = null;
+        }
+    }
+
     public function render()
     {
-<<<<<<< HEAD
-        $riwayat = Lapors::where('email', $this->email)
-            ->orderByDesc('created_at')->get();
-        return view('livewire.lapor', ['laporanSebelumnya' => $riwayat]);
-=======
-        $laporanSebelumnya = Lapors::where('email', $this->email)
-            ->orderByDesc('created_at')
+        $laporanSebelumnya = Lapors::where('email', Auth::user()->email)
+            ->latest()
             ->get();
 
-        return view('livewire.lapor', [
-            'laporanSebelumnya' => $laporanSebelumnya,
-            'isEditing' => $this->isEditing,
-        ]);
-    }
-
-    public function editLaporan($id)
-    {
-        $lapor = Lapors::findOrFail($id);
-
-        $this->email = $lapor->email;
-        $this->id_penyewaan = $lapor->id_penyewaan;
-        $this->keluhan = $lapor->keluhan;
-        $this->fotoLama1 = $lapor->foto;
-        $this->fotoLama2 = $lapor->foto2;
-        $this->fotoLama3 = $lapor->foto3;
-
-        $this->isEditing = true;
-        $this->showEditModal = true;
-    }
-
-    public function closeEditModal()
-    {
-        $this->showEditModal = false;
-        $this->batalEdit(); // reset form juga
+        return view('livewire.lapor', compact('laporanSebelumnya'));
     }
 
 
-
-    public function batalEdit()
-    {
-        $this->resetForm();
-    }
-
-
-    private function resetForm()
-    {
-        $this->reset([
-            'id_penyewaan',
-            'keluhan',
-            'foto',
-            'foto2',
-            'foto3',
-            'fotoLama1',
-            'fotoLama2',
-            'fotoLama3',
-            'isEditing'
-        ]);
->>>>>>> 4ea5ba846bcd0e872e98166cc26e391e08c75433
-    }
 }
