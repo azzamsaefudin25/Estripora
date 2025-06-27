@@ -100,7 +100,7 @@ class PenyewaanPerJam extends Component
         // Ambil semua jam yang sudah dipesan (per jam)
         $penyewaan = Penyewaan::where('id_lokasi', $this->id_lokasi)
             ->where('kategori_sewa', 'per jam')
-            ->where('status', 'Confirmed')
+            ->whereIn('status', ['Pending', 'Confirmed'])
             ->get();
 
         $this->jam_dipesan = [];
@@ -270,7 +270,7 @@ class PenyewaanPerJam extends Component
             for ($hour = $startHour; $hour < $endHour; $hour++) {
                 foreach ($this->jam_dipesan as $bookedTime) {
                     if ($bookedTime['date'] == $date && $bookedTime['hour'] == $hour) {
-                       $this->addError('hourRanges', "Jam " . sprintf('%02d:00', $hour) . " pada tanggal " . Carbon::parse($date)->format('d M Y') . " sudah dipesan. Silakan pilih jam lain.");
+                        $this->addError('hourRanges', "Jam " . sprintf('%02d:00', $hour) . " pada tanggal " . Carbon::parse($date)->format('d M Y') . " sudah dipesan. Silakan pilih jam lain.");
                         return false;
                     }
                 }
@@ -374,7 +374,7 @@ class PenyewaanPerJam extends Component
             Session::put('keranjang', $keranjang);
 
             session()->flash('success', 'Pemesanan berhasil ditambahkan ke keranjang! Total pemesanan: ' . $totalHours .
-                ' jam dengan biaya Rp ' . number_format($subTotal, 0, ',', '.'). ', Silakan melakukan checkout!');
+                ' jam dengan biaya Rp ' . number_format($subTotal, 0, ',', '.') . ', Silakan melakukan checkout!');
 
             return redirect()->route('keranjang');
             // Reset form

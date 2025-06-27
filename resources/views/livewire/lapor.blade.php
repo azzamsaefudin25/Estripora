@@ -4,6 +4,11 @@
             {{ session('message') }}
         </div>
     @endif
+    @if (session()->has('error'))
+        <div class="bg-green-200 text-green-800 p-2 rounded mb-4">
+            {{ session('message') }}
+        </div>
+    @endif
 
     
     <!-- FORM SUBMIT LAPORAN BARU -->

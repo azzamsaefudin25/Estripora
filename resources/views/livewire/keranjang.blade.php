@@ -1,13 +1,12 @@
 <div class="min-h-screen flex flex-col items-center p-6 bg-gray-100">
 
     <h1 class="text-3xl font-bold mb-4">Keranjang</h1>
-
-    {{-- @if (session()->has('success'))
+    @if (session()->has('message'))
         <div x-data="{ show: true }" x-show="show"
             class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r shadow-md relative">
             <div class="flex items-center justify-between">
                 <p class="text-green-800 text-sm font-medium">
-                    {{ session('success') }}
+                    {{ session('message') }}
                 </p>
                 <button @click="show = false" class="text-green-400 hover:opacity-75 transition-opacity duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
@@ -18,7 +17,8 @@
                 </button>
             </div>
         </div>
-    @endif --}}
+    @endif
+
 
     @if (session()->has('error'))
         <div x-data="{ show: true }" x-show="show"
