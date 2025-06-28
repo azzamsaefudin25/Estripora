@@ -23,6 +23,16 @@
         </div>
     @endif
 
+    {{-- notifikasi laporan sudah dibalas --}}
+    @if($notifReplyCount > 0)
+    <div class="bg-yellow-100 border-l-4 border-yellow-400 p-3 mb-4">
+        <p class="text-yellow-800">
+        ⚠️ Anda punya {{ $notifReplyCount }} laporan yang sudah dibalas.  
+        Silakan klik “Lihat Balasan” untuk membacanya.
+        </p>
+    </div>
+    @endif
+
     <!-- FORM SUBMIT LAPORAN BARU -->
     <form wire:submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Email (hidden) -->
@@ -185,8 +195,13 @@
                                 Hapus
                             </button>
                         @else
-                            <button wire:click="viewBalasan('{{ json_encode($lap->balasan) }}')"
-                                class="px-4 py-2 bg-blue-500 text-white rounded">
+                            <button
+                                wire:click="viewBalasan(
+                                    {{ $lap->id_lapor }},
+                                    '{{ addslashes($lap->balasan) }}'
+                                )"
+                                class="px-4 py-2 bg-blue-500 text-white rounded"
+                            >
                                 Lihat Balasan
                             </button>
                         @endif

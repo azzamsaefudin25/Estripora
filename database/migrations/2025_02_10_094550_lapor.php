@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('foto2')->nullable();
             $table->string('foto3')->nullable();
             $table->text('balasan')->nullable();
+            $table->boolean('balasan_dilihat')->default(false);
             $table->timestamps();
         });
     }

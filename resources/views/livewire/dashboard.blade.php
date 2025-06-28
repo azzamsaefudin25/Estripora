@@ -54,37 +54,47 @@
         </div>
 
         <!-- Kontainer Berita -->
-        <div
-            class="relative w-full md:w-[350px] h-[600px] bg-gray-800 shadow-lg p-4 rounded-2xl flex-shrink-0 md:ml-4 mb-4 md:mb-0">
-            <div wire:loading wire:target="nextBerita, prevBerita"
-                class="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-10">
-                <div class="animate-spin h-10 w-10 border-4 border-white border-t-transparent rounded-full"></div>
+        <div class="relative w-full md:w-[350px] bg-gray-800 shadow-lg p-4 rounded-2xl flex-shrink-0 md:ml-4 mb-4 md:mb-0 flex flex-col">
+
+            {{-- Gambar berita --}}
+            <div class="flex-1 flex items-center justify-center overflow-hidden mb-2">
+                @if (count($beritaList) > 0)
+                    <img
+                        src="{{ $beritaList[$beritaIndex]['img'] }}"
+                        alt="Berita {{ $beritaIndex + 1 }}"
+                        class="max-h-[450px] object-contain rounded-lg transform transition-transform hover:scale-105"
+                    />
+                @else
+                    <p class="text-gray-400">Belum ada berita.</p>
+                @endif
             </div>
 
-            <button wire:click="prevBerita"
-                class="absolute left-[10px] top-1/2 -translate-y-1/2 bg-white text-gray-800 p-3 rounded-full hover:bg-gray-700 transition z-20 transform hover:scale-110">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-
-            <div class="relative w-full h-auto overflow-hidden">
-                <div class="relative w-full transition-all duration-500 ease-in-out animate-fadeIn"
-                    wire:key="{{ $beritaIndex }}">
-                    <img src="{{ $beritaList[$beritaIndex]['img'] }}" alt="Berita"
-                        class="w-full h-[450px] lg:h-auto object-contain rounded-lg transform transition-transform hover:scale-105">
-                    <p class="mt-2 text-white text-sm">{{ $beritaList[$beritaIndex]['text'] }}</p>
-                </div>
+            {{-- Baris tombol prev & next --}}
+            <div class="flex justify-between mb-2">
+                <button
+                wire:click="prevBerita"
+                class="bg-white text-gray-800 p-3 rounded-full hover:bg-gray-200 transition transform hover:scale-110"
+                aria-label="Berita Sebelumnya"
+                >
+                ‹
+                </button>
+                <button
+                wire:click="nextBerita"
+                class="bg-white text-gray-800 p-3 rounded-full hover:bg-gray-200 transition transform hover:scale-110"
+                aria-label="Berita Berikutnya"
+                >
+                ›
+                </button>
             </div>
 
-            <button wire:click="nextBerita"
-                class="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-gray-800 p-3 rounded-full hover:bg-gray-700 transition transform hover:scale-110">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+            {{-- Isi teks berita --}}
+            @if (count($beritaList) > 0)
+                <p class="text-white text-center text-sm whitespace-pre-line">
+                    {{ strip_tags($beritaList[$beritaIndex]['text']) }}
+                </p>
+            @endif
+
         </div>
+
     </div>
 </div>

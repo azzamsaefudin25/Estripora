@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Tempat;
+use App\Models\Berita;
 
 class Dashboard extends Component
 {
@@ -12,14 +13,19 @@ class Dashboard extends Component
     public $categories = [];
     public $filteredTempat = [];
     public $beritaIndex = 0;
-    public $beritaList = [
-        ['img' => '/images/qrisready.png', 'text' => 'Berita pertama: QRIS Ready!'],
-        ['img' => '/images/estriporalogo.png', 'text' => 'Berita kedua: Update fitur terbaru.'],
-        ['img' => '/images/estriporalogo.png', 'text' => 'Berita ketiga: Diskon spesial bulan ini!'],
-    ];
+    public $beritaList = [];
 
     public function mount()
     {
+        // ambil semua berita terbaru
+        $this->beritaList = Berita::orderByDesc('created_at')
+            ->get()
+            ->map(fn($b) => [
+                'img'  => asset('storage/' . $b->img),
+                'text' => $b->text,
+                'id'   => $b->id,
+            ])->toArray();
+
         // Ambil kategori unik dari database
         $this->categories = Tempat::distinct()->pluck('kategori')->toArray();
         $this->performSearch();
@@ -69,12 +75,14 @@ class Dashboard extends Component
 
     public function nextBerita()
     {
+        if (count($this->beritaList) === 0) return;
         $this->beritaIndex = ($this->beritaIndex + 1) % count($this->beritaList);
         $this->dispatch('berita-updated');
     }
 
     public function prevBerita()
     {
+        if (count($this->beritaList) === 0) return;
         $this->beritaIndex = ($this->beritaIndex - 1 + count($this->beritaList)) % count($this->beritaList);
         $this->dispatch('berita-updated');
     }

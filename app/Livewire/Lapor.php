@@ -16,6 +16,7 @@ class Lapor extends Component
     public $foto, $foto2, $foto3; 
     public $showBalasanPanel = false;
     public $currentBalasan;
+    public $notifReplyCount;
 
 
 
@@ -45,11 +46,13 @@ class Lapor extends Component
         }
 
         $this->email = Auth::user()->email;
+        $this->countReplies();
     }
 
 
     public function submit()
     {
+        $this->keluhan = strip_tags($this->keluhan);
         $this->validate();
         $paths = [];
         foreach (['foto','foto2','foto3'] as $f) {
@@ -77,15 +80,30 @@ class Lapor extends Component
             ->with('message', 'Laporan berhasil dihapus.');
     }
 
-    public function viewBalasan($balasan)
+    protected function countReplies(): void
     {
-        // Jika dia mulai dan diakhiri dengan tanda kutip ganda, pangkas:
+        $this->notifReplyCount = Lapors::where('email', $this->email)
+            ->whereNotNull('balasan')
+            ->where('balasan', '!=', '')
+            ->where('balasan_dilihat', false)
+            ->count();
+    }
+    public function viewBalasan(int $idLapor, string $balasan)
+    {
+        // bersihkan tanda kutip ganda di awal/akhir
         if (Str::startsWith($balasan, '"') && Str::endsWith($balasan, '"')) {
             $balasan = substr($balasan, 1, -1);
         }
         $this->currentBalasan = $balasan;
         $this->showBalasanPanel = true;
+
+        // tandai sudah dilihat
+        Lapors::where('id_lapor', $idLapor)
+            ->update(['balasan_dilihat' => true]);
+
+        $this->countReplies();
     }
+
 
     public function closeBalasan()
     {
@@ -101,6 +119,7 @@ class Lapor extends Component
 
     public function render()
     {
+        $this->countReplies();
         $laporanSebelumnya = Lapors::where('email', Auth::user()->email)
             ->latest()
             ->get();
