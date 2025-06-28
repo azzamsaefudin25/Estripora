@@ -17,10 +17,41 @@
 
     <!-- Konten -->
     <div class="flex flex-col lg:flex-row flex-grow overflow-auto">
-        <div class="lg:w-1/2 w-full h-60 lg:h-auto flex items-center justify-center bg-gray-200">
+        {{-- <div class="lg:w-1/2 w-full h-60 lg:h-auto flex items-center justify-center bg-gray-200">
             <img src="{{ asset('storage/' . $tempat->image ?? '/images/default.jpg') }}" alt="Gambar Tempat"
                 class="lg:h-1/2 w-auto h-full object-cover shadow-lg">
+        </div> --}}
+        @php
+            $images = array_filter([
+                $tempat->image,
+                $tempat->image2,
+                $tempat->image3,
+                $tempat->image4,
+                $tempat->image5,
+            ]);
+        @endphp
+
+        <div x-data="{ activeImage: '{{ asset('storage/' . ($images[0] ?? 'images/default.jpg')) }}' }" class="lg:w-1/2 w-full">
+
+            <!-- Gambar Utama -->
+            <div class="h-60 lg:h-[550px] flex items-center justify-center bg-gray-200 rounded shadow mb-4">
+                <img :src="activeImage" alt="Gambar Tempat"
+                    class="max-h-full max-w-full object-cover transition-all duration-300">
+            </div>
+
+            <!-- Thumbnail -->
+            <div class="flex space-x-2 overflow-x-auto">
+                @if (!empty($images[1]))
+                    @foreach ($images as $img)
+                        <img src="{{ asset('storage/' . $img) }}"
+                            @click="activeImage = '{{ asset('storage/' . $img) }}'"
+                            class="w-20 h-20 object-cover rounded cursor-pointer border-2 hover:border-blue-500"
+                            :class="{ 'border-blue-500': activeImage === '{{ asset('storage/' . $img) }}' }">
+                    @endforeach
+                @endif
+            </div>
         </div>
+
         <div class="lg:w-1/2 w-full p-8 flex flex-col space-y-6 ">
             <p class="text-lg text-gray-700 leading-relaxed">{{ $tempat->deskripsi ?? 'Deskripsi tidak tersedia.' }}</p>
             <div>

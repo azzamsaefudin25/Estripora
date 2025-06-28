@@ -61,7 +61,7 @@ class Keranjang extends Component
             // Perbarui jumlah item di keranjang (untuk badge notifikasi)
             $this->dispatch('keranjangUpdated', count: count($keranjang));
 
-            session()->flash('success', 'Item berhasil dihapus dari keranjang.');
+            session()->flash('message', 'Item berhasil dihapus dari keranjang.');
         }
     }
 
@@ -531,7 +531,7 @@ class Keranjang extends Component
             // Perbarui jumlah item di keranjang (untuk badge notifikasi)
             $this->dispatch('keranjangUpdated', count: 0);
 
-            session()->flash('success', 'Checkout berhasil! Semua penyewaan dan transaksi telah diproses. Silakan lanjutkan pembayaran sebelum ' . $expiredAt->format('d/m/Y H:i') . '.');
+            session()->flash('message', 'Checkout berhasil! Semua penyewaan dan transaksi telah diproses. Silakan lanjutkan pembayaran sebelum ' . $expiredAt->format('d/m/Y H:i') . '.');
 
             return redirect()->route('cetak');
         } catch (\Exception $e) {

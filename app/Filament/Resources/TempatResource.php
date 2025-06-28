@@ -19,6 +19,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\MarkdownEditor;
 use App\Filament\Resources\TempatResource\Pages;
@@ -33,11 +34,11 @@ class TempatResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Tempat'; 
+        return 'Tempat';
     }
     public static function getPluralLabel(): string
     {
-        return 'Tempat'; 
+        return 'Tempat';
     }
     public static function getModelLabel(): string
     {
@@ -47,8 +48,6 @@ class TempatResource extends Resource
     {
         return 'Kelola Tempat & Area';
     }
-
-
 
     public static function canAccess(): bool
     {
@@ -121,14 +120,32 @@ class TempatResource extends Resource
                                     'per hari' => 'per hari',
                                 ]),
                         ]),
-
                     FileUpload::make('image')
                         ->label('Image')
-                        ->image() // Hanya menerima file gambar
-                        ->directory('uploads/tempat') // Menyimpan ke storage
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image2')
+                        ->label('Image 2')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image3')
+                        ->label('Image 3')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image4')
+                        ->label('Image 4')
+                        ->image()
+                        ->directory('uploads/tempat')
+                        ->nullable(),
+                    FileUpload::make('image5')
+                        ->label('Image 5')
+                        ->image()
+                        ->directory('uploads/tempat')
                         ->nullable(),
                 ])
-
             ]);
     }
 
@@ -138,15 +155,21 @@ class TempatResource extends Resource
             ->columns([
                 TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
                 TextColumn::make('kategori')->label('Kategori')->sortable()->searchable(),
-                ImageColumn::make('image')->label('Image')->sortable(),
                 TextColumn::make('deskripsi')->label('Deskripsi')->sortable()->searchable(),
                 TextColumn::make('kategori_sewa')->label('Kategori Sewa')->sortable()->searchable(),
                 TextColumn::make('rentang_harga')->label('Rentang Harga')->sortable()->searchable(),
+                ImageColumn::make('image')->label('Image')->sortable(),
                 TextColumn::make('created_at')->label('Create At')->dateTime()->sortable(),
             ])
             ->defaultPaginationPageOption(5)
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('kategori_sewa')
+                    ->label('Kategori Sewa')
+                    ->options([
+                        'per jam' => 'Per Jam',
+                        'per hari' => 'Per Hari',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -156,9 +179,8 @@ class TempatResource extends Resource
                 ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\BulkActionGroup::make([]),
             ]);
     }
 

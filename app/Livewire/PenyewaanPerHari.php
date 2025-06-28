@@ -80,7 +80,7 @@ class PenyewaanPerHari extends Component
         // Ambil semua tanggal yang sudah dipesan dengan status confirmed
         $penyewaan = Penyewaan::where('id_lokasi', $this->id_lokasi)
             ->where('kategori_sewa', 'per hari')
-            ->where('status', 'Confirmed') // Hanya yang sudah confirmed
+            ->whereIn('status',[ 'Pending','Confirmed']) 
             ->get();
 
         $this->tanggal_dipesan = [];

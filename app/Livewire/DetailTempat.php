@@ -37,7 +37,11 @@ class DetailTempat extends Component
             'id' => $this->tempatId,
             'nama' => 'Tempat Tidak Ditemukan',
             'deskripsi' => 'Deskripsi tidak tersedia.',
-            'image' => 'images/default.jpg'
+            'image' => 'images/default.jpg',
+            'image2' => 'images/default.jpg',
+            'image3' => 'images/default.jpg',
+            'image4' => 'images/default.jpg',
+            'image5' => 'images/default.jpg'
         ];
     }
 
