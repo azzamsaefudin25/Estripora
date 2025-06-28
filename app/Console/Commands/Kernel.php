@@ -31,7 +31,7 @@ class Kernel extends Command
 
     protected function schedule(Schedule $schedule): void
     {
-    // Jalankan cleanup setiap 30 menit
+
     $schedule->command('transaksi:cleanup-expired')
              ->everyThirtyMinutes()
              ->withoutOverlapping();

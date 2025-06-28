@@ -87,220 +87,247 @@
         </div>
     </div>
 
-    {{-- KONTAINER UPLOAD BUKTI BAYAR --}}
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <span>Upload Bukti Bayar</span>
-        </h2>
+{{-- KONTAINER UPLOAD BUKTI BAYAR --}}
+<div class="bg-white rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <span>Upload Bukti Bayar</span>
+    </h2>
 
-        <form wire:submit.prevent="uploadBuktiBayar" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Input ID Billing --}}
-                <div>
-                    <label for="idBillingUpload" class="block text-gray-700 font-semibold mb-2">ID Billing</label>
-                    <input 
-                        type="text" 
-                        id="idBillingUpload"
-                        wire:model="idBillingUpload"
-                        placeholder="Masukkan ID Billing (contoh: BILL-ABC12345)"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                        {{ $isUploading ? 'disabled' : '' }}
-                    >
-                    @error('idBillingUpload') 
-                        <span class="text-red-600 text-sm">{{ $message }}</span> 
-                    @enderror
-                </div>
-
-                {{-- Input File Upload --}}
-                <div>
-                    <label for="buktiBayar" class="block text-gray-700 font-semibold mb-2">File Bukti Bayar</label>
-                    <input 
-                        type="file" 
-                        id="buktiBayar"
-                        wire:model="buktiBayar"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        {{ $isUploading ? 'disabled' : '' }}
-                    >
-                    @error('buktiBayar') 
-                        <span class="text-red-600 text-sm">{{ $message }}</span> 
-                    @enderror
-                </div>
-            </div>
-
-            {{-- Info dan Tombol Submit --}}
-            <div class="flex flex-col md:flex-row md:items-end md:justify-between space-y-4 md:space-y-0">
-                <div class="text-sm text-gray-600">
-                    <p class="text-yellow-600"><strong>Catatan:</strong> Silahkan lakukan pembayaran melalui transfer bank ke rekening berikut : </p>
-                    <div class="text-yellow-600 list-disc list-inside">
-                        <p><strong>Bank:</strong> Mandiri</p>
-                        <p><strong>Nama Penerima:</strong> Irfan</p>
-                        <p><strong>No. Rekening:</strong> 2222 2222 2222</p>
-                    </div>
-                    <p><strong>Format yang didukung:</strong> JPG, JPEG, PNG, PDF</p>
-                    <p><strong>Ukuran maksimal:</strong> 5MB</p>
-                </div>
-
-                <button 
-                    type="submit"
-                    class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+    <form wire:submit.prevent="uploadBuktiBayar" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Dropdown ID Billing --}}
+            <div>
+                <label for="idBillingUpload" class="block text-gray-700 font-semibold mb-2">ID Billing</label>
+                <select 
+                    id="idBillingUpload"
+                    wire:model="idBillingUpload"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                     {{ $isUploading ? 'disabled' : '' }}
                 >
-                    @if($isUploading)
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <option value="">-- Pilih ID Billing --</option>
+                    @forelse($availableBillings as $billing)
+                        <option value="{{ $billing->id_billing }}">
+                            {{ $billing->id_billing }}
+                        </option>
+                    @empty
+                        <option value="" disabled>Tidak ada billing yang tersedia</option>
+                    @endforelse
+                </select>
+                @error('idBillingUpload') 
+                    <span class="text-red-600 text-sm">{{ $message }}</span> 
+                @enderror
+                
+                {{-- Info jika tidak ada billing --}}
+                @if(empty($availableBillings) || count($availableBillings) == 0)
+                    <p class="text-yellow-600 text-sm mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
-                        <span>Mengupload...</span>
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <span>Upload Bukti Bayar</span>
-                    @endif
-                </button>
+                        Tidak ada transaksi yang dapat diupload bukti bayarnya.
+                    </p>
+                @endif
             </div>
-        </form>
-    </div>
-    
-    {{-- DAFTAR TRANSAKSI --}}
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Transaksi</h2>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr>
-                        <th class="px-4 py-2 text-center">
-                            <input type="checkbox" wire:model="selectAll" />
-                        </th>
-                        <th class="px-4 py-2">NIK</th>
-                        <th class="px-4 py-2">ID Billing</th>
-                        <th class="px-4 py-2">Tanggal Booking</th>
-                        <th class="px-4 py-2">Kategori</th>
-                        <th class="px-4 py-2">Per Hari</th>
-                        <th class="px-4 py-2">Per Jam</th>
-                        <th class="px-4 py-2">Tarif</th>
-                        <th class="px-4 py-2">Sub Total</th>
-                        <th class="px-4 py-2">Status</th>
-                        <th class="px-4 py-2">Bukti Bayar</th>
-                        <th class="px-4 py-2">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($transaksis as $transaksi)
-                        @php
-                            $penyewaan = $transaksi->penyewaan;
-                            $perHari = is_string($penyewaan->penyewaan_per_hari ?? '') 
-                                        ? json_decode($penyewaan->penyewaan_per_hari, true) 
-                                        : ($penyewaan->penyewaan_per_hari ?? []);
-                            $perJam = is_string($penyewaan->penyewaan_per_jam ?? '') 
-                                        ? json_decode($penyewaan->penyewaan_per_jam, true) 
-                                        : ($penyewaan->penyewaan_per_jam ?? []);
-                        @endphp
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-2 text-center">
-                                <input type="checkbox" wire:model="selectedTransaksis" value="{{ $transaksi->id }}">
-                            </td>
-                            <td class="px-4 py-2">{{ $transaksi->nik ?? '-' }}</td>
-                            <td class="px-4 py-2 font-mono">{{ $transaksi->id_billing }}</td>
-                            <td class="px-4 py-2">{{ \Carbon\Carbon::parse($transaksi->tgl_booking)->format('d M Y') }}</td>
-                            <td class="px-4 py-2">{{ $penyewaan->kategori_sewa }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap">
-                                @if(!empty($perHari) && is_array($perHari))
-                                    {{ \Carbon\Carbon::parse($perHari[0]['tgl_mulai'])->format('d M Y') }}
-                                    -
-                                    {{ \Carbon\Carbon::parse($perHari[0]['tgl_selesai'])->format('d M Y') }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 whitespace-nowrap">
-                                @if(!empty($perJam) && is_array($perJam))
-                                    @foreach($perJam as $jam)
-                                        {{ \Carbon\Carbon::parse($jam['tgl_mulai'])->format('d M Y') }}
-                                        ({{ \Carbon\Carbon::parse($jam['jam_mulai'])->format('H:i') }} - {{ \Carbon\Carbon::parse($jam['jam_selesai'])->format('H:i') }})<br>
-                                    @endforeach
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="px-4 py-2">Rp {{ number_format($transaksi->tarif, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 font-bold text-blue-600">Rp {{ number_format($transaksi->sub_total, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2">
-                                @if($transaksi->status === 'Pending')
-                                    <span class="text-yellow-600 font-semibold">{{ $transaksi->status }}</span>
-                                @elseif($transaksi->status === 'Paid')
-                                    <span class="text-green-600 font-semibold">{{ $transaksi->status }}</span>
-                                @elseif($transaksi->status === 'Failed')
-                                    <span class="text-red-600 font-semibold">{{ $transaksi->status }}</span>
-                                @else
-                                    {{ $transaksi->status }}
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($transaksi->bukti_bayar)
-                                    <a href="{{ Storage::url($transaksi->bukti_bayar) }}" 
-                                       target="_blank" 
-                                       class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
-                                       title="Lihat Bukti Bayar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat
-                                    </a>
-                                @else
-                                    <span class="text-gray-400 text-sm">Belum ada</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center space-x-2">
+            {{-- Input File Upload --}}
+            <div>
+                <label for="buktiBayar" class="block text-gray-700 font-semibold mb-2">File Bukti Bayar</label>
+                <input 
+                    type="file" 
+                    id="buktiBayar"
+                    wire:model="buktiBayar"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    {{ $isUploading ? 'disabled' : '' }}
+                >
+                @error('buktiBayar') 
+                    <span class="text-red-600 text-sm">{{ $message }}</span> 
+                @enderror
+            </div>
+        </div>
+
+        {{-- Info Detail Billing yang Dipilih --}}
+        @if($selectedBillingDetail)
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-800 mb-2">Detail Transaksi:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p><strong>ID Billing:</strong> {{ $selectedBillingDetail->id_billing }}</p>
+                    </div>
+                    <div>
+                        <p><strong>Status:</strong> 
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                {{ $selectedBillingDetail->status }}
+                            </span>
+                        </p>
+                        @if($selectedBillingDetail->expired_at)
+                            <p><strong>Berlaku hingga:</strong> 
+                                <span class="text-red-600">{{ \Carbon\Carbon::parse($selectedBillingDetail->expired_at)->format('d/m/Y H:i') }}</span>
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Info dan Tombol Submit --}}
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between space-y-4 md:space-y-0">
+            <div class="text-sm text-gray-600">
+                <p class="text-yellow-600"><strong>Catatan:</strong> Silahkan lakukan pembayaran melalui transfer bank ke rekening berikut : </p>
+                <div class="text-yellow-600 list-disc list-inside">
+                    <p><strong>Bank:</strong> Mandiri</p>
+                    <p><strong>Nama Penerima:</strong> Irfan</p>
+                    <p><strong>No. Rekening:</strong> 2222 2222 2222</p>
+                </div>
+                <p><strong>Format yang didukung:</strong> JPG, JPEG, PNG, PDF</p>
+                <p><strong>Ukuran maksimal:</strong> 5MB</p>
+            </div>
+
+            <button 
+                type="submit"
+                class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+                {{ $isUploading ? 'disabled' : '' }}
+            >
+                @if($isUploading)
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Mengupload...</span>
+                @else
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span>Upload Bukti Bayar</span>
+                @endif
+            </button>
+        </div>
+    </form>
+</div>
+
+{{-- DAFTAR TRANSAKSI --}}
+<div class="bg-white rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Daftar Transaksi</h2>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="px-4 py-2">NIK</th>
+                    <th class="px-4 py-2">ID Billing</th>
+                    <th class="px-4 py-2">Tanggal Booking</th>
+                    <th class="px-4 py-2">Kategori</th>
+                    <th class="px-4 py-2">Per Hari</th>
+                    <th class="px-4 py-2">Per Jam</th>
+                    <th class="px-4 py-2">Tarif</th>
+                    <th class="px-4 py-2">Sub Total</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2">Bukti Bayar</th>
+                    <th class="px-4 py-2">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($transaksis as $transaksi)
+                    @php
+                        $penyewaan = $transaksi->penyewaan;
+                        $perHari = is_string($penyewaan->penyewaan_per_hari ?? '') 
+                                    ? json_decode($penyewaan->penyewaan_per_hari, true) 
+                                    : ($penyewaan->penyewaan_per_hari ?? []);
+                        $perJam = is_string($penyewaan->penyewaan_per_jam ?? '') 
+                                    ? json_decode($penyewaan->penyewaan_per_jam, true) 
+                                    : ($penyewaan->penyewaan_per_jam ?? []);
+                    @endphp
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-2">{{ $transaksi->nik ?? '-' }}</td>
+                        <td class="px-4 py-2 font-mono">{{ $transaksi->id_billing }}</td>
+                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($transaksi->tgl_booking)->format('d M Y') }}</td>
+                        <td class="px-4 py-2">{{ $penyewaan->kategori_sewa }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            @if(!empty($perHari) && is_array($perHari))
+                                {{ \Carbon\Carbon::parse($perHari[0]['tgl_mulai'])->format('d M Y') }}
+                                -
+                                {{ \Carbon\Carbon::parse($perHari[0]['tgl_selesai'])->format('d M Y') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            @if(!empty($perJam) && is_array($perJam))
+                                @foreach($perJam as $jam)
+                                    {{ \Carbon\Carbon::parse($jam['tgl_mulai'])->format('d M Y') }}
+                                    ({{ \Carbon\Carbon::parse($jam['jam_mulai'])->format('H:i') }} - {{ \Carbon\Carbon::parse($jam['jam_selesai'])->format('H:i') }})<br>
+                                @endforeach
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="px-4 py-2">Rp {{ number_format($transaksi->tarif, 0, ',', '.') }}</td>
+                        <td class="px-4 py-2 font-bold text-blue-600">Rp {{ number_format($transaksi->sub_total, 0, ',', '.') }}</td>
+                        <td class="px-4 py-2">
+                            @if($transaksi->status === 'Pending')
+                                <span class="text-yellow-600 font-semibold">{{ $transaksi->status }}</span>
+                            @elseif($transaksi->status === 'Paid')
+                                <span class="text-green-600 font-semibold">{{ $transaksi->status }}</span>
+                            @elseif($transaksi->status === 'Failed')
+                                <span class="text-red-600 font-semibold">{{ $transaksi->status }}</span>
+                            @else
+                                {{ $transaksi->status }}
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            @if($transaksi->bukti_bayar)
+                                <a href="{{ Storage::url($transaksi->bukti_bayar) }}" 
+                                   target="_blank" 
+                                   class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                                   title="Lihat Bukti Bayar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Lihat
+                                </a>
+                            @else
+                                <span class="text-gray-400 text-sm">Belum ada</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                {{-- Tombol Cetak PDF --}}
+                                <button
+                                    wire:click.prevent="cetakPDFSingle({{ $transaksi->id }})"
+                                    title="Cetak PDF"
+                                    class="text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors duration-200"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </button>
+
                                 {{-- Tombol Hapus --}}
                                 <button
                                     wire:click.prevent="hapusTransaksi({{ $transaksi->id }})"
                                     onclick="return confirm('Yakin ingin menghapus transaksi ini?')"
                                     title="Hapus"
-                                    class="text-red-600 hover:text-red-800"
+                                    class="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors duration-200"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a1 1 0 00-1 1v1h6V4a1 1 0 00-1-1m-4 0h4" />
                                     </svg>
                                 </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="12" class="text-center text-gray-500 py-4">Tidak ada data transaksi.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        {{-- TOMBOL CETAK PDF --}}
-        <div class="mt-6 flex justify-between items-center">
-            <div class="text-sm text-gray-600">
-                @if(count($selectedTransaksis) > 0)
-                    {{ count($selectedTransaksis) }} transaksi dipilih
-                @else
-                    Pilih transaksi untuk dicetak
-                @endif
-            </div>
-            
-            <button wire:click="cetakPDF"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Cetak PDF Transaksi Terpilih</span>
-            </button>
-        </div>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="11" class="text-center text-gray-500 py-4">Tidak ada data transaksi.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
-
 <script>
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {

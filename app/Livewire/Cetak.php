@@ -46,6 +46,7 @@ class Cetak extends Component
 
     public function mount()
     {
+        $this->loadAvailableBillings();
         $this->cleanupExpiredTransactions(); // Cleanup saat load page
         $this->loadTransaksis();
     }
@@ -120,70 +121,99 @@ class Cetak extends Component
         $this->loadTransaksis();
     }
 
-    public function uploadBuktiBayar()
-    {
-        $this->isUploading = true;
-        
-        try {
-            $this->validate([
-                'idBillingUpload' => 'required|string',
-                'buktiBayar' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            ]);
+public $availableBillings = [];
+public $selectedBillingDetail = null;
 
-            $userId = Auth::id();
+public function loadAvailableBillings()
+{
+    $userId = Auth::id();
+    
+    $this->availableBillings = Transaksi::where('status', 'Pending')
+        ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
+        ->where(function($query) {
+            $query->whereNull('expired_at')
+                  ->orWhere('expired_at', '>', Carbon::now());
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+}
 
-            // Cari transaksi berdasarkan ID Billing dan pastikan milik user yang login
-            $transaksi = Transaksi::where('id_billing', $this->idBillingUpload)
-                ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
-                ->first();
+public function updatedIdBillingUpload($value)
+{
+    if ($value) {
+        $this->selectedBillingDetail = collect($this->availableBillings)
+            ->firstWhere('id_billing', $value);
+    } else {
+        $this->selectedBillingDetail = null;
+    }
+}
 
-            if (!$transaksi) {
-                session()->flash('error', 'ID Billing tidak ditemukan atau tidak valid.');
-                $this->isUploading = false;
-                return;
-            }
+public function uploadBuktiBayar()
+{
+    $this->isUploading = true;
+    
+    try {
+        $this->validate([
+            'idBillingUpload' => 'required|string',
+            'buktiBayar' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
 
-            // TAMBAHAN: Cek apakah transaksi sudah expired
-            if ($transaksi->expired_at && Carbon::now()->greaterThan($transaksi->expired_at)) {
-                session()->flash('error', 'Transaksi ini sudah kadaluarsa. Silakan buat billing baru.');
-                $this->isUploading = false;
-                return;
-            }
+        $userId = Auth::id();
 
-            if ($transaksi->status !== 'Pending') {
-                session()->flash('error', 'Transaksi ini sudah diproses dan tidak dapat diubah.');
-                $this->isUploading = false;
-                return;
-            }
+        $transaksi = Transaksi::where('id_billing', $this->idBillingUpload)
+            ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
+            ->first();
 
-            // Hapus file lama jika ada
-            if ($transaksi->bukti_bayar && Storage::disk('public')->exists($transaksi->bukti_bayar)) {
-                Storage::disk('public')->delete($transaksi->bukti_bayar);
-            }
-
-            // Upload file baru
-            $filename = 'bukti_bayar_' . $transaksi->id_billing . '_' . time() . '.' . $this->buktiBayar->getClientOriginalExtension();
-            $path = $this->buktiBayar->storeAs('bukti_bayar', $filename, 'public');
-
-            // Update: Simpan path file ke database
-            $transaksi->update([
-                'bukti_bayar' => $path
-            ]);
-
-            session()->flash('success', 'Bukti bayar berhasil diupload.');
-            
-            // Reset form
-            $this->reset(['idBillingUpload', 'buktiBayar']);
-            $this->loadTransaksis();
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            session()->flash('error', 'Validasi gagal: ' . implode(', ', $e->validator->errors()->all()));
-        } catch (\Exception $e) {
-            session()->flash('error', 'Gagal mengupload bukti bayar: ' . $e->getMessage());
+        if (!$transaksi) {
+            session()->flash('error', 'ID Billing tidak ditemukan atau tidak valid.');
+            $this->isUploading = false;
+            return;
         }
 
-        $this->isUploading = false;
+        if ($transaksi->expired_at && Carbon::now()->greaterThan($transaksi->expired_at)) {
+            session()->flash('error', 'Transaksi ini sudah kadaluarsa. Silakan buat billing baru.');
+            $this->isUploading = false;
+            return;
+        }
+
+        if ($transaksi->status !== 'Pending') {
+            session()->flash('error', 'Transaksi ini sudah diproses dan tidak dapat diubah.');
+            $this->isUploading = false;
+            return;
+        }
+
+        if ($transaksi->bukti_bayar && Storage::disk('public')->exists($transaksi->bukti_bayar)) {
+            Storage::disk('public')->delete($transaksi->bukti_bayar);
+        }
+
+        $filename = 'bukti_bayar_' . $transaksi->id_billing . '_' . time() . '.' . $this->buktiBayar->getClientOriginalExtension();
+        $path = $this->buktiBayar->storeAs('bukti_bayar', $filename, 'public');
+
+        $transaksi->update([
+            'bukti_bayar' => $path
+        ]);
+
+        session()->flash('success', 'Bukti bayar berhasil diupload.');
+        
+        $this->reset(['idBillingUpload', 'buktiBayar']);
+        $this->selectedBillingDetail = null;
+        $this->loadAvailableBillings();
+        $this->loadTransaksis();
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        session()->flash('error', 'Validasi gagal: ' . implode(', ', $e->validator->errors()->all()));
+    } catch (\Exception $e) {
+        session()->flash('error', 'Gagal mengupload bukti bayar: ' . $e->getMessage());
     }
+
+    $this->isUploading = false;
+}
+
+public function refreshData()
+{
+    $this->loadAvailableBillings();
+    $this->loadTransaksis();
+}
 
     public function loadTransaksis()
     {
@@ -193,7 +223,6 @@ class Cetak extends Component
             ->latest()
             ->get();
 
-        // Load pending transactions untuk countdown timer
         $this->pendingTransaksis = Transaksi::with('penyewaan')
             ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
             ->where('status', 'Pending')
@@ -270,46 +299,41 @@ class Cetak extends Component
         $this->selectAll = count($this->selectedTransaksis) === $transaksiCollection->count() && $transaksiCollection->count() > 0;
     }
 
-public function cetakPDF()
-{
-    if (empty($this->selectedTransaksis)) {
-        session()->flash('error', 'Pilih transaksi yang akan diprint!');
-        return;
-    }
+public function cetakPDFSingle($transaksiId)
+    {
+        $userId = Auth::id();
 
-    $userId = Auth::id();
+        $transaksi = Transaksi::with([
+            'penyewaan.lokasi',
+            'penyewaan.lokasi.tempat', // Eksplisit load tempat
+        ])
+            ->where('id', $transaksiId)
+            ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
+            ->first();
 
-    $transaksis = Transaksi::with([
-        'penyewaan.lokasi',
-        'penyewaan.lokasi.tempat', // Eksplisit load tempat
-    ])
-        ->whereIn('id', $this->selectedTransaksis)
-        ->whereHas('penyewaan', fn($q) => $q->where('id_user', $userId))
-        ->get();
-    if ($transaksis->isEmpty()) {
-        session()->flash('error', 'Transaksi tidak ditemukan atau tidak berhak mengakses.');
-        return;
-    }
+        if (!$transaksi) {
+            session()->flash('error', 'Transaksi tidak ditemukan atau tidak berhak mengakses.');
+            return;
+        }
 
-    try {
-        foreach ($transaksis as $transaksi) {
+        try {
             $pdf = Pdf::loadView('pdf.validasi-penyewaan', compact('transaksi'));
             $pdf->setPaper('A4', 'portrait');
-        }
-        
-        $filename = 'validasi_penyewaan_' . date('Y-m-d_H-i-s') . '.pdf';
-        
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename, [
-            'Content-Type' => 'application/pdf',
-        ]);
+            
+            $filename = 'validasi_penyewaan_' . $transaksi->id_billing . '_' . date('Y-m-d_H-i-s') . '.pdf';
+            
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
 
-    } catch (\Exception $e) {
-        session()->flash('error', 'Gagal membuat PDF: ' . $e->getMessage());
-        return;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal membuat PDF: ' . $e->getMessage());
+            return;
+        }
     }
-}
+
 
     public function render()
     {
