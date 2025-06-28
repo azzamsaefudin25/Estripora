@@ -27,10 +27,10 @@ class Tempat extends Model
         return $this->hasManyThrough(
             Penyewaan::class,
             Lokasi::class,
-            'id_tempat', 
-            'id_lokasi', 
+            'id_tempat',
+            'id_lokasi',
             'id',
-            'id_lokasi' 
+            'id_lokasi'
         );
     }
 
@@ -46,7 +46,7 @@ class Tempat extends Model
                 'id_penyewaan'
             ],
             [
-                'id', 
+                'id',
                 'id_lokasi',
                 'id_penyewaan'
             ]
@@ -56,7 +56,6 @@ class Tempat extends Model
     // Hitung rating rata-rata
     public function getRatingRataRataAttribute()
     {
-        // Kita perlu mendapatkan ulasan melalui relasi penyewaan -> lokasi
         $ulasans = collect();
         foreach ($this->lokasi as $lokasi) {
             foreach ($lokasi->penyewaan as $penyewaan) {

@@ -40,15 +40,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
+    
     public function penyewaan()
     {
         return $this->hasMany(Penyewaan::class, 'id_user', 'id');
     }
-    
+
     public function transaksis()
     {
-    return $this->hasMany(Transaksi::class, 'id_user');
+        return $this->hasMany(Transaksi::class, 'id_user');
     }
-
 }
