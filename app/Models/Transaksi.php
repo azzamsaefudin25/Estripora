@@ -21,7 +21,8 @@ class Transaksi extends Model
         'status',
         'bukti_bayar',
         'expired_at',
-        'reviewed_at'
+        'reviewed_at',
+        'checkout_session'
     ];
 
     protected $casts = [

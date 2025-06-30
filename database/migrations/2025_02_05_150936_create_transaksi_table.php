@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('bukti_bayar')->nullable();
             $table->timestamp('expired_at')->nullable();
             $table->timestamp('reviewed_at')->nullable();
+            $table->string('checkout_session')->nullable();
             $table->timestamps();
         });
     }
