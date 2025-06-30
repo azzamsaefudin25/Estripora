@@ -40,14 +40,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function setAttribute($key, $value)
-    {
-        if (is_string($value)) {
-            $value = strip_tags(trim($value));
-        }
-
-        return parent::setAttribute($key, $value);
-    }
 
     public function penyewaan()
     {
