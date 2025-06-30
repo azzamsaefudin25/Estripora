@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB; // Add this import
-use Illuminate\Support\Str;
-
 
 class Keranjang extends Component
 {
@@ -373,189 +371,182 @@ class Keranjang extends Component
         return $timeString;
     }
 
-public function checkout()
-{
-    // Cek apakah keranjang kosong
-    if (empty($this->keranjangItems)) {
-        session()->flash('error', 'Keranjang kosong. Tidak ada yang dapat di-checkout.');
-        return;
-    }
-
-    // Cek apakah user sudah login
-    if (!Auth::check()) {
-        // Simpan URL saat ini ke session untuk redirect kembali setelah login
-        Session::put('url.intended', route('keranjang'));
-
-        session()->flash('error', 'Silakan login terlebih dahulu untuk melanjutkan checkout.');
-
-        // Redirect ke halaman login
-        return redirect()->route('login');
-    }
-
-    // Ambil data user termasuk NIK
-    $user = User::find(Auth::id());
-    $userId = Auth::id();
-
-    // Validasi duplikasi untuk setiap item di keranjang (booking sendiri)
-    $duplicateItems = [];
-    foreach ($this->keranjangItems as $index => $item) {
-        $duplicateCheck = $this->checkDuplicateBooking($item, $userId);
-
-        if ($duplicateCheck['isDuplicate']) {
-            $duplicateItems[] = [
-                'index' => $index,
-                'item' => $item,
-            ];
-        }
-    }
-
-    // Validasi ketersediaan untuk setiap item di keranjang (booking user lain)
-    $unavailableItems = [];
-    foreach ($this->keranjangItems as $index => $item) {
-        $availabilityCheck = $this->checkAvailability($item, $userId);
-
-        if (!$availabilityCheck['isAvailable']) {
-            $unavailableItems[] = [
-                'index' => $index,
-                'item' => $item,
-                'availability' => $availabilityCheck
-            ];
-        }
-    }
-
-    // Jika ada item duplikat, tampilkan error dan hentikan proses checkout
-    if (!empty($duplicateItems)) {
-        $errorMessages = [];
-        foreach ($duplicateItems as $duplicate) {
-            $errorMessages[] = "• " . $duplicate['item']['nama_lokasi'];
+    public function checkout()
+    {
+        // Cek apakah keranjang kosong
+        if (empty($this->keranjangItems)) {
+            session()->flash('error', 'Keranjang kosong. Tidak ada yang dapat di-checkout.');
+            return;
         }
 
-        $fullErrorMessage = "Pesanan yang sama sudah pernah Anda checkout sebelumnya. Silakan hapus item tersebut dari keranjang atau pilih waktu yang berbeda.";
+        // Cek apakah user sudah login
+        if (!Auth::check()) {
+            // Simpan URL saat ini ke session untuk redirect kembali setelah login
+            Session::put('url.intended', route('keranjang'));
 
-        session()->flash('error', $fullErrorMessage);
-        return;
-    }
+            session()->flash('error', 'Silakan login terlebih dahulu untuk melanjutkan checkout.');
 
-    // Jika ada item yang tidak tersedia, tampilkan error dan hentikan proses checkout
-    if (!empty($unavailableItems)) {
-        $errorMessages = [];
-        foreach ($unavailableItems as $unavailable) {
-            $item = $unavailable['item'];
-            $availability = $unavailable['availability'];
+            // Redirect ke halaman login
+            return redirect()->route('login');
+        }
 
-            if ($item['kategori_sewa'] == 'per hari') {
-                $conflictDates = implode(', ', $availability['conflictDates']);
-                $errorMessages[] = "• " . $item['nama_lokasi'] . " (Per Hari) - Tanggal " . $conflictDates . " sudah dipesan user lain";
-            } elseif ($item['kategori_sewa'] == 'per jam') {
-                $conflict = $availability['conflictDateTime'];
-                $errorMessages[] = "• " . $item['nama_lokasi'] . " (Per Jam) - " . $conflict['date'] . " jam " . $conflict['time'] . " sudah dipesan user lain";
+        // Ambil data user termasuk NIK
+        $user = User::find(Auth::id());
+        $userId = Auth::id();
+
+        // Validasi duplikasi untuk setiap item di keranjang (booking sendiri)
+        $duplicateItems = [];
+        foreach ($this->keranjangItems as $index => $item) {
+            $duplicateCheck = $this->checkDuplicateBooking($item, $userId);
+
+            if ($duplicateCheck['isDuplicate']) {
+                $duplicateItems[] = [
+                    'index' => $index,
+                    'item' => $item,
+                ];
             }
         }
 
-        $fullErrorMessage = "Tempat tidak tersedia karena sudah dipesan user lain:\n\n" .
-            implode("\n", $errorMessages) .
-            "\n\nSilakan hapus item tersebut dari keranjang atau pilih waktu yang berbeda.";
+        // Validasi ketersediaan untuk setiap item di keranjang (booking user lain)
+        $unavailableItems = [];
+        foreach ($this->keranjangItems as $index => $item) {
+            $availabilityCheck = $this->checkAvailability($item, $userId);
 
-        session()->flash('error', $fullErrorMessage);
-        return;
-    }
+            if (!$availabilityCheck['isAvailable']) {
+                $unavailableItems[] = [
+                    'index' => $index,
+                    'item' => $item,
+                    'availability' => $availabilityCheck
+                ];
+            }
+        }
 
-    // Start database transaction
-    DB::beginTransaction();
-
-    try {
-        $createdTransactions = [];
-        
-        // Generate unique checkout session ID
-        $checkoutSession = 'CHECKOUT-' . strtoupper(Str::random(10)) . '-' . time();
-        $expiredAt = now()->addHours(2);
-
-        // Simpan semua item dari keranjang ke database
-        foreach ($this->keranjangItems as $item) {
-            // Siapkan data penyewaan
-            $penyewaanData = [
-                'id_user' => $userId,
-                'nik' => $user->nik,
-                'id_lokasi' => $item['id_lokasi'],
-                'kategori_sewa' => $item['kategori_sewa'],
-                'tgl_booking' => $item['tgl_booking'],
-                'deskripsi' => $item['deskripsi'],
-                'total_durasi' => $item['total_durasi'],
-                'tarif' => $item['tarif'],
-                'sub_total' => $item['sub_total'],
-                'status' => 'Pending'
-            ];
-
-            // Tambahkan data penyewaan per hari atau per jam sesuai kategori
-            if ($item['kategori_sewa'] == 'per hari') {
-                $penyewaanData['penyewaan_per_hari'] = $item['penyewaan_per_hari'];
-                $penyewaanData['penyewaan_per_jam'] = null; // Pastikan field lain null
-            } elseif ($item['kategori_sewa'] == 'per jam') {
-                $penyewaanData['penyewaan_per_jam'] = $item['penyewaan_per_jam'];
-                $penyewaanData['penyewaan_per_hari'] = null; // Pastikan field lain null
+        // Jika ada item duplikat, tampilkan error dan hentikan proses checkout
+        if (!empty($duplicateItems)) {
+            $errorMessages = [];
+            foreach ($duplicateItems as $duplicate) {
+                $errorMessages[] = "• " . $duplicate['item']['nama_lokasi'];
             }
 
-            // Buat record penyewaan
-            $penyewaan = Penyewaan::create($penyewaanData);
-            
-            // Siapkan data transaksi
-            $detailPenyewaan = $this->prepareDetailPenyewaan($item);
+            $fullErrorMessage = "Pesanan yang sama sudah pernah Anda checkout sebelumnya. Silakan hapus item tersebut dari keranjang atau pilih waktu yang berbeda.";
 
-            $transaksiData = [
-                'id_penyewaan' => $penyewaan->id_penyewaan,
-                'nik' => $user->nik,
-                'tgl_booking' => $item['tgl_booking'],
-                'detail_penyewaan' => $detailPenyewaan,
-                'total_durasi' => $item['total_durasi'],
-                'luas' => $item['luas'] ?? null,
-                'tarif' => $item['tarif'],
-                'sub_total' => $item['sub_total'],
-                'status' => 'Pending',
-                'expired_at' => $expiredAt,
-                'checkout_session' => $checkoutSession // Tambahkan checkout session
-            ];
+            session()->flash('error', $fullErrorMessage);
+            return;
+        }
 
-            // Buat record transaksi
-            $transaksi = Transaksi::create($transaksiData);
-            $createdTransactions[] = $transaksi;
+        // Jika ada item yang tidak tersedia, tampilkan error dan hentikan proses checkout
+        if (!empty($unavailableItems)) {
+            $errorMessages = [];
+            foreach ($unavailableItems as $unavailable) {
+                $item = $unavailable['item'];
+                $availability = $unavailable['availability'];
 
-            Log::info('Transaction created successfully', [
-                'penyewaan_id' => $penyewaan->id_penyewaan,
+                if ($item['kategori_sewa'] == 'per hari') {
+                    $conflictDates = implode(', ', $availability['conflictDates']);
+                    $errorMessages[] = "• " . $item['nama_lokasi'] . " (Per Hari) - Tanggal " . $conflictDates . " sudah dipesan user lain";
+                } elseif ($item['kategori_sewa'] == 'per jam') {
+                    $conflict = $availability['conflictDateTime'];
+                    $errorMessages[] = "• " . $item['nama_lokasi'] . " (Per Jam) - " . $conflict['date'] . " jam " . $conflict['time'] . " sudah dipesan user lain";
+                }
+            }
+
+            $fullErrorMessage = "Tempat tidak tersedia karena sudah dipesan user lain:\n\n" .
+                implode("\n", $errorMessages) .
+                "\n\nSilakan hapus item tersebut dari keranjang atau pilih waktu yang berbeda.";
+
+            session()->flash('error', $fullErrorMessage);
+            return;
+        }
+
+        // Start database transaction
+        DB::beginTransaction();
+
+        try {
+            $createdTransactions = [];
+
+            // Simpan semua item dari keranjang ke database
+            foreach ($this->keranjangItems as $item) {
+                // Siapkan data penyewaan
+                $penyewaanData = [
+                    'id_user' => $userId,
+                    'nik' => $user->nik,
+                    'id_lokasi' => $item['id_lokasi'],
+                    'kategori_sewa' => $item['kategori_sewa'],
+                    'tgl_booking' => $item['tgl_booking'],
+                    'deskripsi' => $item['deskripsi'],
+                    'total_durasi' => $item['total_durasi'],
+                    'tarif' => $item['tarif'],
+                    'sub_total' => $item['sub_total'],
+                    'status' => 'Pending'
+                ];
+
+                // Tambahkan data penyewaan per hari atau per jam sesuai kategori
+                if ($item['kategori_sewa'] == 'per hari') {
+                    $penyewaanData['penyewaan_per_hari'] = $item['penyewaan_per_hari'];
+                    $penyewaanData['penyewaan_per_jam'] = null; // Pastikan field lain null
+                } elseif ($item['kategori_sewa'] == 'per jam') {
+                    $penyewaanData['penyewaan_per_jam'] = $item['penyewaan_per_jam'];
+                    $penyewaanData['penyewaan_per_hari'] = null; // Pastikan field lain null
+                }
+
+                // Buat record penyewaan
+                $penyewaan = Penyewaan::create($penyewaanData);
+                $expiredAt = now()->addHours(2);
+                // Siapkan data transaksi
+                $detailPenyewaan = $this->prepareDetailPenyewaan($item);
+
+                $transaksiData = [
+                    'id_penyewaan' => $penyewaan->id_penyewaan,
+                    'nik' => $user->nik,
+                    'tgl_booking' => $item['tgl_booking'],
+                    'detail_penyewaan' => $detailPenyewaan,
+                    'total_durasi' => $item['total_durasi'],
+                    'luas' => $item['luas'] ?? null,
+                    'tarif' => $item['tarif'],
+                    'sub_total' => $item['sub_total'],
+                    'status' => 'Pending',
+                    'expired_at' => $expiredAt
+                ];
+
+                // Buat record transaksi
+                $transaksi = Transaksi::create($transaksiData);
+                $createdTransactions[] = $transaksi;
+
+                Log::info('Transaction created successfully', [
+                    'penyewaan_id' => $penyewaan->id_penyewaan,
+                    'user_id' => $userId
+                ]);
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            // Kosongkan keranjang setelah checkout berhasil
+            Session::forget('keranjang');
+
+            // Refresh data komponen
+            $this->keranjangItems = [];
+            $this->totalKeseluruhan = 0;
+
+            // Perbarui jumlah item di keranjang (untuk badge notifikasi)
+            $this->dispatch('keranjangUpdated', count: 0);
+
+            session()->flash('message', 'Checkout berhasil! Semua penyewaan dan transaksi telah diproses. Silakan lanjutkan pembayaran sebelum ' . $expiredAt->format('d/m/Y H:i') . '.');
+
+            return redirect()->route('cetak');
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            DB::rollBack();
+
+            Log::error('Checkout failed: ' . $e->getMessage(), [
                 'user_id' => $userId,
-                'checkout_session' => $checkoutSession
+                'cart_items' => $this->keranjangItems,
+                'trace' => $e->getTraceAsString()
             ]);
+
+            session()->flash('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
         }
-
-        // Commit transaction
-        DB::commit();
-
-        // Kosongkan keranjang setelah checkout berhasil
-        Session::forget('keranjang');
-
-        // Refresh data komponen
-        $this->keranjangItems = [];
-        $this->totalKeseluruhan = 0;
-
-        // Perbarui jumlah item di keranjang (untuk badge notifikasi)
-        $this->dispatch('keranjangUpdated', count: 0);
-
-        $itemCount = count($createdTransactions);
-        session()->flash('message', "Checkout berhasil! {$itemCount} penyewaan dan transaksi telah diproses. Silakan lanjutkan pembayaran sebelum " . $expiredAt->format('d/m/Y H:i') . '.');
-
-        return redirect()->route('cetak');
-    } catch (\Exception $e) {
-        // Rollback transaction on error
-        DB::rollBack();
-
-        Log::error('Checkout failed: ' . $e->getMessage(), [
-            'user_id' => $userId,
-            'cart_items' => $this->keranjangItems,
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        session()->flash('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
     }
-}
 
     public function render()
     {
