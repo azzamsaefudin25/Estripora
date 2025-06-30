@@ -15,6 +15,14 @@ class Lokasi extends Model
     protected $keyType = 'int';
 
     protected $fillable = ['id_tempat', 'nama_lokasi', 'tarif'];
+    public function setAttribute($key, $value)
+    {
+        if (is_string($value)) {
+            $value = strip_tags(trim($value));
+        }
+
+        return parent::setAttribute($key, $value);
+    }
 
     public function tempat()
     {
