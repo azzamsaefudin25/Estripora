@@ -41,8 +41,8 @@ class Tempat extends Model
             Ulasan::class,
             [Lokasi::class, Penyewaan::class],
             [
-                'id_tempat', 
-                'id_lokasi', 
+                'id_tempat',
+                'id_lokasi',
                 'id_penyewaan'
             ],
             [
