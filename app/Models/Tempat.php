@@ -52,14 +52,6 @@ class Tempat extends Model
             ]
         );
     }
-    public function setAttribute($key, $value)
-    {
-        if (is_string($value)) {
-            $value = strip_tags(trim($value));
-        }
-
-        return parent::setAttribute($key, $value);
-    }
 
     // Hitung rating rata-rata
     public function getRatingRataRataAttribute()

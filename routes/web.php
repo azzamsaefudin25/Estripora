@@ -20,12 +20,11 @@ use App\Livewire\RiwayatPesanan;
 use App\Livewire\Kalenderperhari;
 use App\Livewire\PenyewaanPerJam;
 use App\Livewire\PenyewaanPerHari;
-use App\Livewire\Auth\LupaPassword;
 use App\Livewire\Auth\UbahPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\TransaksiPdfController;
+use App\Livewire\Auth\LupaPassword;
 
 Route::get('/', function () {
     return redirect('dashboard');
@@ -84,7 +83,7 @@ Route::middleware('guest')->group(function () {
 //     ->name('profile.show');
 
 //     // routes/web.php
-Route::get('/captcha', [CaptchaController::class, 'generate'])->name('captcha.generate');
+
 
 Route::post('/cetak-transaksi-pdf', [TransaksiPdfController::class, 'generate'])->name('cetak.transaksi.pdf');
 
@@ -92,3 +91,5 @@ Route::post('/cetak-transaksi-pdf', [TransaksiPdfController::class, 'generate'])
 Route::post('/logout', [Login::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+    

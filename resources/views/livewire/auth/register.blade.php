@@ -48,8 +48,7 @@
                             <div>
                                 <label for="phone" class="block text-sm mb-2 dark:text-white">No HP</label>
                                 <div class="relative">
-                                    <input type="text" id="phone" wire:model="phone"
-                                        placeholder="No HP/Telephone"
+                                    <input type="text" id="phone" wire:model="phone" placeholder="No HP/Telephone"
                                         class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
                                         aria-describedby="phone-error">
                                 </div>
@@ -106,44 +105,7 @@
                                     <p class="text-xs text-red-600 mt-2" id="password-error">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <!-- Captcha Form Group -->
-                            <div>
-                                <label for="captcha" class="block text-sm mb-2 dark:text-white">Captcha</label>
-                                <div class="flex gap-3 items-center mb-3">
-                                    <!-- Captcha Display -->
-                                    <div class="flex-1">
-                                        <div
-                                            class="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center">
-                                            <span
-                                                class="text-lg font-mono font-bold text-gray-800 dark:text-white letter-spacing-wide select-none"
-                                                style="letter-spacing: 4px; font-family: 'Courier New', monospace;">
-                                                {{ $captcha_code }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <!-- Refresh Button -->
-                                    <button type="button" wire:click="refreshCaptcha"
-                                        class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </div>
 
-                                <!-- Captcha Input -->
-                                <input type="text" id="captcha" wire:model="captcha"
-                                    placeholder="Masukkan captcha"
-                                    class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
-                                    aria-describedby="captcha-error">
-
-                                @error('captcha')
-                                    <p class="text-xs text-red-600 mt-2" id="captcha-error">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <!-- End Captcha Form Group -->
                             <!-- Submit Button -->
                             <div class="mt-4 col-span-2">
                                 <button type="submit"
